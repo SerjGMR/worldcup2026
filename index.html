@@ -692,6 +692,9 @@ function loadSection(id) {
 loadTeamPoints().then(() => renderPicks());
 loadLeaderboard();
 setInterval(loadLeaderboard, 30000);
+setInterval(() => {
+  if (document.getElementById('bracket').classList.contains('active')) loadBracket();
+}, 30000);
 </script>
 </body>
 </html>
