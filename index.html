@@ -494,7 +494,7 @@ async function loadMatchday(num, btn) {
         html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
             <div class="match-group">${a}</div>
-            <div class="match-team-name home clickable-country" onclick="openCountryPage('${b.replace(/'/g,"\\'")}',event)">
+            <div class="match-team-name home">
               <span>${b}</span>
               <img class="match-team-flag" src="${flag(b)}" alt="${b}" onerror="this.style.display='none'">
             </div>
@@ -509,7 +509,7 @@ async function loadMatchday(num, btn) {
           </div>
           <div class="away-side">
             <div class="match-group"></div>
-            <div class="match-team-name clickable-country" onclick="openCountryPage('${e.replace(/'/g,"\\'")}',event)">
+            <div class="match-team-name">
               <img class="match-team-flag" src="${flag(e)}" alt="${e}" onerror="this.style.display='none'">
               <span>${e}</span>
             </div>
