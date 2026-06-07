@@ -231,6 +231,18 @@
   .stat-card-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
   .stat-card-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold); letter-spacing: 1px; line-height: 1; }
   .stat-card-value.white { color: #fff; }
+  .team-breakdown-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  .team-breakdown-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+  .team-breakdown-table thead tr { background: var(--mid); }
+  .team-breakdown-table thead th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); padding: 10px 10px; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .team-breakdown-table thead th:first-child { text-align: left; }
+  .team-breakdown-table tbody tr { border-bottom: 1px solid rgba(42,42,58,0.4); transition: background 0.15s; }
+  .team-breakdown-table tbody tr:last-child { border-bottom: none; }
+  .team-breakdown-table tbody tr:hover { background: rgba(245,197,24,0.03); }
+  .team-breakdown-table tbody td { padding: 9px 10px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; color: var(--muted); }
+  .team-breakdown-table tbody td:first-child { text-align: left; display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 700; font-size: 14px; }
+  .team-breakdown-table tbody td.total-col { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); }
+  .team-breakdown-flag { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
 
   @media (max-width: 768px) {
     /* HEADER */
@@ -374,7 +386,7 @@
 
 <script>
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6F2WCGWZxZgg6TCnjpODIAT4TNxR53OFNUtLFaeElyAthAYoTudjKQr-kVEGlZH3rf2IDieTerOAx/pub?output=csv&gid=';
-const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806' };
+const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806', extlb:'1764237413' };
 
 const FLAGS = {
   "Argentina":"ar","Belgium":"be","Uruguay":"uy","Sweden":"se","Algeria":"dz","Egypt":"eg","Panama":"pa","Jordan":"jo",
@@ -828,6 +840,7 @@ function loadSection(id) {
 }
 
 let PROBS_DATA = {}; // name -> { rank, winChance, firstPick, teamsIn, prize }
+let EXTLB_DATA = {}; // name -> [ { team, groupStage, ro32, ro16, quarters, semis, thirdPlace, finals, champion, total } ]
 
 async function loadProbsData() {
   try {
@@ -843,6 +856,33 @@ async function loadProbsData() {
   } catch(e) { console.warn('Could not load probs data', e); }
 }
 
+async function loadExtLBData() {
+  try {
+    const rows = await fetchCSV(GIDS.extlb);
+    // Structure: each player block starts with a rank row (col0=rank, col1=name)
+    // followed by team rows (col1=team, col2=GroupStage, ..., col9=Total)
+    let currentPlayer = null;
+    rows.forEach(row => {
+      const col0 = (row[0]||'').trim();
+      const col1 = (row[1]||'').trim();
+      const col2 = (row[2]||'').trim();
+      // Player header row: col0 is a number (rank), col1 is player name, col2 is "Group Stage"
+      if (col0 && !isNaN(parseInt(col0)) && col1 && /group stage/i.test(col2)) {
+        currentPlayer = col1.toLowerCase();
+        if (!EXTLB_DATA[currentPlayer]) EXTLB_DATA[currentPlayer] = [];
+      } else if (currentPlayer && col1 && col2 !== 'Group Stage' && !isNaN(parseFloat(col2)||0)) {
+        // Team row
+        EXTLB_DATA[currentPlayer].push({
+          team: col1,
+          groupStage: row[2]||'0', ro32: row[3]||'0', ro16: row[4]||'0',
+          quarters: row[5]||'0', semis: row[6]||'0', thirdPlace: row[7]||'0',
+          finals: row[8]||'0', champion: row[9]||'0', total: row[10]||'0'
+        });
+      }
+    });
+  } catch(e) { console.warn('Could not load extended LB data', e); }
+}
+
 async function openPlayerPage(playerName, e) {
   if (e) e.stopPropagation();
   const el = document.getElementById('player-page-content');
@@ -850,35 +890,67 @@ async function openPlayerPage(playerName, e) {
   showSection('player-page', null);
   window.scrollTo(0, 0);
 
-  // Find player data
   const player = PLAYERS.find(p => p.name.toLowerCase() === playerName.toLowerCase());
   const lb = LB_ORDER[playerName.toLowerCase()] || {};
   const probs = PROBS_DATA[playerName.toLowerCase()] || {};
+  const extTeams = EXTLB_DATA[playerName.toLowerCase()] || [];
   const totalPts = player ? player.teams.reduce((sum,t) => sum+(TEAM_POINTS[t]||0), 0) : 0;
 
-  // Avatar color
   const idx = player ? PLAYERS.indexOf(player) : 0;
   const color = COLORS[idx % COLORS.length];
   const initials = playerName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 
-  // Stats
   const rank = lb.rank || probs.rank || '—';
   const rankNum = parseInt(rank)||99;
   const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
 
-  // Teams grid
-  const teamsHTML = player ? player.teams.map(t => {
-    const pts = TEAM_POINTS[t]||0;
-    return `<div class="player-page-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
-      <img src="${flag(t)}" onerror="this.style.display='none'">
-      <div class="player-page-team-name">${t}</div>
-      ${pts > 0 ? `<div class="player-page-team-pts">+${pts}</div>` : ''}
-    </div>`;
-  }).join('') : '';
+  // Build team breakdown — use extlb if available, else fallback to flags only
+  let teamsSection = '';
+  if (extTeams.length > 0) {
+    const rows = extTeams.map(t => `
+      <tr class="clickable-country" onclick="openCountryPage('${t.team.replace(/'/g,"\\'")}',event)">
+        <td><img class="team-breakdown-flag" src="${flag(t.team)}" onerror="this.style.display='none'">${t.team}</td>
+        <td>${t.groupStage}</td>
+        <td>${t.ro32}</td>
+        <td>${t.ro16}</td>
+        <td>${t.quarters}</td>
+        <td>${t.semis}</td>
+        <td>${t.thirdPlace}</td>
+        <td>${t.finals}</td>
+        <td>${t.champion}</td>
+        <td class="total-col">${t.total}</td>
+      </tr>`).join('');
+    teamsSection = `
+      <div class="country-block">
+        <div class="country-section-title">Team Breakdown</div>
+        <div class="team-breakdown-wrap">
+          <table class="team-breakdown-table">
+            <thead><tr>
+              <th>Team</th><th>GS</th><th>RO32</th><th>RO16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th><th>🏆</th><th>Total</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  } else if (player) {
+    // Fallback: just flags
+    const flagsHTML = player.teams.map(t => {
+      const pts = TEAM_POINTS[t]||0;
+      return `<div class="player-page-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
+        <img src="${flag(t)}" onerror="this.style.display='none'">
+        <div class="player-page-team-name">${t}</div>
+        ${pts > 0 ? `<div class="player-page-team-pts">+${pts}</div>` : ''}
+      </div>`;
+    }).join('');
+    teamsSection = `
+      <div class="country-block">
+        <div class="country-section-title">Teams (${player.teams.length})</div>
+        <div class="player-page-teams">${flagsHTML}</div>
+      </div>`;
+  }
 
   let html = `
     <button class="country-back" onclick="goBack()">← Back</button>
-
     <div class="country-hero">
       <div class="avatar" style="background:${color};width:64px;height:64px;font-size:22px;flex-shrink:0">${initials}</div>
       <div class="country-hero-info">
@@ -887,7 +959,6 @@ async function openPlayerPage(playerName, e) {
       </div>
       <div class="country-pts-big">${totalPts}<small>PTS</small></div>
     </div>
-
     <div class="country-block">
       <div class="stat-grid">
         <div class="stat-card">
@@ -906,22 +977,9 @@ async function openPlayerPage(playerName, e) {
           <div class="stat-card-label">Win Chance</div>
           <div class="stat-card-value" style="font-size:22px">${probs.winChance || '—'}</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-label">First Pick</div>
-          <div class="stat-card-value white" style="font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px">
-            ${probs.firstPick && probs.firstPick !== '—' ? `<img src="${flag(probs.firstPick)}" style="width:28px;height:19px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'">` : ''}
-            ${probs.firstPick || '—'}
-          </div>
-        </div>
-        ${probs.prize ? `<div class="stat-card"><div class="stat-card-label">Prize</div><div class="stat-card-value" style="color:var(--green);font-size:22px">${probs.prize}</div></div>` : ''}
       </div>
     </div>
-
-    ${player ? `
-    <div class="country-block">
-      <div class="country-section-title">Teams (${player.teams.length})</div>
-      <div class="player-page-teams">${teamsHTML}</div>
-    </div>` : ''}`;
+    ${teamsSection}`;
 
   el.innerHTML = html;
 }
@@ -1023,7 +1081,7 @@ function goBack() {
 }
 
 // INIT
-loadTeamPoints().then(() => loadProbsData().then(() => loadLeaderboard().then(() => renderPicks())));
+loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => loadLeaderboard().then(() => renderPicks()))));
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
   if (document.getElementById('probs').classList.contains('active')) loadProbabilities();
