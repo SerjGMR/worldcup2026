@@ -140,6 +140,7 @@
   .team-cell:hover { background: rgba(245,197,24,0.06); }
   .team-flag { width: 42px; height: 28px; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
   .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.5px; color: var(--muted); text-align: center; text-transform: uppercase; line-height: 1.2; }
+  .team-pts { font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: var(--gold); line-height: 1; }
   .no-results { text-align: center; padding: 60px 20px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; }
 
   @media (max-width: 768px) {
@@ -210,7 +211,7 @@
 
 <script>
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6F2WCGWZxZgg6TCnjpODIAT4TNxR53OFNUtLFaeElyAthAYoTudjKQr-kVEGlZH3rf2IDieTerOAx/pub?output=csv&gid=';
-const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710' };
+const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254' };
 
 const FLAGS = {
   "Argentina":"ar","Belgium":"be","Uruguay":"uy","Sweden":"se","Algeria":"dz","Egypt":"eg","Panama":"pa","Jordan":"jo",
@@ -431,14 +432,42 @@ const PLAYERS = [
   {name:"Zoe",teams:["Portugal","Croatia","Switzerland","Austria","Ghana","Bosnia-Herzegovina","Tunisia","Iraq"]}
 ];
 
+let TEAM_POINTS = {};
+
+async function loadTeamPoints() {
+  try {
+    const rows = await fetchCSV(GIDS.points);
+    // Row 0 = headers: Team, Group Stage, ..., Total
+    // Find Total column index
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    const totalIdx = headers.indexOf('total');
+    rows.slice(1).forEach(row => {
+      const team = (row[0]||'').trim();
+      const pts = parseFloat(row[totalIdx]||0)||0;
+      if (team) TEAM_POINTS[team] = pts;
+    });
+  } catch(e) { console.warn('Could not load team points', e); }
+}
+
 function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
 function buildCard(p,i){
   const color=COLORS[i%COLORS.length];
-  const teams=p.teams.map(t=>`<div class="team-cell"><img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'"><div class="team-name">${t}</div></div>`).join('');
+  const totalPts = p.teams.reduce((sum,t) => sum+(TEAM_POINTS[t]||0), 0);
+  const teams=p.teams.map(t=>{
+    const pts = TEAM_POINTS[t]||0;
+    return `<div class="team-cell">
+      <img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
+      <div class="team-name">${t}</div>
+      ${pts > 0 ? `<div class="team-pts">+${pts}</div>` : ''}
+    </div>`;
+  }).join('');
   return `<div class="player-card" data-name="${p.name.toLowerCase()}" data-teams="${p.teams.join(' ').toLowerCase()}">
     <div class="player-card-header">
       <div class="avatar" style="background:${color}">${getInitials(p.name)}</div>
-      <div class="player-info"><h3>${p.name}</h3><span>${p.teams.length} teams picked</span></div>
+      <div class="player-info">
+        <h3>${p.name}</h3>
+        <span>${p.teams.length} teams · <span style="color:var(--gold)">${totalPts} pts</span></span>
+      </div>
     </div>
     <div class="teams-grid">${teams}</div>
   </div>`;
@@ -469,7 +498,7 @@ function loadSection(id) {
 }
 
 // INIT
-renderPicks();
+loadTeamPoints().then(() => renderPicks());
 loadLeaderboard();
 setInterval(loadLeaderboard, 30000);
 </script>
