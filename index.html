@@ -1189,13 +1189,13 @@ function goBack() {
 
 // INIT
 loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => loadLeaderboard().then(() => renderPicks()))));
-setInterval(loadLeaderboard, 30000);
+setInterval(loadLeaderboard, 180000);
 setInterval(() => {
   if (document.getElementById('probs').classList.contains('active')) loadProbabilities();
-}, 30000);
+}, 180000);
 setInterval(() => {
   if (document.getElementById('bracket').classList.contains('active')) loadBracket();
-}, 30000);
+}, 180000);
 </script>
 </body>
 </html>
