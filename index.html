@@ -413,27 +413,17 @@ const PLAYER_COLORS = {
   "Viken":"#26A69A","Zoe":"#FFA726"
 };
 
-const PLAYER_AVATARS = {
-  "Alec": null, "Ara": null, "Arbi O": null, "Arbi T": null,
-  "Armand": null, "Armen J": null, "Armen P": null, "Chris Ab": null,
-  "Chris Agh": null, "Costya": null, "Greg": null, "Joe": null,
-  "Julian": null, "Kenan": null, "Koko": null,
-  "Leo": "leoworldcup.jpg",
-  "Lucas": null, "Michael": null, "Nishan": null, "Patrick": null,
-  "Raffi": null, "Roman": "romanworldcup.jpg", "Sandro": null, "Serj": null,
-  "Sevan": null, "Tony": null, "Vahik": null,
-  "Vahn": "vahnworldcup.jpg",
-  "Viken": null, "Zoe": null
-};
-
 function playerAvatar(name, size=32) {
   const color = PLAYER_COLORS[name] || '#888';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  const img = PLAYER_AVATARS[name];
-  if (img) {
-    return `<img src="${img}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.4)">`;
-  }
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>`;
+  const filename = 'images/' + name.toLowerCase().replace(/\s+/g,'') + 'worldcup.jpg';
+  const uid = 'av' + Math.random().toString(36).slice(2,8);
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;flex-shrink:0;position:relative">
+    <div id="${uid}fb" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>
+    <img src="${filename}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.4);position:absolute;top:0;left:0;display:none"
+      onload="this.style.display='block'"
+      onerror="this.remove()">
+  </div>`;
 }
 
 async function fetchCSV(gid) {
