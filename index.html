@@ -399,6 +399,39 @@ const FLAGS = {
 };
 function flag(c) { const code=FLAGS[c]||FLAGS[c?.trim()]; return code?`https://flagcdn.com/w40/${code}.png`:'https://flagcdn.com/w40/un.png'; }
 
+// PLAYER AVATARS - swap 'null' with 'images/name.jpg' once uploaded to GitHub
+const PLAYER_AVATARS = {
+  "Alec": null, "Ara": null, "Arbi O": null, "Arbi T": null,
+  "Armand": null, "Armen J": null, "Armen P": null, "Chris Ab": null,
+  "Chris Agh": null, "Costya": null, "Greg": null, "Joe": null,
+  "Julian": null, "Kenan": null, "Koko": null, "Leo": null,
+  "Lucas": null, "Michael": null, "Nishan": null, "Patrick": null,
+  "Raffi": null, "Roman": null, "Sandro": null, "Serj": null,
+  "Sevan": null, "Tony": null, "Vahik": null, "Vahn": null,
+  "Viken": null, "Zoe": null
+};
+
+const PLAYER_COLORS = {
+  "Alec":"#E74C3C","Ara":"#E67E22","Arbi O":"#F1C40F","Arbi T":"#2ECC71",
+  "Armand":"#1ABC9C","Armen J":"#3498DB","Armen P":"#9B59B6","Chris Ab":"#E91E63",
+  "Chris Agh":"#00BCD4","Costya":"#FF5722","Greg":"#8BC34A","Joe":"#FF9800",
+  "Julian":"#607D8B","Kenan":"#795548","Koko":"#673AB7","Leo":"#F06292",
+  "Lucas":"#4DB6AC","Michael":"#FFB74D","Nishan":"#A1887F","Patrick":"#90A4AE",
+  "Raffi":"#EF5350","Roman":"#AB47BC","Sandro":"#42A5F5","Serj":"#26C6DA",
+  "Sevan":"#D4E157","Tony":"#FF7043","Vahik":"#8D6E63","Vahn":"#78909C",
+  "Viken":"#26A69A","Zoe":"#FFA726"
+};
+
+function playerAvatar(name, size=32) {
+  const img = PLAYER_AVATARS[name];
+  const color = PLAYER_COLORS[name] || '#888';
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  if (img) {
+    return `<img src="${img}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.4)">`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>`;
+}
+
 async function fetchCSV(gid) {
   const r = await fetch(BASE + gid);
   if (!r.ok) throw new Error('Failed to fetch');
@@ -422,7 +455,7 @@ async function loadLeaderboard() {
     const rows = await fetchCSV(GIDS.leaderboard);
     const data = rows.slice(2).filter(r => r[3] && r[3].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
-      <thead><tr><th>#</th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
+      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row) => {
       const sheetRank = row[2]||'—';
       const rankNum = parseInt(sheetRank)||99;
@@ -433,6 +466,7 @@ async function loadLeaderboard() {
       const prize = row[6]||'';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
+        <td style="padding:10px 6px">${playerAvatar(name, 32)}</td>
         <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
@@ -580,7 +614,7 @@ async function loadProbabilities() {
     const data = rows.slice(2).filter(r => r[3] && r[3].trim());
     // Cols: A=empty, B=empty, C=Rank, D=Name, E=TeamsIn, F=WinChance, G=FirstPick, H=Prize
     let html = `<div class="lb-wrap"><table class="lb-table">
-      <thead><tr><th>#</th><th>Player</th><th>Teams In</th><th>Win Chance</th><th>First Pick</th><th>Prize</th></tr></thead><tbody>`;
+      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Win Chance</th><th>First Pick</th><th>Prize</th></tr></thead><tbody>`;
     const maxPct = data.reduce((max, row) => {
       const p = parseFloat((row[5]||'0').replace('%',''))||0;
       return p > max ? p : max;
@@ -598,6 +632,7 @@ async function loadProbabilities() {
       const barWidth = maxPct > 0 ? Math.round((pct/maxPct)*100) : 0;
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
+        <td style="padding:10px 6px">${playerAvatar(name, 32)}</td>
         <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td>
@@ -780,7 +815,7 @@ function buildCard(p, i) {
   }).join('');
   return `<div class="player-card" data-name="${p.name.toLowerCase()}" data-teams="${p.teams.join(' ').toLowerCase()}">
     <div class="player-card-header">
-      <div class="avatar" style="background:${color}">${getInitials(p.name)}</div>
+      ${playerAvatar(p.name, 46)}
       <div class="player-info">
         <div class="player-info-top">
           <span class="player-rank-badge ${rc}">#${rank}</span>
@@ -952,7 +987,7 @@ async function openPlayerPage(playerName, e) {
   let html = `
     <button class="country-back" onclick="goBack()">← Back</button>
     <div class="country-hero">
-      <div class="avatar" style="background:${color};width:64px;height:64px;font-size:22px;flex-shrink:0">${initials}</div>
+      ${playerAvatar(playerName, 64)}
       <div class="country-hero-info">
         <h2>${playerName}</h2>
         <p>World Cup 2026 Draft</p>
