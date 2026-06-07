@@ -27,49 +27,40 @@
     overflow-x: hidden;
   }
 
+  /* HEADER */
   header {
     background: var(--darker);
     border-bottom: 3px solid var(--gold);
     position: relative;
     overflow: hidden;
   }
-
   .header-bg {
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse at 20% 50%, rgba(197,48,32,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 50%, rgba(245,197,24,0.08) 0%, transparent 60%);
+      radial-gradient(ellipse at 20% 50%, rgba(197,48,32,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(245,197,24,0.10) 0%, transparent 60%);
   }
-
   .header-inner {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 40px;
-    max-width: 1300px;
-    margin: 0 auto;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px; max-width: 1300px; margin: 0 auto;
+    flex-wrap: wrap; gap: 12px;
   }
-
   .logo { display: flex; align-items: center; gap: 14px; }
   .logo-icon {
-    width: 48px; height: 48px;
-    background: var(--gold);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
+    width: 50px; height: 50px; background: var(--gold);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 26px; flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(245,197,24,0.3);
   }
   .logo-text h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px; letter-spacing: 2px; color: #fff; line-height: 1;
+    font-size: 30px; letter-spacing: 2px; color: #fff; line-height: 1;
   }
   .logo-text span {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase;
+    font-size: 12px; color: var(--gold); letter-spacing: 5px; text-transform: uppercase;
   }
-
   nav { display: flex; gap: 4px; flex-wrap: wrap; }
   nav button {
     background: transparent; border: none; color: var(--muted);
@@ -85,17 +76,19 @@
     height: 2px; background: var(--gold);
   }
 
+  /* MAIN */
   main { max-width: 1300px; margin: 0 auto; padding: 40px 40px 80px; }
   .section { display: none; }
-  .section.active { display: block; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
   .section-header {
     display: flex; align-items: baseline; gap: 16px;
-    margin-bottom: 28px; border-left: 4px solid var(--gold); padding-left: 16px;
+    margin-bottom: 32px; border-left: 4px solid var(--gold); padding-left: 16px;
   }
   .section-header h2 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px; letter-spacing: 3px; color: #fff; line-height: 1;
+    font-size: 44px; letter-spacing: 3px; color: #fff; line-height: 1;
   }
   .section-header p {
     color: var(--muted); font-size: 13px;
@@ -103,99 +96,96 @@
     letter-spacing: 2px; text-transform: uppercase;
   }
 
+  /* SUB TABS */
   .sub-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
   .sub-tab {
     background: var(--card); border: 1px solid var(--border); color: var(--muted);
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-    padding: 8px 20px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+    padding: 9px 22px; border-radius: 5px; cursor: pointer; transition: all 0.2s;
   }
   .sub-tab:hover { border-color: var(--gold); color: var(--text); }
   .sub-tab.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
 
+  /* EMBED */
   .embed-wrap {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   }
   .embed-wrap iframe { width: 100%; height: 720px; border: none; display: block; background: #fff; }
 
   /* PICKS */
   .search-bar {
-    width: 100%; padding: 14px 20px;
+    width: 100%; padding: 14px 22px;
     background: var(--card); border: 1px solid var(--border);
     border-radius: 30px; color: var(--text);
     font-family: 'Barlow', sans-serif; font-size: 15px;
-    margin-bottom: 28px; outline: none;
-    transition: border-color 0.2s;
+    margin-bottom: 28px; outline: none; transition: border-color 0.2s;
   }
   .search-bar:focus { border-color: var(--gold); }
   .search-bar::placeholder { color: var(--muted); }
 
   .picks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
     gap: 20px;
   }
 
   .player-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   }
-  .player-card:hover { border-color: rgba(245,197,24,0.4); transform: translateY(-2px); }
-
+  .player-card:hover {
+    border-color: rgba(245,197,24,0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
   .player-card-header {
     display: flex; align-items: center; gap: 14px;
     padding: 16px 18px;
     background: rgba(255,255,255,0.03);
     border-bottom: 1px solid var(--border);
   }
-
   .avatar {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 46px; height: 46px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 17px;
     color: #fff; flex-shrink: 0; letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-
   .player-info h3 {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+    font-size: 19px; font-weight: 700; letter-spacing: 0.5px;
   }
   .player-info span {
-    font-size: 12px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+    font-size: 11px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase;
   }
-
   .teams-grid {
     display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 1px; background: var(--border);
   }
-
   .team-cell {
     background: var(--card);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 12px 6px; gap: 6px;
+    padding: 13px 6px; gap: 7px;
     transition: background 0.15s;
+    cursor: default;
   }
-  .team-cell:hover { background: rgba(245,197,24,0.05); }
-
+  .team-cell:hover { background: rgba(245,197,24,0.06); }
   .team-flag {
-    width: 40px; height: 27px;
+    width: 42px; height: 28px;
     object-fit: cover; border-radius: 3px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   }
-
   .team-name {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px; letter-spacing: 0.5px;
     color: var(--muted); text-align: center;
     text-transform: uppercase; line-height: 1.2;
   }
-
   .no-results {
     text-align: center; padding: 60px 20px;
     color: var(--muted); font-family: 'Barlow Condensed', sans-serif;
@@ -206,7 +196,7 @@
     .header-inner { padding: 14px 20px; }
     nav button { padding: 6px 10px; font-size: 11px; }
     main { padding: 24px 16px 60px; }
-    .section-header h2 { font-size: 30px; }
+    .section-header h2 { font-size: 32px; }
     .embed-wrap iframe { height: 500px; }
     .picks-grid { grid-template-columns: 1fr; }
   }
@@ -290,38 +280,27 @@
 </main>
 
 <script>
-// FLAG CODES - maps country name to ISO 3166-1 alpha-2 code for flagcdn.com
 const FLAGS = {
-  "Argentina": "ar", "Belgium": "be", "Uruguay": "uy", "Sweden": "se",
-  "Algeria": "dz", "Egypt": "eg", "Panama": "pa", "Jordan": "jo",
-  "Brazil": "br", "Germany": "de", "Mexico": "mx", "Morocco": "ma",
-  "Ivory Coast": "ci", "Cape Verde": "cv", "Spain": "es", "Croatia": "hr",
-  "Colombia": "co", "Canada": "ca", "Ghana": "gh", "Australia": "au",
-  "Tunisia": "tn", "Iraq": "iq", "England": "gb-eng", "Portugal": "pt",
-  "Turkey": "tr", "Paraguay": "py", "South Africa": "za", "New Zealand": "nz",
-  "Japan": "jp", "Bosnia-Herzegovina": "ba", "Congo DR": "cd",
-  "Haiti": "ht", "United States": "us", "Norway": "no", "Switzerland": "ch",
-  "Senegal": "sn", "Qatar": "qa", "Curacao": "cw", "Ecuador": "ec",
-  "Netherlands": "nl", "Scotland": "gb-sct", "Czechia": "cz", "Uzbekistan": "uz",
-  "Austria": "at", "South Korea": "kr", "Saudi Arabia": "sa", "France": "fr",
-  "Iran": "ir", "Serbia": "rs", "Ukraine": "ua", "Poland": "pl",
-  "Costa Rica": "cr", "Honduras": "hn", "Bolivia": "bo", "Venezuela": "ve",
-  "Cameroon": "cm", "Nigeria": "ng", "Mali": "ml", "Guinea": "gn",
-  "Kenya": "ke", "Tanzania": "tz", "Rwanda": "rw", "Zimbabwe": "zw",
-  "China": "cn", "India": "in", "Thailand": "th", "Vietnam": "vn",
-  "Philippines": "ph", "Indonesia": "id", "Malaysia": "my",
-  "New Caledonia": "nc", "Fiji": "fj", "Tahiti": "pf",
-  "Cuba": "cu", "Jamaica": "jm", "Trinidad and Tobago": "tt",
-  "El Salvador": "sv", "Guatemala": "gt", "Nicaragua": "ni"
+  "Argentina":"ar","Belgium":"be","Uruguay":"uy","Sweden":"se",
+  "Algeria":"dz","Egypt":"eg","Panama":"pa","Jordan":"jo",
+  "Brazil":"br","Germany":"de","Mexico":"mx","Morocco":"ma",
+  "Ivory Coast":"ci","Cape Verde":"cv","Spain":"es","Croatia":"hr",
+  "Colombia":"co","Canada":"ca","Ghana":"gh","Australia":"au",
+  "Tunisia":"tn","Iraq":"iq","England":"gb-eng","Portugal":"pt",
+  "Turkey":"tr","Paraguay":"py","South Africa":"za","New Zealand":"nz",
+  "Japan":"jp","Bosnia-Herzegovina":"ba","Congo DR":"cd","Haiti":"ht",
+  "United States":"us","Norway":"no","Switzerland":"ch","Senegal":"sn",
+  "Qatar":"qa","Curacao":"cw","Ecuador":"ec","Netherlands":"nl",
+  "Scotland":"gb-sct","Czechia":"cz","Uzbekistan":"uz","Austria":"at",
+  "South Korea":"kr","Saudi Arabia":"sa","France":"fr","Iran":"ir"
 };
 
-function flagUrl(country) {
-  const code = FLAGS[country];
-  if (!code) return 'https://flagcdn.com/w40/un.png';
-  return `https://flagcdn.com/w40/${code}.png`;
+function flagUrl(c) {
+  const code = FLAGS[c];
+  return code ? `https://flagcdn.com/w40/${code}.png` : 'https://flagcdn.com/w40/un.png';
 }
 
-const AVATAR_COLORS = [
+const COLORS = [
   '#E74C3C','#E67E22','#F1C40F','#2ECC71','#1ABC9C',
   '#3498DB','#9B59B6','#E91E63','#00BCD4','#FF5722',
   '#8BC34A','#FF9800','#607D8B','#795548','#673AB7',
@@ -331,81 +310,73 @@ const AVATAR_COLORS = [
 ];
 
 const PLAYERS = [
-  { name: "Alec", teams: ["Argentina","Belgium","Uruguay","Sweden","Algeria","Egypt","Panama","Jordan"] },
-  { name: "Ara", teams: ["Brazil","Germany","Mexico","Morocco","Egypt","Ivory Coast","Jordan","Cape Verde"] },
-  { name: "Arbi O", teams: ["Spain","Croatia","Colombia","Canada","Ghana","Australia","Tunisia","Iraq"] },
-  { name: "Arbi T", teams: ["England","Portugal","Morocco","Turkey","Paraguay","Australia","South Africa","New Zealand"] },
-  { name: "Armand", teams: ["Spain","Croatia","Turkey","Sweden","Canada","Egypt","Congo DR","Haiti"] },
-  { name: "Armen J", teams: ["Brazil","Germany","Japan","Morocco","Paraguay","Bosnia-Herzegovina","Congo DR","South Africa"] },
-  { name: "Armen P", teams: ["Argentina","Colombia","United States","Japan","Ghana","Bosnia-Herzegovina","New Zealand","Jordan"] },
-  { name: "Chris Ab", teams: ["Spain","Norway","Switzerland","Sweden","Senegal","Algeria","Qatar","Curacao"] },
-  { name: "Chris Agh", teams: ["Germany","Norway","Bosnia-Herzegovina","Senegal","Ecuador","Tunisia","Algeria","Haiti"] },
-  { name: "Costya", teams: ["Netherlands","Colombia","Uruguay","Sweden","Czechia","Paraguay","Panama","Uzbekistan"] },
-  { name: "Greg", teams: ["Brazil","Ghana","Mexico","Austria","Czechia","Paraguay","Panama","South Africa"] },
-  { name: "Joe", teams: ["England","Netherlands","Uruguay","Morocco","Scotland","Australia","New Zealand","Jordan"] },
-  { name: "Julian", teams: ["Spain","Belgium","Norway","Scotland","South Korea","Qatar","Tunisia","Cape Verde"] },
-  { name: "Kenan", teams: ["England","Netherlands","United States","Japan","Czechia","Australia","Haiti","Iraq"] },
-  { name: "Koko", teams: ["Argentina","Belgium","Uruguay","Japan","Ghana","Ivory Coast","Panama","Iraq"] },
-  { name: "Leo", teams: ["France","Belgium","United States","South Korea","Canada","Saudi Arabia","Qatar","Cape Verde"] },
-  { name: "Lucas", teams: ["England","Netherlands","Mexico","Turkey","Iran","Czechia","Panama","South Africa"] },
-  { name: "Michael", teams: ["France","Uruguay","Colombia","Czechia","Canada","Saudi Arabia","New Zealand","Curacao"] },
-  { name: "Nishan", teams: ["England","Portugal","Austria","Canada","Paraguay","Iran","Jordan","Uzbekistan"] },
-  { name: "Patrick", teams: ["Brazil","Germany","Morocco","Turkey","Bosnia-Herzegovina","Ivory Coast","Congo DR","Uzbekistan"] },
-  { name: "Raffi", teams: ["Argentina","Netherlands","United States","Austria","Scotland","Ivory Coast","Tunisia","Haiti"] },
-  { name: "Roman", teams: ["France","Switzerland","Scotland","South Korea","Ecuador","Saudi Arabia","Algeria","Curacao"] },
-  { name: "Sandro", teams: ["Portugal","Croatia","Austria","Japan","Iran","Australia","South Africa","Iraq"] },
-  { name: "Serj", teams: ["Spain","Belgium","Switzerland","Ecuador","South Korea","Egypt","Congo DR","Cape Verde"] },
-  { name: "Sevan", teams: ["Brazil","Germany","Mexico","Senegal","Iran","Ivory Coast","Uzbekistan","New Zealand"] },
-  { name: "Tony", teams: ["France","Norway","United States","Ecuador","Senegal","Algeria","Congo DR","Curacao"] },
-  { name: "Vahik", teams: ["Argentina","Norway","Turkey","South Korea","Iran","Saudi Arabia","Qatar","Curacao"] },
-  { name: "Vahn", teams: ["Portugal","Croatia","Colombia","Ecuador","Scotland","Egypt","Uzbekistan","Cape Verde"] },
-  { name: "Viken", teams: ["France","Switzerland","Mexico","Senegal","Sweden","Saudi Arabia","Qatar","Haiti"] },
-  { name: "Zoe", teams: ["Portugal","Croatia","Switzerland","Austria","Ghana","Bosnia-Herzegovina","Tunisia","Iraq"] }
+  {name:"Alec",teams:["Argentina","Belgium","Uruguay","Sweden","Algeria","Egypt","Panama","Jordan"]},
+  {name:"Ara",teams:["Brazil","Germany","Mexico","Morocco","Egypt","Ivory Coast","Jordan","Cape Verde"]},
+  {name:"Arbi O",teams:["Spain","Croatia","Colombia","Canada","Ghana","Australia","Tunisia","Iraq"]},
+  {name:"Arbi T",teams:["England","Portugal","Morocco","Turkey","Paraguay","Australia","South Africa","New Zealand"]},
+  {name:"Armand",teams:["Spain","Croatia","Turkey","Sweden","Canada","Egypt","Congo DR","Haiti"]},
+  {name:"Armen J",teams:["Brazil","Germany","Japan","Morocco","Paraguay","Bosnia-Herzegovina","Congo DR","South Africa"]},
+  {name:"Armen P",teams:["Argentina","Colombia","United States","Japan","Ghana","Bosnia-Herzegovina","New Zealand","Jordan"]},
+  {name:"Chris Ab",teams:["Spain","Norway","Switzerland","Sweden","Senegal","Algeria","Qatar","Curacao"]},
+  {name:"Chris Agh",teams:["Germany","Norway","Bosnia-Herzegovina","Senegal","Ecuador","Tunisia","Algeria","Haiti"]},
+  {name:"Costya",teams:["Netherlands","Colombia","Uruguay","Sweden","Czechia","Paraguay","Panama","Uzbekistan"]},
+  {name:"Greg",teams:["Brazil","Ghana","Mexico","Austria","Czechia","Paraguay","Panama","South Africa"]},
+  {name:"Joe",teams:["England","Netherlands","Uruguay","Morocco","Scotland","Australia","New Zealand","Jordan"]},
+  {name:"Julian",teams:["Spain","Belgium","Norway","Scotland","South Korea","Qatar","Tunisia","Cape Verde"]},
+  {name:"Kenan",teams:["England","Netherlands","United States","Japan","Czechia","Australia","Haiti","Iraq"]},
+  {name:"Koko",teams:["Argentina","Belgium","Uruguay","Japan","Ghana","Ivory Coast","Panama","Iraq"]},
+  {name:"Leo",teams:["France","Belgium","United States","South Korea","Canada","Saudi Arabia","Qatar","Cape Verde"]},
+  {name:"Lucas",teams:["England","Netherlands","Mexico","Turkey","Iran","Czechia","Panama","South Africa"]},
+  {name:"Michael",teams:["France","Uruguay","Colombia","Czechia","Canada","Saudi Arabia","New Zealand","Curacao"]},
+  {name:"Nishan",teams:["England","Portugal","Austria","Canada","Paraguay","Iran","Jordan","Uzbekistan"]},
+  {name:"Patrick",teams:["Brazil","Germany","Morocco","Turkey","Bosnia-Herzegovina","Ivory Coast","Congo DR","Uzbekistan"]},
+  {name:"Raffi",teams:["Argentina","Netherlands","United States","Austria","Scotland","Ivory Coast","Tunisia","Haiti"]},
+  {name:"Roman",teams:["France","Switzerland","Scotland","South Korea","Ecuador","Saudi Arabia","Algeria","Curacao"]},
+  {name:"Sandro",teams:["Portugal","Croatia","Austria","Japan","Iran","Australia","South Africa","Iraq"]},
+  {name:"Serj",teams:["Spain","Belgium","Switzerland","Ecuador","South Korea","Egypt","Congo DR","Cape Verde"]},
+  {name:"Sevan",teams:["Brazil","Germany","Mexico","Senegal","Iran","Ivory Coast","Uzbekistan","New Zealand"]},
+  {name:"Tony",teams:["France","Norway","United States","Ecuador","Senegal","Algeria","Congo DR","Curacao"]},
+  {name:"Vahik",teams:["Argentina","Norway","Turkey","South Korea","Iran","Saudi Arabia","Qatar","Curacao"]},
+  {name:"Vahn",teams:["Portugal","Croatia","Colombia","Ecuador","Scotland","Egypt","Uzbekistan","Cape Verde"]},
+  {name:"Viken",teams:["France","Switzerland","Mexico","Senegal","Sweden","Saudi Arabia","Qatar","Haiti"]},
+  {name:"Zoe",teams:["Portugal","Croatia","Switzerland","Austria","Ghana","Bosnia-Herzegovina","Tunisia","Iraq"]}
 ];
 
-function getInitials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-}
+function getInitials(n) { return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 
-function buildCard(player, idx) {
-  const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
-  const initials = getInitials(player.name);
-  const teamsHTML = player.teams.map(team => `
+function buildCard(p, i) {
+  const color = COLORS[i % COLORS.length];
+  const teams = p.teams.map(t => `
     <div class="team-cell">
-      <img class="team-flag" src="${flagUrl(team)}" alt="${team}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
-      <div class="team-name">${team}</div>
-    </div>
-  `).join('');
-
+      <img class="team-flag" src="${flagUrl(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
+      <div class="team-name">${t}</div>
+    </div>`).join('');
   return `
-    <div class="player-card" data-name="${player.name.toLowerCase()}" data-teams="${player.teams.join(' ').toLowerCase()}">
+    <div class="player-card" data-name="${p.name.toLowerCase()}" data-teams="${p.teams.join(' ').toLowerCase()}">
       <div class="player-card-header">
-        <div class="avatar" style="background:${color}">${initials}</div>
+        <div class="avatar" style="background:${color}">${getInitials(p.name)}</div>
         <div class="player-info">
-          <h3>${player.name}</h3>
-          <span>${player.teams.length} teams picked</span>
+          <h3>${p.name}</h3>
+          <span>${p.teams.length} teams picked</span>
         </div>
       </div>
-      <div class="teams-grid">${teamsHTML}</div>
-    </div>
-  `;
+      <div class="teams-grid">${teams}</div>
+    </div>`;
 }
 
 function renderPicks() {
-  const grid = document.getElementById('picks-grid');
-  grid.innerHTML = PLAYERS.map((p, i) => buildCard(p, i)).join('');
+  document.getElementById('picks-grid').innerHTML = PLAYERS.map((p,i) => buildCard(p,i)).join('');
 }
 
-function filterPicks(query) {
-  const q = query.toLowerCase().trim();
-  const cards = document.querySelectorAll('.player-card');
-  let visible = 0;
-  cards.forEach(card => {
-    const match = !q || card.dataset.name.includes(q) || card.dataset.teams.includes(q);
-    card.style.display = match ? '' : 'none';
-    if (match) visible++;
+function filterPicks(q) {
+  q = q.toLowerCase().trim();
+  let v = 0;
+  document.querySelectorAll('.player-card').forEach(c => {
+    const show = !q || c.dataset.name.includes(q) || c.dataset.teams.includes(q);
+    c.style.display = show ? '' : 'none';
+    if (show) v++;
   });
-  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+  document.getElementById('no-results').style.display = v === 0 ? 'block' : 'none';
 }
 
 function showSection(id, btn) {
@@ -416,7 +387,7 @@ function showSection(id, btn) {
 }
 
 function switchMatchday(id, btn) {
-  document.querySelectorAll('#md1, #md2, #md3').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#md1,#md2,#md3').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
   document.getElementById(id).style.display = 'block';
   btn.classList.add('active');
