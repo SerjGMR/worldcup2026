@@ -218,6 +218,19 @@
   .country-pts-row span:last-child { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); }
   .clickable-country { cursor: pointer; }
   .clickable-country:hover { opacity: 0.75; }
+  .clickable-player { cursor: pointer; text-decoration: none; }
+  .clickable-player:hover { color: var(--gold) !important; }
+  .player-page-teams { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin-top: 8px; }
+  .player-page-team { background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 8px; gap: 8px; cursor: pointer; transition: background 0.15s; }
+  .player-page-team:hover { background: rgba(245,197,24,0.06); }
+  .player-page-team img { width: 42px; height: 28px; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .player-page-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.5px; color: var(--muted); text-align: center; text-transform: uppercase; }
+  .player-page-team-pts { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--gold); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-card-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .stat-card-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold); letter-spacing: 1px; line-height: 1; }
+  .stat-card-value.white { color: #fff; }
 
   @media (max-width: 768px) {
     /* HEADER */
@@ -352,6 +365,11 @@
     <div id="country-page-content"></div>
   </div>
 
+  <!-- PLAYER PAGE -->
+  <div class="section" id="player-page">
+    <div id="player-page-content"></div>
+  </div>
+
 </main>
 
 <script>
@@ -403,7 +421,7 @@ async function loadLeaderboard() {
       const prize = row[6]||'';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
-        <td><span class="lb-name">${name}</span></td>
+        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
         <td><span class="lb-prize">${prize}</span></td>
@@ -568,13 +586,13 @@ async function loadProbabilities() {
       const barWidth = maxPct > 0 ? Math.round((pct/maxPct)*100) : 0;
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
-        <td><span class="lb-name">${name}</span></td>
+        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td>
           <span class="prob-pct">${winChance}</span>
           <span class="prob-bar-wrap"><span class="prob-bar" style="width:${barWidth}%"></span></span>
         </td>
-        <td>
+        <td class="clickable-country" onclick="openCountryPage('${firstPick.replace(/'/g,"\\'")}',event)">
           <img class="first-pick-flag" src="${flag(firstPick)}" onerror="this.style.display='none'">
           <span class="lb-teams">${firstPick}</span>
         </td>
@@ -754,7 +772,7 @@ function buildCard(p, i) {
       <div class="player-info">
         <div class="player-info-top">
           <span class="player-rank-badge ${rc}">#${rank}</span>
-          <h3>${p.name}</h3>
+          <h3 class="clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${p.name}</h3>
         </div>
         <span>${p.teams.length} teams picked</span>
       </div>
@@ -809,7 +827,104 @@ function loadSection(id) {
   else if (id==='bracket') loadBracket();
 }
 
-// COUNTRY PAGE
+let PROBS_DATA = {}; // name -> { rank, winChance, firstPick, teamsIn, prize }
+
+async function loadProbsData() {
+  try {
+    const rows = await fetchCSV(GIDS.probs);
+    const data = rows.slice(2).filter(r => r[3] && r[3].trim());
+    data.forEach(row => {
+      const name = (row[3]||'').trim().toLowerCase();
+      if (name) PROBS_DATA[name] = {
+        rank: row[2]||'—', winChance: row[5]||'—',
+        firstPick: row[6]||'—', teamsIn: row[4]||'—', prize: row[7]||''
+      };
+    });
+  } catch(e) { console.warn('Could not load probs data', e); }
+}
+
+async function openPlayerPage(playerName, e) {
+  if (e) e.stopPropagation();
+  const el = document.getElementById('player-page-content');
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Loading…</div>`;
+  showSection('player-page', null);
+  window.scrollTo(0, 0);
+
+  // Find player data
+  const player = PLAYERS.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+  const lb = LB_ORDER[playerName.toLowerCase()] || {};
+  const probs = PROBS_DATA[playerName.toLowerCase()] || {};
+  const totalPts = player ? player.teams.reduce((sum,t) => sum+(TEAM_POINTS[t]||0), 0) : 0;
+
+  // Avatar color
+  const idx = player ? PLAYERS.indexOf(player) : 0;
+  const color = COLORS[idx % COLORS.length];
+  const initials = playerName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  // Stats
+  const rank = lb.rank || probs.rank || '—';
+  const rankNum = parseInt(rank)||99;
+  const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
+
+  // Teams grid
+  const teamsHTML = player ? player.teams.map(t => {
+    const pts = TEAM_POINTS[t]||0;
+    return `<div class="player-page-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
+      <img src="${flag(t)}" onerror="this.style.display='none'">
+      <div class="player-page-team-name">${t}</div>
+      ${pts > 0 ? `<div class="player-page-team-pts">+${pts}</div>` : ''}
+    </div>`;
+  }).join('') : '';
+
+  let html = `
+    <button class="country-back" onclick="goBack()">← Back</button>
+
+    <div class="country-hero">
+      <div class="avatar" style="background:${color};width:64px;height:64px;font-size:22px;flex-shrink:0">${initials}</div>
+      <div class="country-hero-info">
+        <h2>${playerName}</h2>
+        <p>World Cup 2026 Draft</p>
+      </div>
+      <div class="country-pts-big">${totalPts}<small>PTS</small></div>
+    </div>
+
+    <div class="country-block">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Rank</div>
+          <div class="stat-card-value lb-rank ${rc}" style="font-size:32px">${rank}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Points</div>
+          <div class="stat-card-value">${lb.pts ?? totalPts}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Teams In</div>
+          <div class="stat-card-value white">${probs.teamsIn || '—'}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Win Chance</div>
+          <div class="stat-card-value" style="font-size:22px">${probs.winChance || '—'}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">First Pick</div>
+          <div class="stat-card-value white" style="font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px">
+            ${probs.firstPick && probs.firstPick !== '—' ? `<img src="${flag(probs.firstPick)}" style="width:28px;height:19px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'">` : ''}
+            ${probs.firstPick || '—'}
+          </div>
+        </div>
+        ${probs.prize ? `<div class="stat-card"><div class="stat-card-label">Prize</div><div class="stat-card-value" style="color:var(--green);font-size:22px">${probs.prize}</div></div>` : ''}
+      </div>
+    </div>
+
+    ${player ? `
+    <div class="country-block">
+      <div class="country-section-title">Teams (${player.teams.length})</div>
+      <div class="player-page-teams">${teamsHTML}</div>
+    </div>` : ''}`;
+
+  el.innerHTML = html;
+}
 let ALL_MATCH_ROWS = {};
 
 async function ensureMatchRows(num) {
@@ -908,7 +1023,7 @@ function goBack() {
 }
 
 // INIT
-loadTeamPoints().then(() => loadLeaderboard().then(() => renderPicks()));
+loadTeamPoints().then(() => loadProbsData().then(() => loadLeaderboard().then(() => renderPicks())));
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
   if (document.getElementById('probs').classList.contains('active')) loadProbabilities();
