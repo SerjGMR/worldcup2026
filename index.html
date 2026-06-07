@@ -8,7 +8,6 @@
 <style>
   :root {
     --gold: #F5C518;
-    --red: #C0392B;
     --dark: #0a0a0f;
     --darker: #050508;
     --mid: #13131a;
@@ -16,7 +15,6 @@
     --border: #2a2a3a;
     --text: #e8e8f0;
     --muted: #888899;
-    --green: #27ae60;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,19 +27,16 @@
     overflow-x: hidden;
   }
 
-  /* HERO */
   header {
     background: var(--darker);
     border-bottom: 3px solid var(--gold);
-    padding: 0;
     position: relative;
     overflow: hidden;
   }
 
   .header-bg {
-    position: absolute;
-    inset: 0;
-    background: 
+    position: absolute; inset: 0;
+    background:
       radial-gradient(ellipse at 20% 50%, rgba(197,48,32,0.15) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 50%, rgba(245,197,24,0.08) 0%, transparent 60%);
   }
@@ -52,434 +47,168 @@
     align-items: center;
     justify-content: space-between;
     padding: 18px 40px;
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
+  .logo { display: flex; align-items: center; gap: 14px; }
   .logo-icon {
-    width: 48px;
-    height: 48px;
+    width: 48px; height: 48px;
     background: var(--gold);
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
   }
-
   .logo-text h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    color: #fff;
-    line-height: 1;
+    font-size: 28px; letter-spacing: 2px; color: #fff; line-height: 1;
   }
-
   .logo-text span {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    color: var(--gold);
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase;
   }
 
-  nav {
-    display: flex;
-    gap: 4px;
-  }
-
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
   nav button {
-    background: transparent;
-    border: none;
-    color: var(--muted);
+    background: transparent; border: none; color: var(--muted);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s;
-    position: relative;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 8px 16px; cursor: pointer; border-radius: 4px;
+    transition: all 0.2s; position: relative;
   }
-
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
   nav button.active { color: var(--gold); }
   nav button.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 16px; right: 16px;
-    height: 2px;
-    background: var(--gold);
+    content: ''; position: absolute; bottom: -2px; left: 16px; right: 16px;
+    height: 2px; background: var(--gold);
   }
 
-  /* MAIN */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 40px 80px;
-  }
-
+  main { max-width: 1300px; margin: 0 auto; padding: 40px 40px 80px; }
   .section { display: none; }
   .section.active { display: block; }
 
-  /* SECTION HEADER */
   .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 32px;
-    border-left: 4px solid var(--gold);
-    padding-left: 16px;
+    display: flex; align-items: baseline; gap: 16px;
+    margin-bottom: 28px; border-left: 4px solid var(--gold); padding-left: 16px;
   }
-
   .section-header h2 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 3px;
-    color: #fff;
-    line-height: 1;
+    font-size: 42px; letter-spacing: 3px; color: #fff; line-height: 1;
   }
-
   .section-header p {
-    color: var(--muted);
-    font-size: 13px;
+    color: var(--muted); font-size: 13px;
     font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    letter-spacing: 2px; text-transform: uppercase;
   }
 
-  /* LOADING */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 60px;
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 2px;
-    font-size: 14px;
-  }
-
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ERROR */
-  .error-msg {
-    background: rgba(192,57,43,0.1);
-    border: 1px solid rgba(192,57,43,0.3);
-    border-radius: 8px;
-    padding: 20px 24px;
-    color: #e88;
-    font-size: 14px;
-    margin: 20px 0;
-  }
-
-  /* TABLE */
-  .table-wrap {
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-
-  thead tr {
-    background: var(--mid);
-  }
-
-  thead th {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(42,42,58,0.5);
-    transition: background 0.15s;
-  }
-
-  tbody tr:hover { background: rgba(245,197,24,0.03); }
-  tbody tr:last-child { border-bottom: none; }
-
-  tbody td {
-    padding: 11px 16px;
-    color: var(--text);
-    vertical-align: middle;
-  }
-
-  /* RANK */
-  .rank {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: var(--muted);
-    width: 40px;
-  }
-
-  .rank-1 { color: #F5C518; }
-  .rank-2 { color: #C0C0C0; }
-  .rank-3 { color: #CD7F32; }
-
-  /* PLAYER NAME */
-  .player-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  /* SCORE BADGE */
-  .score-badge {
-    display: inline-block;
-    background: rgba(245,197,24,0.12);
-    border: 1px solid rgba(245,197,24,0.25);
-    color: var(--gold);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    padding: 2px 10px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-  }
-
-  /* MATCHDAY TABS */
-  .sub-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
-
+  .sub-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
   .sub-tab {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--muted);
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 8px 20px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
   }
-
   .sub-tab:hover { border-color: var(--gold); color: var(--text); }
   .sub-tab.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
 
-  /* MATCH CARD */
-  .matches-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .embed-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   }
+  .embed-wrap iframe { width: 100%; height: 720px; border: none; display: block; background: #fff; }
 
-  .match-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 16px;
+  /* PICKS */
+  .search-bar {
+    width: 100%; padding: 14px 20px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 30px; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: 15px;
+    margin-bottom: 28px; outline: none;
     transition: border-color 0.2s;
   }
+  .search-bar:focus { border-color: var(--gold); }
+  .search-bar::placeholder { color: var(--muted); }
 
-  .match-card:hover { border-color: rgba(245,197,24,0.3); }
-
-  .match-team {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-
-  .match-team.home { text-align: right; }
-  .match-team.away { text-align: left; }
-
-  .match-score {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    color: var(--gold);
-    white-space: nowrap;
-  }
-
-  .match-score .sep { color: var(--muted); font-size: 20px; }
-
-  .date-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin: 20px 0 10px;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .group-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-
-  /* DRAFT TABLE */
-  .draft-table td:first-child {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  /* EMBED FALLBACK */
-  .embed-container {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .embed-container iframe {
-    width: 100%;
-    height: 700px;
-    border: none;
-    display: block;
-  }
-
-  /* LIVE BADGE */
-  .live-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(192,57,43,0.15);
-    border: 1px solid rgba(192,57,43,0.4);
-    color: #e88;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 3px;
-    margin-left: 12px;
-  }
-
-  .live-dot {
-    width: 6px; height: 6px;
-    background: #e44;
-    border-radius: 50%;
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* REFRESH */
-  .refresh-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-  .section-meta {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-    gap: 12px;
-  }
-
-  .last-updated {
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 1px;
-  }
-
-  /* GROUPS GRID */
-  .groups-grid {
+  .picks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
   }
 
-  .group-card {
+  .player-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 14px;
     overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
   }
+  .player-card:hover { border-color: rgba(245,197,24,0.4); transform: translateY(-2px); }
 
-  .group-card-header {
-    background: var(--mid);
-    padding: 10px 16px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 3px;
-    color: var(--gold);
+  .player-card-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.03);
     border-bottom: 1px solid var(--border);
   }
 
-  .group-card table { font-size: 13px; }
-  .group-card thead th { font-size: 10px; padding: 8px 12px; }
-  .group-card tbody td { padding: 9px 12px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+    color: #fff; flex-shrink: 0; letter-spacing: 1px;
+  }
 
-  /* RESPONSIVE */
+  .player-info h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .player-info span {
+    font-size: 12px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+  }
+
+  .teams-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+  }
+
+  .team-cell {
+    background: var(--card);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px 6px; gap: 6px;
+    transition: background 0.15s;
+  }
+  .team-cell:hover { background: rgba(245,197,24,0.05); }
+
+  .team-flag {
+    width: 40px; height: 27px;
+    object-fit: cover; border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; letter-spacing: 0.5px;
+    color: var(--muted); text-align: center;
+    text-transform: uppercase; line-height: 1.2;
+  }
+
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; letter-spacing: 2px; text-transform: uppercase;
+  }
+
   @media (max-width: 768px) {
-    .header-inner { padding: 14px 20px; flex-wrap: wrap; gap: 12px; }
-    nav { gap: 2px; }
+    .header-inner { padding: 14px 20px; }
     nav button { padding: 6px 10px; font-size: 11px; }
     main { padding: 24px 16px 60px; }
-    .section-header h2 { font-size: 32px; }
-    .match-card { grid-template-columns: 1fr; text-align: center; }
-    .match-team.home { text-align: center; }
-    .match-score { justify-content: center; }
+    .section-header h2 { font-size: 30px; }
+    .embed-wrap iframe { height: 500px; }
+    .picks-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -498,6 +227,7 @@
     <nav>
       <button class="active" onclick="showSection('leaderboard', this)">Leaderboard</button>
       <button onclick="showSection('matches', this)">Matches</button>
+      <button onclick="showSection('picks', this)">Player Picks</button>
       <button onclick="showSection('draft', this)">Draft</button>
       <button onclick="showSection('groups', this)">Groups</button>
     </nav>
@@ -508,317 +238,191 @@
 
   <!-- LEADERBOARD -->
   <div class="section active" id="leaderboard">
-    <div class="section-header">
-      <h2>Leaderboard</h2>
-      <p>Live standings</p>
+    <div class="section-header"><h2>Leaderboard</h2><p>Live standings</p></div>
+    <div class="embed-wrap">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1101782913&single=true&widget=false&headers=false"></iframe>
     </div>
-    <div class="section-meta">
-      <span class="last-updated" id="lb-updated">Loading…</span>
-      <button class="refresh-btn" onclick="loadSection('leaderboard')">↻ Refresh</button>
-    </div>
-    <div id="lb-content"><div class="loading"><div class="spinner"></div>Fetching standings…</div></div>
   </div>
 
   <!-- MATCHES -->
   <div class="section" id="matches">
-    <div class="section-header">
-      <h2>Matches</h2>
-      <p>Matchday results</p>
-    </div>
+    <div class="section-header"><h2>Matches</h2><p>Matchday results</p></div>
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="loadMatchday(1, this)">Matchday 1</button>
-      <button class="sub-tab" onclick="loadMatchday(2, this)">Matchday 2</button>
-      <button class="sub-tab" onclick="loadMatchday(3, this)">Matchday 3</button>
+      <button class="sub-tab active" onclick="switchMatchday('md1', this)">Matchday 1</button>
+      <button class="sub-tab" onclick="switchMatchday('md2', this)">Matchday 2</button>
+      <button class="sub-tab" onclick="switchMatchday('md3', this)">Matchday 3</button>
     </div>
-    <div id="matches-content"><div class="loading"><div class="spinner"></div>Fetching matches…</div></div>
+    <div id="md1" class="embed-wrap">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1655786227&single=true&widget=false&headers=false"></iframe>
+    </div>
+    <div id="md2" class="embed-wrap" style="display:none">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1080001360&single=true&widget=false&headers=false"></iframe>
+    </div>
+    <div id="md3" class="embed-wrap" style="display:none">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=782783342&single=true&widget=false&headers=false"></iframe>
+    </div>
+  </div>
+
+  <!-- PLAYER PICKS -->
+  <div class="section" id="picks">
+    <div class="section-header"><h2>Player Picks</h2><p>Draft selections</p></div>
+    <input class="search-bar" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
+    <div class="picks-grid" id="picks-grid"></div>
+    <div class="no-results" id="no-results" style="display:none">No results found</div>
   </div>
 
   <!-- DRAFT -->
   <div class="section" id="draft">
-    <div class="section-header">
-      <h2>Draft</h2>
-      <p>Team selections</p>
+    <div class="section-header"><h2>Draft</h2><p>Team selections</p></div>
+    <div class="embed-wrap">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=213895062&single=true&widget=false&headers=false"></iframe>
     </div>
-    <div class="section-meta">
-      <span class="last-updated" id="draft-updated">Loading…</span>
-      <button class="refresh-btn" onclick="loadSection('draft')">↻ Refresh</button>
-    </div>
-    <div id="draft-content"><div class="loading"><div class="spinner"></div>Fetching draft…</div></div>
   </div>
 
   <!-- GROUPS -->
   <div class="section" id="groups">
-    <div class="section-header">
-      <h2>Groups</h2>
-      <p>Group stage standings</p>
+    <div class="section-header"><h2>Groups</h2><p>Group stage standings</p></div>
+    <div class="embed-wrap">
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1340150710&single=true&widget=false&headers=false"></iframe>
     </div>
-    <div class="section-meta">
-      <span class="last-updated" id="groups-updated">Loading…</span>
-      <button class="refresh-btn" onclick="loadSection('groups')">↻ Refresh</button>
-    </div>
-    <div id="groups-content"><div class="loading"><div class="spinner"></div>Fetching groups…</div></div>
   </div>
 
 </main>
 
 <script>
-const SHEET_ID = '1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk';
+// FLAG CODES - maps country name to ISO 3166-1 alpha-2 code for flagcdn.com
+const FLAGS = {
+  "Argentina": "ar", "Belgium": "be", "Uruguay": "uy", "Sweden": "se",
+  "Algeria": "dz", "Egypt": "eg", "Panama": "pa", "Jordan": "jo",
+  "Brazil": "br", "Germany": "de", "Mexico": "mx", "Morocco": "ma",
+  "Ivory Coast": "ci", "Cape Verde": "cv", "Spain": "es", "Croatia": "hr",
+  "Colombia": "co", "Canada": "ca", "Ghana": "gh", "Australia": "au",
+  "Tunisia": "tn", "Iraq": "iq", "England": "gb-eng", "Portugal": "pt",
+  "Turkey": "tr", "Paraguay": "py", "South Africa": "za", "New Zealand": "nz",
+  "Japan": "jp", "Bosnia-Herzegovina": "ba", "Congo DR": "cd",
+  "Haiti": "ht", "United States": "us", "Norway": "no", "Switzerland": "ch",
+  "Senegal": "sn", "Qatar": "qa", "Curacao": "cw", "Ecuador": "ec",
+  "Netherlands": "nl", "Scotland": "gb-sct", "Czechia": "cz", "Uzbekistan": "uz",
+  "Austria": "at", "South Korea": "kr", "Saudi Arabia": "sa", "France": "fr",
+  "Iran": "ir", "Serbia": "rs", "Ukraine": "ua", "Poland": "pl",
+  "Costa Rica": "cr", "Honduras": "hn", "Bolivia": "bo", "Venezuela": "ve",
+  "Cameroon": "cm", "Nigeria": "ng", "Mali": "ml", "Guinea": "gn",
+  "Kenya": "ke", "Tanzania": "tz", "Rwanda": "rw", "Zimbabwe": "zw",
+  "China": "cn", "India": "in", "Thailand": "th", "Vietnam": "vn",
+  "Philippines": "ph", "Indonesia": "id", "Malaysia": "my",
+  "New Caledonia": "nc", "Fiji": "fj", "Tahiti": "pf",
+  "Cuba": "cu", "Jamaica": "jm", "Trinidad and Tobago": "tt",
+  "El Salvador": "sv", "Guatemala": "gt", "Nicaragua": "ni"
+};
 
-// Tab names to GID mapping — Google Sheets CSV export by sheet name
-function csvUrl(sheetName) {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+function flagUrl(country) {
+  const code = FLAGS[country];
+  if (!code) return 'https://flagcdn.com/w40/un.png';
+  return `https://flagcdn.com/w40/${code}.png`;
 }
 
-async function fetchCSV(sheetName) {
-  const url = csvUrl(sheetName);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to load ${sheetName}`);
-  const text = await res.text();
-  return parseCSV(text);
+const AVATAR_COLORS = [
+  '#E74C3C','#E67E22','#F1C40F','#2ECC71','#1ABC9C',
+  '#3498DB','#9B59B6','#E91E63','#00BCD4','#FF5722',
+  '#8BC34A','#FF9800','#607D8B','#795548','#673AB7',
+  '#F06292','#4DB6AC','#FFB74D','#A1887F','#90A4AE',
+  '#EF5350','#AB47BC','#42A5F5','#26C6DA','#D4E157',
+  '#FF7043','#8D6E63','#78909C','#26A69A','#FFA726'
+];
+
+const PLAYERS = [
+  { name: "Alec", teams: ["Argentina","Belgium","Uruguay","Sweden","Algeria","Egypt","Panama","Jordan"] },
+  { name: "Ara", teams: ["Brazil","Germany","Mexico","Morocco","Egypt","Ivory Coast","Jordan","Cape Verde"] },
+  { name: "Arbi O", teams: ["Spain","Croatia","Colombia","Canada","Ghana","Australia","Tunisia","Iraq"] },
+  { name: "Arbi T", teams: ["England","Portugal","Morocco","Turkey","Paraguay","Australia","South Africa","New Zealand"] },
+  { name: "Armand", teams: ["Spain","Croatia","Turkey","Sweden","Canada","Egypt","Congo DR","Haiti"] },
+  { name: "Armen J", teams: ["Brazil","Germany","Japan","Morocco","Paraguay","Bosnia-Herzegovina","Congo DR","South Africa"] },
+  { name: "Armen P", teams: ["Argentina","Colombia","United States","Japan","Ghana","Bosnia-Herzegovina","New Zealand","Jordan"] },
+  { name: "Chris Ab", teams: ["Spain","Norway","Switzerland","Sweden","Senegal","Algeria","Qatar","Curacao"] },
+  { name: "Chris Agh", teams: ["Germany","Norway","Bosnia-Herzegovina","Senegal","Ecuador","Tunisia","Algeria","Haiti"] },
+  { name: "Costya", teams: ["Netherlands","Colombia","Uruguay","Sweden","Czechia","Paraguay","Panama","Uzbekistan"] },
+  { name: "Greg", teams: ["Brazil","Ghana","Mexico","Austria","Czechia","Paraguay","Panama","South Africa"] },
+  { name: "Joe", teams: ["England","Netherlands","Uruguay","Morocco","Scotland","Australia","New Zealand","Jordan"] },
+  { name: "Julian", teams: ["Spain","Belgium","Norway","Scotland","South Korea","Qatar","Tunisia","Cape Verde"] },
+  { name: "Kenan", teams: ["England","Netherlands","United States","Japan","Czechia","Australia","Haiti","Iraq"] },
+  { name: "Koko", teams: ["Argentina","Belgium","Uruguay","Japan","Ghana","Ivory Coast","Panama","Iraq"] },
+  { name: "Leo", teams: ["France","Belgium","United States","South Korea","Canada","Saudi Arabia","Qatar","Cape Verde"] },
+  { name: "Lucas", teams: ["England","Netherlands","Mexico","Turkey","Iran","Czechia","Panama","South Africa"] },
+  { name: "Michael", teams: ["France","Uruguay","Colombia","Czechia","Canada","Saudi Arabia","New Zealand","Curacao"] },
+  { name: "Nishan", teams: ["England","Portugal","Austria","Canada","Paraguay","Iran","Jordan","Uzbekistan"] },
+  { name: "Patrick", teams: ["Brazil","Germany","Morocco","Turkey","Bosnia-Herzegovina","Ivory Coast","Congo DR","Uzbekistan"] },
+  { name: "Raffi", teams: ["Argentina","Netherlands","United States","Austria","Scotland","Ivory Coast","Tunisia","Haiti"] },
+  { name: "Roman", teams: ["France","Switzerland","Scotland","South Korea","Ecuador","Saudi Arabia","Algeria","Curacao"] },
+  { name: "Sandro", teams: ["Portugal","Croatia","Austria","Japan","Iran","Australia","South Africa","Iraq"] },
+  { name: "Serj", teams: ["Spain","Belgium","Switzerland","Ecuador","South Korea","Egypt","Congo DR","Cape Verde"] },
+  { name: "Sevan", teams: ["Brazil","Germany","Mexico","Senegal","Iran","Ivory Coast","Uzbekistan","New Zealand"] },
+  { name: "Tony", teams: ["France","Norway","United States","Ecuador","Senegal","Algeria","Congo DR","Curacao"] },
+  { name: "Vahik", teams: ["Argentina","Norway","Turkey","South Korea","Iran","Saudi Arabia","Qatar","Curacao"] },
+  { name: "Vahn", teams: ["Portugal","Croatia","Colombia","Ecuador","Scotland","Egypt","Uzbekistan","Cape Verde"] },
+  { name: "Viken", teams: ["France","Switzerland","Mexico","Senegal","Sweden","Saudi Arabia","Qatar","Haiti"] },
+  { name: "Zoe", teams: ["Portugal","Croatia","Switzerland","Austria","Ghana","Bosnia-Herzegovina","Tunisia","Iraq"] }
+];
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 }
 
-function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  return lines.map(line => {
-    const cols = [];
-    let inQ = false, cur = '';
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else cur += c;
-    }
-    cols.push(cur.trim());
-    return cols;
+function buildCard(player, idx) {
+  const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  const initials = getInitials(player.name);
+  const teamsHTML = player.teams.map(team => `
+    <div class="team-cell">
+      <img class="team-flag" src="${flagUrl(team)}" alt="${team}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
+      <div class="team-name">${team}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="player-card" data-name="${player.name.toLowerCase()}" data-teams="${player.teams.join(' ').toLowerCase()}">
+      <div class="player-card-header">
+        <div class="avatar" style="background:${color}">${initials}</div>
+        <div class="player-info">
+          <h3>${player.name}</h3>
+          <span>${player.teams.length} teams picked</span>
+        </div>
+      </div>
+      <div class="teams-grid">${teamsHTML}</div>
+    </div>
+  `;
+}
+
+function renderPicks() {
+  const grid = document.getElementById('picks-grid');
+  grid.innerHTML = PLAYERS.map((p, i) => buildCard(p, i)).join('');
+}
+
+function filterPicks(query) {
+  const q = query.toLowerCase().trim();
+  const cards = document.querySelectorAll('.player-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const match = !q || card.dataset.name.includes(q) || card.dataset.teams.includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) visible++;
   });
+  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
 }
 
-function now() {
-  return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-}
-
-// ---- LEADERBOARD ----
-async function loadLeaderboard() {
-  const el = document.getElementById('lb-content');
-  const upd = document.getElementById('lb-updated');
-  el.innerHTML = `<div class="loading"><div class="spinner"></div>Fetching standings…</div>`;
-  try {
-    const rows = await fetchCSV('Leaderboard');
-    if (!rows || rows.length < 2) throw new Error('No data');
-    
-    // Find header row (look for name/player column)
-    let headerIdx = 0;
-    for (let i = 0; i < Math.min(5, rows.length); i++) {
-      if (rows[i].some(c => c && c.length > 0)) { headerIdx = i; break; }
-    }
-    
-    const headers = rows[headerIdx];
-    const data = rows.slice(headerIdx + 1).filter(r => r.some(c => c && c.trim()));
-
-    let html = `<div class="table-wrap"><table>
-      <thead><tr>${headers.map((h,i) => `<th>${i===0?'#&nbsp;&nbsp;'+h:h}</th>`).join('')}</tr></thead>
-      <tbody>`;
-    
-    data.forEach((row, idx) => {
-      const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
-      html += `<tr>`;
-      row.forEach((cell, ci) => {
-        if (ci === 0) {
-          html += `<td><span class="rank ${rankClass}">${idx+1}</span> <span class="player-name">${cell}</span></td>`;
-        } else {
-          // Check if it looks like a score/number
-          const num = parseFloat(cell);
-          if (!isNaN(num) && cell.trim() !== '') {
-            html += `<td><span class="score-badge">${cell}</span></td>`;
-          } else {
-            html += `<td>${cell}</td>`;
-          }
-        }
-      });
-      html += `</tr>`;
-    });
-    
-    html += `</tbody></table></div>`;
-    el.innerHTML = html;
-    upd.textContent = `Updated ${now()}`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-msg">⚠ Could not load leaderboard data. Make sure the sheet is published to web (File → Share → Publish to web).<br><small>${e.message}</small></div>`;
-    upd.textContent = 'Failed to load';
-  }
-}
-
-// ---- MATCHDAY ----
-async function loadMatchday(num, btn) {
-  if (btn) {
-    document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  const el = document.getElementById('matches-content');
-  el.innerHTML = `<div class="loading"><div class="spinner"></div>Fetching matches…</div>`;
-  try {
-    const rows = await fetchCSV(`Matchday ${num}`);
-    if (!rows || rows.length < 2) throw new Error('No data');
-    
-    let html = `<div class="matches-grid">`;
-    let currentDate = '';
-    
-    // Find data rows — look for rows that have team names / scores
-    const dataRows = rows.filter(r => r.some(c => c && c.trim()));
-    
-    dataRows.forEach(row => {
-      const nonEmpty = row.filter(c => c && c.trim());
-      if (nonEmpty.length === 0) return;
-      
-      // Date rows usually have a single value that looks like a date
-      const first = (row[0] || '').trim();
-      if (nonEmpty.length <= 2 && first && (first.match(/\w+ \d+/) || first.includes('June') || first.includes('July'))) {
-        currentDate = first;
-        html += `<div class="date-label">📅 ${first}</div>`;
-        return;
-      }
-      
-      // Match rows: look for rows with meaningful content
-      if (nonEmpty.length >= 2) {
-        // Try to find team1, score1, score2, team2 pattern
-        const cols = row.map(c => (c || '').trim());
-        
-        // Common patterns from Google Sheets match data
-        // Attempt: col0=group, col1=team1, col2=score1, col3=score2, col4=team2
-        // OR: col0=team1, col1=score, col2=team2
-        
-        let group = '', team1 = '', score1 = '', score2 = '', team2 = '';
-        
-        if (cols.length >= 5 && cols[0] && cols[1] && cols[4]) {
-          group = cols[0];
-          team1 = cols[1];
-          score1 = cols[2] || '-';
-          score2 = cols[3] || '-';
-          team2 = cols[4];
-        } else if (cols.length >= 3 && cols[0] && cols[2]) {
-          team1 = cols[0];
-          score1 = cols[1] || '-';
-          team2 = cols[2];
-        } else {
-          // Generic row
-          html += `<div style="padding:8px 0;color:var(--muted);font-size:13px;">${nonEmpty.join(' · ')}</div>`;
-          return;
-        }
-        
-        if (team1 && team2) {
-          html += `
-            <div class="match-card">
-              <div>
-                ${group ? `<div class="group-label">${group}</div>` : ''}
-                <div class="match-team home">${team1}</div>
-              </div>
-              <div class="match-score">
-                <span>${score1}</span>
-                <span class="sep">–</span>
-                <span>${score2}</span>
-              </div>
-              <div class="match-team away">${team2}</div>
-            </div>`;
-        }
-      }
-    });
-    
-    html += `</div>`;
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = `<div class="error-msg">⚠ Could not load Matchday ${num} data.<br><small>${e.message}</small></div>`;
-  }
-}
-
-// ---- DRAFT ----
-async function loadDraft() {
-  const el = document.getElementById('draft-content');
-  const upd = document.getElementById('draft-updated');
-  el.innerHTML = `<div class="loading"><div class="spinner"></div>Fetching draft…</div>`;
-  try {
-    const rows = await fetchCSV('Draft');
-    if (!rows || rows.length < 2) throw new Error('No data');
-    
-    const headers = rows[0];
-    const data = rows.slice(1).filter(r => r.some(c => c && c.trim()));
-    
-    let html = `<div class="table-wrap"><table class="draft-table">
-      <thead><tr>${headers.filter(h=>h).map(h=>`<th>${h}</th>`).join('')}</tr></thead>
-      <tbody>`;
-    
-    data.forEach(row => {
-      html += `<tr>${row.filter((_,i)=>headers[i]).map((cell, ci) => {
-        if (ci === 0) return `<td class="player-name">${cell}</td>`;
-        return `<td>${cell}</td>`;
-      }).join('')}</tr>`;
-    });
-    
-    html += `</tbody></table></div>`;
-    el.innerHTML = html;
-    upd.textContent = `Updated ${now()}`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-msg">⚠ Could not load draft data.<br><small>${e.message}</small></div>`;
-    upd.textContent = 'Failed to load';
-  }
-}
-
-// ---- GROUPS ----
-async function loadGroups() {
-  const el = document.getElementById('groups-content');
-  const upd = document.getElementById('groups-updated');
-  el.innerHTML = `<div class="loading"><div class="spinner"></div>Fetching groups…</div>`;
-  try {
-    const rows = await fetchCSV('Groups');
-    if (!rows || rows.length < 2) throw new Error('No data');
-    
-    // Try to detect group blocks
-    const data = rows.filter(r => r.some(c => c && c.trim()));
-    
-    let html = `<div class="table-wrap"><table>
-      <thead><tr>${data[0].filter(h=>h).map(h=>`<th>${h}</th>`).join('')}</tr></thead>
-      <tbody>`;
-    
-    data.slice(1).forEach(row => {
-      html += `<tr>${row.filter((_,i)=>data[0][i]!==undefined).map((cell,ci) => {
-        if (ci === 0) return `<td class="player-name">${cell}</td>`;
-        const num = parseFloat(cell);
-        if (!isNaN(num) && cell.trim()) return `<td><span class="score-badge">${cell}</span></td>`;
-        return `<td>${cell}</td>`;
-      }).join('')}</tr>`;
-    });
-    
-    html += `</tbody></table></div>`;
-    el.innerHTML = html;
-    upd.textContent = `Updated ${now()}`;
-  } catch(e) {
-    // Fallback: show embedded iframe
-    el.innerHTML = `
-      <div class="error-msg" style="margin-bottom:16px;">⚠ Could not parse groups data directly. Showing embedded sheet below.</div>
-      <div class="embed-container">
-        <iframe src="https://docs.google.com/spreadsheets/d/${SHEET_ID}/pubhtml?gid=groups&single=true&widget=false&headers=false"></iframe>
-      </div>`;
-    upd.textContent = 'Via embed';
-  }
-}
-
-// ---- NAV ----
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  loadSection(id);
 }
 
-const loaded = {};
-function loadSection(id) {
-  if (id === 'leaderboard') loadLeaderboard();
-  else if (id === 'matches') loadMatchday(1);
-  else if (id === 'draft') loadDraft();
-  else if (id === 'groups') loadGroups();
+function switchMatchday(id, btn) {
+  document.querySelectorAll('#md1, #md2, #md3').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).style.display = 'block';
+  btn.classList.add('active');
 }
 
-// Initial load
-loadLeaderboard();
+renderPicks();
 </script>
 </body>
 </html>
