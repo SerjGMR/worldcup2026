@@ -192,6 +192,33 @@
   .team-pts { font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: var(--gold); line-height: 1; }
   .no-results { text-align: center; padding: 60px 20px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; }
 
+  /* COUNTRY PAGE */
+  .country-back { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 28px; transition: all 0.2s; }
+  .country-back:hover { border-color: var(--gold); color: var(--gold); }
+  .country-hero { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+  .country-hero-flag { width: 80px; height: 54px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); flex-shrink: 0; }
+  .country-hero-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 3px; color: #fff; line-height: 1; }
+  .country-hero-info p { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  .country-pts-big { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--gold); letter-spacing: 2px; margin-left: auto; line-height: 1; text-align: right; }
+  .country-pts-big small { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--muted); display: block; letter-spacing: 1px; }
+  .country-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--gold); margin-bottom: 12px; border-left: 3px solid var(--gold); padding-left: 12px; }
+  .country-block { margin-bottom: 28px; }
+  .country-pickers { display: flex; flex-direction: column; gap: 8px; }
+  .country-picker-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; }
+  .country-picker-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
+  .country-picker-pts { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); }
+  .country-match { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 10px 16px; gap: 10px; margin-bottom: 8px; }
+  .country-match-team { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .country-match-team.home { justify-content: flex-end; }
+  .country-match-flag { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; }
+  .country-match-score { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fff; text-align: center; white-space: nowrap; }
+  .country-match-score .sep { color: var(--muted); font-size: 20px; margin: 0 4px; }
+  .country-pts-breakdown { display: flex; flex-direction: column; gap: 6px; }
+  .country-pts-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; }
+  .country-pts-row span:last-child { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); }
+  .clickable-country { cursor: pointer; }
+  .clickable-country:hover { opacity: 0.75; }
+
   @media (max-width: 768px) {
     /* HEADER */
     .header-inner { padding: 10px 16px; gap: 8px; }
@@ -319,6 +346,12 @@
     <div class="section-header"><h2>Bracket</h2><p>Knockout stage</p></div>
     <div id="bracket-content"><div class="loading"><div class="spinner"></div>Loading bracket…</div></div>
   </div>
+
+  <!-- COUNTRY PAGE -->
+  <div class="section" id="country-page">
+    <div id="country-page-content"></div>
+  </div>
+
 </main>
 
 <script>
@@ -431,7 +464,7 @@ async function loadMatchday(num, btn) {
         html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
             <div class="match-group">${a}</div>
-            <div class="match-team-name home">
+            <div class="match-team-name home clickable-country" onclick="openCountryPage('${b.replace(/'/g,"\\'")}',event)">
               <span>${b}</span>
               <img class="match-team-flag" src="${flag(b)}" alt="${b}" onerror="this.style.display='none'">
             </div>
@@ -446,7 +479,7 @@ async function loadMatchday(num, btn) {
           </div>
           <div class="away-side">
             <div class="match-group"></div>
-            <div class="match-team-name">
+            <div class="match-team-name clickable-country" onclick="openCountryPage('${e.replace(/'/g,"\\'")}',event)">
               <img class="match-team-flag" src="${flag(e)}" alt="${e}" onerror="this.style.display='none'">
               <span>${e}</span>
             </div>
@@ -499,7 +532,7 @@ async function loadGroups() {
       const teams = groups[gname];
       html += `<div class="group-card"><div class="group-card-header">${gname}</div><table class="group-table"><thead><tr><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;
       teams.forEach(t => {
-        html += `<tr><td><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
+        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
       });
       html += `</tbody></table></div>`;
     });
@@ -577,8 +610,8 @@ async function loadBracket() {
       return pairs.map(([r1,r2]) => {
         const t1 = team(r1,col), t2 = team(r2,col);
         return `<div class="bracket-matchup">
-          <div class="bracket-team ${t1?'':'empty'}">${t1?`<img src="${flag(t1)}" onerror="this.style.display='none'">${t1}`:'TBD'}</div>
-          <div class="bracket-team ${t2?'':'empty'}">${t2?`<img src="${flag(t2)}" onerror="this.style.display='none'">${t2}`:'TBD'}</div>
+          <div class="bracket-team ${t1?'clickable-country':'empty'}" ${t1?`onclick="openCountryPage('${t1.replace(/'/g,"\\'")}',event)"`:''}>${t1?`<img src="${flag(t1)}" onerror="this.style.display='none'">${t1}`:'TBD'}</div>
+          <div class="bracket-team ${t2?'clickable-country':'empty'}" ${t2?`onclick="openCountryPage('${t2.replace(/'/g,"\\'")}',event)"`:''}>${t2?`<img src="${flag(t2)}" onerror="this.style.display='none'">${t2}`:'TBD'}</div>
         </div>`;
       }).join('');
     }
@@ -709,7 +742,7 @@ function buildCard(p, i) {
   const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
   const teams = p.teams.map(t => {
     const pts = TEAM_POINTS[t]||0;
-    return `<div class="team-cell">
+    return `<div class="team-cell clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
       <img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
       <div class="team-name">${t}</div>
       ${pts > 0 ? `<div class="team-pts">+${pts}</div>` : ''}
@@ -755,12 +788,17 @@ function togglePicker(uid) {
   const el = document.getElementById('picker-'+uid);
   el.classList.toggle('open');
 }
+
+let lastSection = 'leaderboard';
+let lastBtn = null;
+
 const sectionLoaded = {};
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
+  if (btn) { btn.classList.add('active'); lastBtn = btn; }
+  if (id !== 'country-page') lastSection = id;
   if (!sectionLoaded[id]) { sectionLoaded[id]=true; loadSection(id); }
 }
 function loadSection(id) {
@@ -769,6 +807,104 @@ function loadSection(id) {
   else if (id==='groups') loadGroups();
   else if (id==='probs') loadProbabilities();
   else if (id==='bracket') loadBracket();
+}
+
+// COUNTRY PAGE
+let ALL_MATCH_ROWS = {};
+
+async function ensureMatchRows(num) {
+  if (ALL_MATCH_ROWS[num]) return ALL_MATCH_ROWS[num];
+  try {
+    ALL_MATCH_ROWS[num] = await fetchCSV(GIDS['md'+num]);
+  } catch(e) { ALL_MATCH_ROWS[num] = []; }
+  return ALL_MATCH_ROWS[num];
+}
+
+async function openCountryPage(countryName, e) {
+  if (e) e.stopPropagation();
+
+  const el = document.getElementById('country-page-content');
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Loading…</div>`;
+  showSection('country-page', null);
+
+  // Gather all matches across all matchdays
+  const allMatches = [];
+  for (let md = 1; md <= 3; md++) {
+    const rows = await ensureMatchRows(md);
+    rows.forEach(row => {
+      const b=(row[1]||'').trim(), c=(row[2]||'').trim(), d=(row[3]||'').trim(), e2=(row[4]||'').trim();
+      if (b && e2) {
+        const isHome = b.toLowerCase() === countryName.toLowerCase();
+        const isAway = e2.toLowerCase() === countryName.toLowerCase();
+        if (isHome || isAway) {
+          allMatches.push({ home: b, away: e2, scoreHome: c, scoreAway: d, md });
+        }
+      }
+    });
+  }
+
+  // Points breakdown from TEAM_POINTS sheet headers
+  const pts = TEAM_POINTS[countryName] || 0;
+
+  // Players who picked this country
+  const pickers = PLAYERS
+    .filter(p => p.teams.some(t => t.toLowerCase() === countryName.toLowerCase()))
+    .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
+    .sort((a,b) => b.pts - a.pts);
+
+  // Build HTML
+  let html = `
+    <button class="country-back" onclick="goBack()">← Back</button>
+    <div class="country-hero">
+      <img class="country-hero-flag" src="${flag(countryName)}" onerror="this.style.display='none'">
+      <div class="country-hero-info">
+        <h2>${countryName}</h2>
+        <p>World Cup 2026</p>
+      </div>
+      <div class="country-pts-big">${pts}<small>PTS</small></div>
+    </div>
+
+    <div class="country-block">
+      <div class="country-section-title">Matches</div>
+      ${allMatches.length ? allMatches.map(m => {
+        const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
+        return `<div class="country-match">
+          <div class="country-match-team home clickable-country" onclick="openCountryPage('${m.home.replace(/'/g,"\\'")}',event)">
+            <span>${m.home}</span>
+            <img class="country-match-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
+          </div>
+          <div class="country-match-score">
+            ${hasScore ? `${m.scoreHome}<span class="sep">:</span>${m.scoreAway}` : `<span style="color:var(--muted);font-size:16px">Upcoming</span>`}
+          </div>
+          <div class="country-match-team clickable-country" onclick="openCountryPage('${m.away.replace(/'/g,"\\'")}',event)">
+            <img class="country-match-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
+            <span>${m.away}</span>
+          </div>
+        </div>`;
+      }).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No matches found</div>`}
+    </div>
+
+    <div class="country-block">
+      <div class="country-section-title">Draft Players (${pickers.length})</div>
+      <div class="country-pickers">
+        ${pickers.length ? pickers.map(p => `
+          <div class="country-picker-row">
+            <span class="country-picker-name">${p.name}</span>
+            <span class="country-picker-pts">${p.pts} pts</span>
+          </div>`).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No one picked this team</div>`}
+      </div>
+    </div>`;
+
+  el.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(lastSection).classList.add('active');
+  if (lastBtn) lastBtn.classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 // INIT
