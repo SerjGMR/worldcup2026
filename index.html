@@ -399,18 +399,8 @@ const FLAGS = {
 };
 function flag(c) { const code=FLAGS[c]||FLAGS[c?.trim()]; return code?`https://flagcdn.com/w40/${code}.png`:'https://flagcdn.com/w40/un.png'; }
 
-// PLAYER AVATARS - swap 'null' with 'images/name.jpg' once uploaded to GitHub
-const PLAYER_AVATARS = {
-  "Alec": null, "Ara": null, "Arbi O": null, "Arbi T": null,
-  "Armand": null, "Armen J": null, "Armen P": null, "Chris Ab": null,
-  "Chris Agh": null, "Costya": null, "Greg": null, "Joe": null,
-  "Julian": null, "Kenan": null, "Koko": null, "Leo": null,
-  "Lucas": null, "Michael": null, "Nishan": null, "Patrick": null,
-  "Raffi": null, "Roman": null, "Sandro": null, "Serj": null,
-  "Sevan": null, "Tony": null, "Vahik": null,
-  "Vahn": "vahnworldcup.jpg",
-  "Viken": null, "Zoe": null
-};
+// PLAYER COLORS & AVATARS
+// Just upload [name]worldcup.jpg to the repo root — no code changes needed!
 
 const PLAYER_COLORS = {
   "Alec":"#E74C3C","Ara":"#E67E22","Arbi O":"#F1C40F","Arbi T":"#2ECC71",
@@ -424,13 +414,13 @@ const PLAYER_COLORS = {
 };
 
 function playerAvatar(name, size=32) {
-  const img = PLAYER_AVATARS[name];
   const color = PLAYER_COLORS[name] || '#888';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  if (img) {
-    return `<img src="${img}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.4)">`;
-  }
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>`;
+  const filename = name.toLowerCase().replace(/\s+/g,'') + 'worldcup.jpg';
+  return `<img src="${filename}" alt="${name}" 
+    style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.4)"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+  <div style="display:none;width:${size}px;height:${size}px;border-radius:50%;background:${color};align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>`;
 }
 
 async function fetchCSV(gid) {
