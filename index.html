@@ -816,7 +816,7 @@ function showSection(id, btn) {
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (btn) { btn.classList.add('active'); lastBtn = btn; }
-  if (id !== 'country-page') lastSection = id;
+  if (id !== 'country-page' && id !== 'player-page') lastSection = id;
   if (!sectionLoaded[id]) { sectionLoaded[id]=true; loadSection(id); }
 }
 function loadSection(id) {
