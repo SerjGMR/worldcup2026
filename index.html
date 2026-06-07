@@ -528,7 +528,7 @@ async function loadBracket() {
   try {
     const rows = await fetchCSV(GIDS.bracket);
     const r = (row, col) => (rows[row] && rows[row][col] ? rows[row][col].trim() : '');
-    const team = (row, col) => { const t = r(row, col); return t && !/^\+|round|semi|quarter|final|champion|bracket|place|3rd/i.test(t) ? t : ''; };
+    const team = (row, col) => { const t = r(row, col); return t && !/^\+\d|^round of|^semi final|^quarter final|^3rd place|^champion|^bracket|^final$/i.test(t) ? t : ''; };
 
     // Left side: col A=0, C=2, E=4, G=6
     // Right side: col P=15, N=13, L=11, J=9
