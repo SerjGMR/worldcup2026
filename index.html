@@ -417,10 +417,13 @@ function playerAvatar(name, size=32) {
   const color = PLAYER_COLORS[name] || '#888';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const filename = name.toLowerCase().replace(/\s+/g,'') + 'worldcup.jpg';
-  return `<img src="${filename}" alt="${name}" 
-    style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.4)"
-    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-  <div style="display:none;width:${size}px;height:${size}px;border-radius:50%;background:${color};align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${initials}</div>`;
+  const uid = 'av_' + name.replace(/\s+/g,'').toLowerCase();
+  return `<div style="width:${size}px;height:${size}px;flex-shrink:0;position:relative">
+    <img id="${uid}_img" src="${filename}" alt="${name}"
+      style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.4);position:absolute;top:0;left:0"
+      onerror="document.getElementById('${uid}_img').style.display='none';document.getElementById('${uid}_fb').style.display='flex'">
+    <div id="${uid}_fb" style="display:none;width:${size}px;height:${size}px;border-radius:50%;background:${color};align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:${Math.round(size*0.38)}px;color:#fff;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,0.3);position:absolute;top:0;left:0">${initials}</div>
+  </div>`;
 }
 
 async function fetchCSV(gid) {
