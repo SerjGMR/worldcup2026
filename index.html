@@ -260,7 +260,7 @@ async function loadLeaderboard() {
       const pts = row[5]||'0';
       const prize = row[6]||'';
       html += `<tr>
-        <td><span class="lb-rank ${rc}">${i+1}</span></td>
+        <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td><span class="lb-name">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
