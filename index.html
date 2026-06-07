@@ -999,25 +999,34 @@ async function openCountryPage(countryName, e) {
   const el = document.getElementById('country-page-content');
   el.innerHTML = `<div class="loading"><div class="spinner"></div>Loading…</div>`;
   showSection('country-page', null);
+  window.scrollTo(0, 0);
 
   // Gather all matches across all matchdays
   const allMatches = [];
   for (let md = 1; md <= 3; md++) {
     const rows = await ensureMatchRows(md);
     rows.forEach(row => {
-      const b=(row[1]||'').trim(), c=(row[2]||'').trim(), d=(row[3]||'').trim(), e2=(row[4]||'').trim();
+      const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
+            d=(row[3]||'').trim(), e2=(row[4]||'').trim(), f=(row[5]||'').trim();
       if (b && e2) {
         const isHome = b.toLowerCase() === countryName.toLowerCase();
         const isAway = e2.toLowerCase() === countryName.toLowerCase();
         if (isHome || isAway) {
-          allMatches.push({ home: b, away: e2, scoreHome: c, scoreAway: d, md });
+          allMatches.push({ group: a, home: b, away: e2, scoreHome: c, scoreAway: d, status: f, md });
         }
       }
     });
   }
 
-  // Points breakdown from TEAM_POINTS sheet headers
-  const pts = TEAM_POINTS[countryName] || 0;
+  const totalPts = TEAM_POINTS[countryName] || 0;
+
+  // Points breakdown from extlb — find this country across all players
+  // Build a per-stage breakdown by looking at EXTLB_DATA
+  let breakdownRow = null;
+  for (const playerName of Object.keys(EXTLB_DATA)) {
+    const found = EXTLB_DATA[playerName].find(t => t.team.toLowerCase() === countryName.toLowerCase());
+    if (found) { breakdownRow = found; break; }
+  }
 
   // Players who picked this country
   const pickers = PLAYERS
@@ -1025,7 +1034,86 @@ async function openCountryPage(countryName, e) {
     .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
     .sort((a,b) => b.pts - a.pts);
 
-  // Build HTML
+  // Build match cards with dropdown pickers (same style as matches tab)
+  const matchesHTML = allMatches.length ? allMatches.map(m => {
+    const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
+    const isLive = /live/i.test(m.status);
+    const uid = Math.random().toString(36).slice(2,8);
+
+    const homePickers = PLAYERS
+      .filter(p => p.teams.some(t => t.toLowerCase() === m.home.toLowerCase()))
+      .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
+      .sort((a,b) => b.pts - a.pts);
+    const awayPickers = PLAYERS
+      .filter(p => p.teams.some(t => t.toLowerCase() === m.away.toLowerCase()))
+      .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
+      .sort((a,b) => b.pts - a.pts);
+
+    const pickerRows = (arr) => arr.length
+      ? arr.map(p => `<div class="picker-player">
+          <span class="picker-player-name clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${p.name}</span>
+          <span class="picker-player-pts">${p.pts}</span>
+        </div>`).join('')
+      : `<div class="picker-none">No one</div>`;
+
+    return `<div class="match-card" onclick="togglePicker('${uid}')">
+      <div class="home-side">
+        <div class="match-group">${m.group}</div>
+        <div class="match-team-name home">
+          <span>${m.home}</span>
+          <img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="match-score-wrap">
+        <div class="match-score">
+          <span class="s">${hasScore?m.scoreHome:'–'}</span>
+          <span class="sep">:</span>
+          <span class="s">${hasScore?m.scoreAway:'–'}</span>
+        </div>
+        ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">Upcoming</div>`}
+      </div>
+      <div class="away-side">
+        <div class="match-group"></div>
+        <div class="match-team-name">
+          <img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
+          <span>${m.away}</span>
+        </div>
+      </div>
+      <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
+        <div class="picker-col">
+          <h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5>
+          ${pickerRows(homePickers)}
+        </div>
+        <div class="picker-col">
+          <h5><img src="${flag(m.away)}" onerror="this.style.display='none'">${m.away}</h5>
+          ${pickerRows(awayPickers)}
+        </div>
+      </div>
+    </div>`;
+  }).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No matches found</div>`;
+
+  // Points breakdown table
+  const breakdownHTML = breakdownRow ? `
+    <div class="country-block">
+      <div class="country-section-title">Points Breakdown</div>
+      <div class="team-breakdown-wrap">
+        <table class="team-breakdown-table">
+          <thead><tr><th>GS</th><th>RO32</th><th>RO16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th><th>🏆</th><th>Total</th></tr></thead>
+          <tbody><tr>
+            <td style="text-align:center">${breakdownRow.groupStage}</td>
+            <td style="text-align:center">${breakdownRow.ro32}</td>
+            <td style="text-align:center">${breakdownRow.ro16}</td>
+            <td style="text-align:center">${breakdownRow.quarters}</td>
+            <td style="text-align:center">${breakdownRow.semis}</td>
+            <td style="text-align:center">${breakdownRow.thirdPlace}</td>
+            <td style="text-align:center">${breakdownRow.finals}</td>
+            <td style="text-align:center">${breakdownRow.champion}</td>
+            <td class="total-col">${breakdownRow.total}</td>
+          </tr></tbody>
+        </table>
+      </div>
+    </div>` : '';
+
   let html = `
     <button class="country-back" onclick="goBack()">← Back</button>
     <div class="country-hero">
@@ -1034,27 +1122,14 @@ async function openCountryPage(countryName, e) {
         <h2>${countryName}</h2>
         <p>World Cup 2026</p>
       </div>
-      <div class="country-pts-big">${pts}<small>PTS</small></div>
+      <div class="country-pts-big">${totalPts}<small>PTS</small></div>
     </div>
+
+    ${breakdownHTML}
 
     <div class="country-block">
       <div class="country-section-title">Matches</div>
-      ${allMatches.length ? allMatches.map(m => {
-        const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
-        return `<div class="country-match">
-          <div class="country-match-team home clickable-country" onclick="openCountryPage('${m.home.replace(/'/g,"\\'")}',event)">
-            <span>${m.home}</span>
-            <img class="country-match-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
-          </div>
-          <div class="country-match-score">
-            ${hasScore ? `${m.scoreHome}<span class="sep">:</span>${m.scoreAway}` : `<span style="color:var(--muted);font-size:16px">Upcoming</span>`}
-          </div>
-          <div class="country-match-team clickable-country" onclick="openCountryPage('${m.away.replace(/'/g,"\\'")}',event)">
-            <img class="country-match-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
-            <span>${m.away}</span>
-          </div>
-        </div>`;
-      }).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No matches found</div>`}
+      ${matchesHTML}
     </div>
 
     <div class="country-block">
@@ -1062,7 +1137,7 @@ async function openCountryPage(countryName, e) {
       <div class="country-pickers">
         ${pickers.length ? pickers.map(p => `
           <div class="country-picker-row">
-            <span class="country-picker-name">${p.name}</span>
+            <span class="country-picker-name clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${p.name}</span>
             <span class="country-picker-pts">${p.pts} pts</span>
           </div>`).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No one picked this team</div>`}
       </div>
