@@ -246,19 +246,19 @@ async function loadLeaderboard() {
     const rows = await fetchCSV(GIDS.leaderboard);
     // Row 1=blank, Row 2=title, Row 3=headers, Row 4+=data
     // Columns: B=Rank, C=Name, D=TeamsIn, E=Points, F=Prize (0-indexed: 1,2,3,4,5)
-    const data = rows.slice(3).filter(r => r[2] && r[2].trim());
+    const data = rows.slice(3).filter(r => r[3] && r[3].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
       <thead><tr><th>#</th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row, i) => {
-      // Sheet: col A=empty, B=Rank, C=Name, D=TeamsIn, E=Points, F=Prize
-      // CSV appears 0-indexed: 0=Rank, 1=Name, 2=TeamsIn, 3=Points, 4=Prize
-      const sheetRank = row[0]||String(i+1);
+      // Sheet: A=empty, B=empty, C=Rank, D=Name, E=TeamsIn, F=Points, G=Prize
+      // CSV 0-indexed: 0=empty, 1=empty, 2=Rank, 3=Name, 4=TeamsIn, 5=Points, 6=Prize
+      const sheetRank = row[2]||String(i+1);
       const rankNum = parseInt(sheetRank)||i+1;
       const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
-      const name = row[1]||'';
-      const teamsIn = row[2]||'—';
-      const pts = row[3]||'0';
-      const prize = row[4]||'';
+      const name = row[3]||'';
+      const teamsIn = row[4]||'—';
+      const pts = row[5]||'0';
+      const prize = row[6]||'';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${i+1}</span></td>
         <td><span class="lb-name">${name}</span></td>
