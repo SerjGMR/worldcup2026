@@ -535,17 +535,17 @@ async function loadBracket() {
     // Center: col H=7 (final/3rd), col I=8 (champion)
     // Row mapping (0-indexed from CSV):
     // Sheet row 8 = CSV index 6, sheet row 9 = CSV index 7, etc. (offset of -2)
-    const L32 = [ [6,7],[10,11],[14,15],[18,19],[22,23],[26,27],[30,31],[34,35] ];
-    const L16 = [ [8,9],[16,17],[24,25],[32,33] ];
-    const LQF = [ [12,13],[28,29] ];
-    const LSF = [ [20,21] ];
-    const R32 = [ [6,7],[10,11],[14,15],[18,19],[22,23],[26,27],[30,31],[34,35] ];
-    const R16 = [ [8,9],[16,17],[24,25],[32,33] ];
-    const RQF = [ [12,13],[28,29] ];
-    const RSF = [ [20,21] ];
-    const FINAL = [14,18];
-    const THIRD = [25,27];
-    const CHAMP = 7;
+    const L32 = [ [7,8],[11,12],[15,16],[19,20],[23,24],[27,28],[31,32],[35,36] ];
+    const L16 = [ [9,10],[17,18],[25,26],[33,34] ];
+    const LQF = [ [13,14],[29,30] ];
+    const LSF = [ [21,22] ];
+    const R32 = [ [7,8],[11,12],[15,16],[19,20],[23,24],[27,28],[31,32],[35,36] ];
+    const R16 = [ [9,10],[17,18],[25,26],[33,34] ];
+    const RQF = [ [13,14],[29,30] ];
+    const RSF = [ [21,22] ];
+    const FINAL = [15,19];
+    const THIRD = [26,28];
+    const CHAMP = 8;
 
     function matchupHTML(pairs, col) {
       return pairs.map(([r1,r2]) => {
