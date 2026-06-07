@@ -250,15 +250,17 @@ async function loadLeaderboard() {
     let html = `<div class="lb-wrap"><table class="lb-table">
       <thead><tr><th>#</th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row, i) => {
-      const rank = row[1]||String(i+1);
-      const rankNum = parseInt(rank)||i+1;
+      // Sheet: col A=empty, B=Rank, C=Name, D=TeamsIn, E=Points, F=Prize
+      // CSV 0-indexed: 0=empty, 1=Rank, 2=Name, 3=TeamsIn, 4=Points, 5=Prize
+      const sheetRank = row[1]||String(i+1);
+      const rankNum = parseInt(sheetRank)||i+1;
       const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
       const name = row[2]||'';
       const teamsIn = row[3]||'—';
       const pts = row[4]||'0';
       const prize = row[5]||'';
       html += `<tr>
-        <td><span class="lb-rank ${rc}">${rank}</span></td>
+        <td><span class="lb-rank ${rc}">${i+1}</span></td>
         <td><span class="lb-name">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
