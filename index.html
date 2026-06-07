@@ -244,19 +244,19 @@ async function fetchCSV(gid) {
 async function loadLeaderboard() {
   try {
     const rows = await fetchCSV(GIDS.leaderboard);
-    // find header row
-    let hi = rows.findIndex(r => r.some(c => /rank|name|point/i.test(c)));
-    if (hi < 0) hi = 0;
-    const data = rows.slice(hi+1).filter(r => r[1] && r[1].trim());
+    // Row 1=blank, Row 2=title, Row 3=headers, Row 4+=data
+    // Columns: B=Rank, C=Name, D=TeamsIn, E=Points, F=Prize (0-indexed: 1,2,3,4,5)
+    const data = rows.slice(3).filter(r => r[2] && r[2].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
       <thead><tr><th>#</th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row, i) => {
-      const rank = i+1;
-      const rc = rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
-      const name = row[1]||'';
-      const teamsIn = row[2]||'0';
-      const pts = row[3]||'0';
-      const prize = row[4]||'';
+      const rank = row[1]||String(i+1);
+      const rankNum = parseInt(rank)||i+1;
+      const rc = rankNum===1?'r1':rankNum===2?'r2':rankNum===3?'r3':'';
+      const name = row[2]||'';
+      const teamsIn = row[3]||'—';
+      const pts = row[4]||'0';
+      const prize = row[5]||'';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${rank}</span></td>
         <td><span class="lb-name">${name}</span></td>
