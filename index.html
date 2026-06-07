@@ -460,7 +460,7 @@ async function loadLeaderboard() {
       const prize = row[6]||'';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
-        <td style="padding:8px 6px">${playerAvatar(name, 44)}</td>
+        <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
         <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
@@ -515,7 +515,10 @@ async function loadMatchday(num, btn) {
           .sort((a,b) => b.pts - a.pts);
 
         const pickerRows = (arr) => arr.length
-          ? arr.map(p => `<div class="picker-player"><span class="picker-player-name">${p.name}</span><span class="picker-player-pts">${p.pts}</span></div>`).join('')
+          ? arr.map(p => `<div class="picker-player">
+              <span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span>
+              <span class="picker-player-pts">${p.pts}</span>
+            </div>`).join('')
           : `<div class="picker-none">No one</div>`;
 
         const uid = Math.random().toString(36).slice(2,8);
@@ -626,7 +629,7 @@ async function loadProbabilities() {
       const barWidth = maxPct > 0 ? Math.round((pct/maxPct)*100) : 0;
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
-        <td style="padding:8px 6px">${playerAvatar(name, 44)}</td>
+        <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
         <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td>
@@ -809,7 +812,7 @@ function buildCard(p, i) {
   }).join('');
   return `<div class="player-card" data-name="${p.name.toLowerCase()}" data-teams="${p.teams.join(' ').toLowerCase()}">
     <div class="player-card-header">
-      ${playerAvatar(p.name, 46)}
+      <span class="clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name, 46)}</span>
       <div class="player-info">
         <div class="player-info-top">
           <span class="player-rank-badge ${rc}">#${rank}</span>
@@ -1080,7 +1083,7 @@ async function openCountryPage(countryName, e) {
 
     const pickerRows = (arr) => arr.length
       ? arr.map(p => `<div class="picker-player">
-          <span class="picker-player-name clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${p.name}</span>
+          <span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span>
           <span class="picker-player-pts">${p.pts}</span>
         </div>`).join('')
       : `<div class="picker-none">No one</div>`;
@@ -1166,7 +1169,7 @@ async function openCountryPage(countryName, e) {
       <div class="country-pickers">
         ${pickers.length ? pickers.map(p => `
           <div class="country-picker-row">
-            <span class="country-picker-name clickable-player" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${p.name}</span>
+            <span style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,32)}<span class="country-picker-name clickable-player">${p.name}</span></span>
             <span class="country-picker-pts">${p.pts} pts</span>
           </div>`).join('') : `<div style="color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px">No one picked this team</div>`}
       </div>
