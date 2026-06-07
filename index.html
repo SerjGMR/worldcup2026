@@ -8,7 +8,6 @@
 <style>
   :root {
     --gold: #F5C518;
-    --red: #C0392B;
     --dark: #0a0a0f;
     --darker: #050508;
     --mid: #13131a;
@@ -36,9 +35,8 @@
   }
 
   .header-bg {
-    position: absolute;
-    inset: 0;
-    background: 
+    position: absolute; inset: 0;
+    background:
       radial-gradient(ellipse at 20% 50%, rgba(197,48,32,0.15) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 50%, rgba(245,197,24,0.08) 0%, transparent 60%);
   }
@@ -55,141 +53,153 @@
     gap: 12px;
   }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
+  .logo { display: flex; align-items: center; gap: 14px; }
   .logo-icon {
     width: 48px; height: 48px;
     background: var(--gold);
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
   }
-
   .logo-text h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    color: #fff;
-    line-height: 1;
+    font-size: 28px; letter-spacing: 2px; color: #fff; line-height: 1;
   }
-
   .logo-text span {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    color: var(--gold);
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase;
   }
 
   nav { display: flex; gap: 4px; flex-wrap: wrap; }
-
   nav button {
-    background: transparent;
-    border: none;
-    color: var(--muted);
+    background: transparent; border: none; color: var(--muted);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s;
-    position: relative;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 8px 16px; cursor: pointer; border-radius: 4px;
+    transition: all 0.2s; position: relative;
   }
-
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
   nav button.active { color: var(--gold); }
   nav button.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 16px; right: 16px;
-    height: 2px;
-    background: var(--gold);
+    content: ''; position: absolute; bottom: -2px; left: 16px; right: 16px;
+    height: 2px; background: var(--gold);
   }
 
-  main {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 40px 40px 80px;
-  }
-
+  main { max-width: 1300px; margin: 0 auto; padding: 40px 40px 80px; }
   .section { display: none; }
   .section.active { display: block; }
 
   .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 28px;
-    border-left: 4px solid var(--gold);
-    padding-left: 16px;
+    display: flex; align-items: baseline; gap: 16px;
+    margin-bottom: 28px; border-left: 4px solid var(--gold); padding-left: 16px;
   }
-
   .section-header h2 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 3px;
-    color: #fff;
-    line-height: 1;
+    font-size: 42px; letter-spacing: 3px; color: #fff; line-height: 1;
   }
-
   .section-header p {
-    color: var(--muted);
-    font-size: 13px;
+    color: var(--muted); font-size: 13px;
     font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    letter-spacing: 2px; text-transform: uppercase;
   }
 
-  .sub-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-
+  .sub-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
   .sub-tab {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--muted);
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 8px 20px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
   }
-
   .sub-tab:hover { border-color: var(--gold); color: var(--text); }
   .sub-tab.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
 
   .embed-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .embed-wrap iframe { width: 100%; height: 720px; border: none; display: block; background: #fff; }
+
+  /* PICKS */
+  .search-bar {
+    width: 100%; padding: 14px 20px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 30px; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: 15px;
+    margin-bottom: 28px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus { border-color: var(--gold); }
+  .search-bar::placeholder { color: var(--muted); }
+
+  .picks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
   }
 
-  .embed-wrap iframe {
-    width: 100%;
-    height: 720px;
-    border: none;
-    display: block;
-    background: #fff;
+  .player-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .player-card:hover { border-color: rgba(245,197,24,0.4); transform: translateY(-2px); }
+
+  .player-card-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+    color: #fff; flex-shrink: 0; letter-spacing: 1px;
+  }
+
+  .player-info h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .player-info span {
+    font-size: 12px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+  }
+
+  .teams-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+  }
+
+  .team-cell {
+    background: var(--card);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px 6px; gap: 6px;
+    transition: background 0.15s;
+  }
+  .team-cell:hover { background: rgba(245,197,24,0.05); }
+
+  .team-flag {
+    width: 40px; height: 27px;
+    object-fit: cover; border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; letter-spacing: 0.5px;
+    color: var(--muted); text-align: center;
+    text-transform: uppercase; line-height: 1.2;
+  }
+
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; letter-spacing: 2px; text-transform: uppercase;
   }
 
   @media (max-width: 768px) {
@@ -198,6 +208,7 @@
     main { padding: 24px 16px 60px; }
     .section-header h2 { font-size: 30px; }
     .embed-wrap iframe { height: 500px; }
+    .picks-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -216,6 +227,7 @@
     <nav>
       <button class="active" onclick="showSection('leaderboard', this)">Leaderboard</button>
       <button onclick="showSection('matches', this)">Matches</button>
+      <button onclick="showSection('picks', this)">Player Picks</button>
       <button onclick="showSection('draft', this)">Draft</button>
       <button onclick="showSection('groups', this)">Groups</button>
     </nav>
@@ -226,76 +238,191 @@
 
   <!-- LEADERBOARD -->
   <div class="section active" id="leaderboard">
-    <div class="section-header">
-      <h2>Leaderboard</h2>
-      <p>Live standings</p>
-    </div>
+    <div class="section-header"><h2>Leaderboard</h2><p>Live standings</p></div>
     <div class="embed-wrap">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1101782913&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=1101782913&single=true&output=html"></iframe>
     </div>
   </div>
 
   <!-- MATCHES -->
   <div class="section" id="matches">
-    <div class="section-header">
-      <h2>Matches</h2>
-      <p>Matchday results</p>
-    </div>
+    <div class="section-header"><h2>Matches</h2><p>Matchday results</p></div>
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="switchMatchday('md1', this)">Matchday 1</button>
       <button class="sub-tab" onclick="switchMatchday('md2', this)">Matchday 2</button>
       <button class="sub-tab" onclick="switchMatchday('md3', this)">Matchday 3</button>
     </div>
     <div id="md1" class="embed-wrap">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1655786227&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=1655786227&single=true&output=html"></iframe>
     </div>
     <div id="md2" class="embed-wrap" style="display:none">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1080001360&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=1080001360&single=true&output=html"></iframe>
     </div>
     <div id="md3" class="embed-wrap" style="display:none">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=782783342&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=782783342&single=true&output=html"></iframe>
     </div>
+  </div>
+
+  <!-- PLAYER PICKS -->
+  <div class="section" id="picks">
+    <div class="section-header"><h2>Player Picks</h2><p>Draft selections</p></div>
+    <input class="search-bar" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
+    <div class="picks-grid" id="picks-grid"></div>
+    <div class="no-results" id="no-results" style="display:none">No results found</div>
   </div>
 
   <!-- DRAFT -->
   <div class="section" id="draft">
-    <div class="section-header">
-      <h2>Draft</h2>
-      <p>Team selections</p>
-    </div>
+    <div class="section-header"><h2>Draft</h2><p>Team selections</p></div>
     <div class="embed-wrap">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=213895062&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=213895062&single=true&output=html"></iframe>
     </div>
   </div>
 
   <!-- GROUPS -->
   <div class="section" id="groups">
-    <div class="section-header">
-      <h2>Groups</h2>
-      <p>Group stage standings</p>
-    </div>
+    <div class="section-header"><h2>Groups</h2><p>Group stage standings</p></div>
     <div class="embed-wrap">
-      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pubhtml?gid=1340150710&single=true&widget=false&headers=false"></iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/1SIXgrYjzcfUlclZ1AUYF8ahmWawDib7s8IFcoh6ihNk/pub?gid=1340150710&single=true&output=html"></iframe>
     </div>
   </div>
 
 </main>
 
 <script>
-  function showSection(id, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
-  }
+// FLAG CODES - maps country name to ISO 3166-1 alpha-2 code for flagcdn.com
+const FLAGS = {
+  "Argentina": "ar", "Belgium": "be", "Uruguay": "uy", "Sweden": "se",
+  "Algeria": "dz", "Egypt": "eg", "Panama": "pa", "Jordan": "jo",
+  "Brazil": "br", "Germany": "de", "Mexico": "mx", "Morocco": "ma",
+  "Ivory Coast": "ci", "Cape Verde": "cv", "Spain": "es", "Croatia": "hr",
+  "Colombia": "co", "Canada": "ca", "Ghana": "gh", "Australia": "au",
+  "Tunisia": "tn", "Iraq": "iq", "England": "gb-eng", "Portugal": "pt",
+  "Turkey": "tr", "Paraguay": "py", "South Africa": "za", "New Zealand": "nz",
+  "Japan": "jp", "Bosnia-Herzegovina": "ba", "Congo DR": "cd",
+  "Haiti": "ht", "United States": "us", "Norway": "no", "Switzerland": "ch",
+  "Senegal": "sn", "Qatar": "qa", "Curacao": "cw", "Ecuador": "ec",
+  "Netherlands": "nl", "Scotland": "gb-sct", "Czechia": "cz", "Uzbekistan": "uz",
+  "Austria": "at", "South Korea": "kr", "Saudi Arabia": "sa", "France": "fr",
+  "Iran": "ir", "Serbia": "rs", "Ukraine": "ua", "Poland": "pl",
+  "Costa Rica": "cr", "Honduras": "hn", "Bolivia": "bo", "Venezuela": "ve",
+  "Cameroon": "cm", "Nigeria": "ng", "Mali": "ml", "Guinea": "gn",
+  "Kenya": "ke", "Tanzania": "tz", "Rwanda": "rw", "Zimbabwe": "zw",
+  "China": "cn", "India": "in", "Thailand": "th", "Vietnam": "vn",
+  "Philippines": "ph", "Indonesia": "id", "Malaysia": "my",
+  "New Caledonia": "nc", "Fiji": "fj", "Tahiti": "pf",
+  "Cuba": "cu", "Jamaica": "jm", "Trinidad and Tobago": "tt",
+  "El Salvador": "sv", "Guatemala": "gt", "Nicaragua": "ni"
+};
 
-  function switchMatchday(id, btn) {
-    document.querySelectorAll('#md1, #md2, #md3').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).style.display = 'block';
-    btn.classList.add('active');
-  }
+function flagUrl(country) {
+  const code = FLAGS[country];
+  if (!code) return 'https://flagcdn.com/w40/un.png';
+  return `https://flagcdn.com/w40/${code}.png`;
+}
+
+const AVATAR_COLORS = [
+  '#E74C3C','#E67E22','#F1C40F','#2ECC71','#1ABC9C',
+  '#3498DB','#9B59B6','#E91E63','#00BCD4','#FF5722',
+  '#8BC34A','#FF9800','#607D8B','#795548','#673AB7',
+  '#F06292','#4DB6AC','#FFB74D','#A1887F','#90A4AE',
+  '#EF5350','#AB47BC','#42A5F5','#26C6DA','#D4E157',
+  '#FF7043','#8D6E63','#78909C','#26A69A','#FFA726'
+];
+
+const PLAYERS = [
+  { name: "Alec", teams: ["Argentina","Belgium","Uruguay","Sweden","Algeria","Egypt","Panama","Jordan"] },
+  { name: "Ara", teams: ["Brazil","Germany","Mexico","Morocco","Egypt","Ivory Coast","Jordan","Cape Verde"] },
+  { name: "Arbi O", teams: ["Spain","Croatia","Colombia","Canada","Ghana","Australia","Tunisia","Iraq"] },
+  { name: "Arbi T", teams: ["England","Portugal","Morocco","Turkey","Paraguay","Australia","South Africa","New Zealand"] },
+  { name: "Armand", teams: ["Spain","Croatia","Turkey","Sweden","Canada","Egypt","Congo DR","Haiti"] },
+  { name: "Armen J", teams: ["Brazil","Germany","Japan","Morocco","Paraguay","Bosnia-Herzegovina","Congo DR","South Africa"] },
+  { name: "Armen P", teams: ["Argentina","Colombia","United States","Japan","Ghana","Bosnia-Herzegovina","New Zealand","Jordan"] },
+  { name: "Chris Ab", teams: ["Spain","Norway","Switzerland","Sweden","Senegal","Algeria","Qatar","Curacao"] },
+  { name: "Chris Agh", teams: ["Germany","Norway","Bosnia-Herzegovina","Senegal","Ecuador","Tunisia","Algeria","Haiti"] },
+  { name: "Costya", teams: ["Netherlands","Colombia","Uruguay","Sweden","Czechia","Paraguay","Panama","Uzbekistan"] },
+  { name: "Greg", teams: ["Brazil","Ghana","Mexico","Austria","Czechia","Paraguay","Panama","South Africa"] },
+  { name: "Joe", teams: ["England","Netherlands","Uruguay","Morocco","Scotland","Australia","New Zealand","Jordan"] },
+  { name: "Julian", teams: ["Spain","Belgium","Norway","Scotland","South Korea","Qatar","Tunisia","Cape Verde"] },
+  { name: "Kenan", teams: ["England","Netherlands","United States","Japan","Czechia","Australia","Haiti","Iraq"] },
+  { name: "Koko", teams: ["Argentina","Belgium","Uruguay","Japan","Ghana","Ivory Coast","Panama","Iraq"] },
+  { name: "Leo", teams: ["France","Belgium","United States","South Korea","Canada","Saudi Arabia","Qatar","Cape Verde"] },
+  { name: "Lucas", teams: ["England","Netherlands","Mexico","Turkey","Iran","Czechia","Panama","South Africa"] },
+  { name: "Michael", teams: ["France","Uruguay","Colombia","Czechia","Canada","Saudi Arabia","New Zealand","Curacao"] },
+  { name: "Nishan", teams: ["England","Portugal","Austria","Canada","Paraguay","Iran","Jordan","Uzbekistan"] },
+  { name: "Patrick", teams: ["Brazil","Germany","Morocco","Turkey","Bosnia-Herzegovina","Ivory Coast","Congo DR","Uzbekistan"] },
+  { name: "Raffi", teams: ["Argentina","Netherlands","United States","Austria","Scotland","Ivory Coast","Tunisia","Haiti"] },
+  { name: "Roman", teams: ["France","Switzerland","Scotland","South Korea","Ecuador","Saudi Arabia","Algeria","Curacao"] },
+  { name: "Sandro", teams: ["Portugal","Croatia","Austria","Japan","Iran","Australia","South Africa","Iraq"] },
+  { name: "Serj", teams: ["Spain","Belgium","Switzerland","Ecuador","South Korea","Egypt","Congo DR","Cape Verde"] },
+  { name: "Sevan", teams: ["Brazil","Germany","Mexico","Senegal","Iran","Ivory Coast","Uzbekistan","New Zealand"] },
+  { name: "Tony", teams: ["France","Norway","United States","Ecuador","Senegal","Algeria","Congo DR","Curacao"] },
+  { name: "Vahik", teams: ["Argentina","Norway","Turkey","South Korea","Iran","Saudi Arabia","Qatar","Curacao"] },
+  { name: "Vahn", teams: ["Portugal","Croatia","Colombia","Ecuador","Scotland","Egypt","Uzbekistan","Cape Verde"] },
+  { name: "Viken", teams: ["France","Switzerland","Mexico","Senegal","Sweden","Saudi Arabia","Qatar","Haiti"] },
+  { name: "Zoe", teams: ["Portugal","Croatia","Switzerland","Austria","Ghana","Bosnia-Herzegovina","Tunisia","Iraq"] }
+];
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function buildCard(player, idx) {
+  const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  const initials = getInitials(player.name);
+  const teamsHTML = player.teams.map(team => `
+    <div class="team-cell">
+      <img class="team-flag" src="${flagUrl(team)}" alt="${team}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
+      <div class="team-name">${team}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="player-card" data-name="${player.name.toLowerCase()}" data-teams="${player.teams.join(' ').toLowerCase()}">
+      <div class="player-card-header">
+        <div class="avatar" style="background:${color}">${initials}</div>
+        <div class="player-info">
+          <h3>${player.name}</h3>
+          <span>${player.teams.length} teams picked</span>
+        </div>
+      </div>
+      <div class="teams-grid">${teamsHTML}</div>
+    </div>
+  `;
+}
+
+function renderPicks() {
+  const grid = document.getElementById('picks-grid');
+  grid.innerHTML = PLAYERS.map((p, i) => buildCard(p, i)).join('');
+}
+
+function filterPicks(query) {
+  const q = query.toLowerCase().trim();
+  const cards = document.querySelectorAll('.player-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const match = !q || card.dataset.name.includes(q) || card.dataset.teams.includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+}
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchMatchday(id, btn) {
+  document.querySelectorAll('#md1, #md2, #md3').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).style.display = 'block';
+  btn.classList.add('active');
+}
+
+renderPicks();
 </script>
-
 </body>
 </html>
