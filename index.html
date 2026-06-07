@@ -189,7 +189,7 @@
   .team-cell:hover { background: rgba(245,197,24,0.06); }
   .team-flag { width: 42px; height: 28px; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
   .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.5px; color: var(--muted); text-align: center; text-transform: uppercase; line-height: 1.2; }
-  .team-pts { font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: var(--gold); line-height: 1; }
+  .team-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; line-height: 1; letter-spacing: 0.5px; }
   .no-results { text-align: center; padding: 60px 20px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; }
 
   /* COUNTRY PAGE */
@@ -807,7 +807,7 @@ function buildCard(p, i) {
     return `<div class="team-cell clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
       <img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
       <div class="team-name">${t}</div>
-      ${pts > 0 ? `<div class="team-pts">+${pts}</div>` : ''}
+      <div class="team-pts" style="color:${pts>0?'var(--gold)':'var(--muted)'}">${pts > 0 ? '+'+pts : '0'} pts</div>
     </div>`;
   }).join('');
   return `<div class="player-card" data-name="${p.name.toLowerCase()}" data-teams="${p.teams.join(' ').toLowerCase()}">
