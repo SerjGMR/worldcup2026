@@ -91,7 +91,7 @@
     background: var(--card); border: 1px solid var(--border); border-radius: 10px;
     display: grid; grid-template-columns: 1fr auto 1fr;
     align-items: center; padding: 10px 14px; margin-bottom: 8px;
-    gap: 10px; transition: border-color 0.2s;
+    gap: 10px; transition: border-color 0.2s; cursor: pointer;
   }
   .match-card:hover { border-color: rgba(245,197,24,0.3); }
   .match-group { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
@@ -109,6 +109,18 @@
   .upcoming-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
   .home-side { text-align: right; min-width: 0; overflow: hidden; }
   .away-side { text-align: left; min-width: 0; overflow: hidden; }
+
+  /* MATCH PICKER DROPDOWN */
+  .match-picker { display: none; border-top: 1px solid var(--border); padding: 12px 14px; background: rgba(0,0,0,0.2); }
+  .match-picker.open { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .picker-col h5 { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .picker-col h5 img { width: 18px; height: 12px; object-fit: cover; border-radius: 2px; }
+  .picker-player { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(42,42,58,0.4); }
+  .picker-player:last-child { border-bottom: none; }
+  .picker-player-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+  .picker-player-pts { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--gold); }
+  .picker-none { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--muted); font-style: italic; }
+  .match-card { cursor: pointer; }
 
   /* GROUPS */
   .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
@@ -342,7 +354,23 @@ async function loadMatchday(num, btn) {
       if (b && e) {
         const isLive = /live/i.test(f);
         const hasScore = c !== '' || d !== '';
-        html += `<div class="match-card">
+
+        // Build picker lists
+        const homePickers = PLAYERS
+          .filter(p => p.teams.some(t => t.toLowerCase() === b.toLowerCase()))
+          .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
+          .sort((a,b) => b.pts - a.pts);
+        const awayPickers = PLAYERS
+          .filter(p => p.teams.some(t => t.toLowerCase() === e.toLowerCase()))
+          .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
+          .sort((a,b) => b.pts - a.pts);
+
+        const pickerRows = (arr) => arr.length
+          ? arr.map(p => `<div class="picker-player"><span class="picker-player-name">${p.name}</span><span class="picker-player-pts">${p.pts}</span></div>`).join('')
+          : `<div class="picker-none">No one</div>`;
+
+        const uid = Math.random().toString(36).slice(2,8);
+        html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
             <div class="match-group">${a}</div>
             <div class="match-team-name home">
@@ -363,6 +391,16 @@ async function loadMatchday(num, btn) {
             <div class="match-team-name">
               <img class="match-team-flag" src="${flag(e)}" alt="${e}" onerror="this.style.display='none'">
               <span>${e}</span>
+            </div>
+          </div>
+          <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
+            <div class="picker-col">
+              <h5><img src="${flag(b)}" onerror="this.style.display='none'">${b}</h5>
+              ${pickerRows(homePickers)}
+            </div>
+            <div class="picker-col">
+              <h5><img src="${flag(e)}" onerror="this.style.display='none'">${e}</h5>
+              ${pickerRows(awayPickers)}
             </div>
           </div>
         </div>`;
@@ -612,6 +650,10 @@ function filterPicks(q) {
 }
 
 // NAV
+function togglePicker(uid) {
+  const el = document.getElementById('picker-'+uid);
+  el.classList.toggle('open');
+}
 const sectionLoaded = {};
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
