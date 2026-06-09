@@ -485,7 +485,111 @@ async function loadLeaderboard() {
   }
 }
 
-// MATCHES
+// MATCH TIMES - stored as UTC ISO strings
+const MATCH_TIMES = {
+  // June 11
+  "mexico_south africa":       "2026-06-11T19:00:00Z",
+  "south korea_czechia":       "2026-06-12T02:00:00Z",
+  // June 12
+  "canada_bosnia-herzegovina": "2026-06-12T19:00:00Z",
+  "united states_paraguay":    "2026-06-13T01:00:00Z",
+  // June 13
+  "qatar_switzerland":         "2026-06-13T19:00:00Z",
+  "brazil_morocco":            "2026-06-13T22:00:00Z",
+  "haiti_scotland":            "2026-06-14T01:00:00Z",
+  "australia_turkey":          "2026-06-14T04:00:00Z",
+  // June 14
+  "germany_curacao":           "2026-06-14T17:00:00Z",
+  "ivory coast_ecuador":       "2026-06-14T23:00:00Z",
+  "netherlands_japan":         "2026-06-14T20:00:00Z",
+  "sweden_tunisia":            "2026-06-15T02:00:00Z",
+  // June 15
+  "spain_cape verde":          "2026-06-15T17:00:00Z",
+  "belgium_egypt":             "2026-06-15T22:00:00Z",
+  "saudi arabia_uruguay":      "2026-06-16T01:00:00Z",
+  "iran_new zealand":          "2026-06-16T04:00:00Z",
+  // June 16
+  "france_senegal":            "2026-06-16T17:00:00Z",
+  "iraq_norway":               "2026-06-16T20:00:00Z",
+  "argentina_algeria":         "2026-06-16T23:00:00Z",
+  "austria_jordan":            "2026-06-17T02:00:00Z",
+  // June 17
+  "portugal_congo dr":         "2026-06-17T17:00:00Z",
+  "uzbekistan_colombia":       "2026-06-17T20:00:00Z",
+  "england_croatia":           "2026-06-17T23:00:00Z",
+  "ghana_panama":              "2026-06-18T02:00:00Z",
+  // June 18
+  "spain_senegal":             "2026-06-18T17:00:00Z",
+  "france_iraq":               "2026-06-18T20:00:00Z",
+  "germany_south africa":      "2026-06-18T23:00:00Z",
+  "mexico_south korea":        "2026-06-19T02:00:00Z",
+  // June 19
+  "iran_scotland":             "2026-06-19T17:00:00Z",
+  "sweden_canada":             "2026-06-19T20:00:00Z",
+  "belgium_saudi arabia":      "2026-06-20T01:00:00Z",
+  "uruguay_egypt":             "2026-06-20T01:00:00Z",
+  // June 20
+  "netherlands_czechia":       "2026-06-20T17:00:00Z",
+  "turkey_haiti":              "2026-06-20T20:00:00Z",
+  "brazil_australia":          "2026-06-20T23:00:00Z",
+  "morocco_new zealand":       "2026-06-21T02:00:00Z",
+  // June 21
+  "japan_ivory coast":         "2026-06-21T17:00:00Z",
+  "ecuador_netherlands":       "2026-06-21T20:00:00Z",
+  "portugal_uzbekistan":       "2026-06-21T23:00:00Z",
+  "colombia_england":          "2026-06-22T02:00:00Z",
+  // June 22
+  "norway_austria":            "2026-06-22T17:00:00Z",
+  "jordan_argentina":          "2026-06-22T20:00:00Z",
+  "senegal_ghana":             "2026-06-22T23:00:00Z",
+  "panama_congo dr":           "2026-06-23T02:00:00Z",
+  // June 23
+  "south africa_czechia":      "2026-06-23T17:00:00Z",
+  "south korea_mexico":        "2026-06-23T17:00:00Z",
+  "canada_qatar":              "2026-06-23T21:00:00Z",
+  "switzerland_bosnia-herzegovina": "2026-06-23T21:00:00Z",
+  // June 24
+  "haiti_australia":           "2026-06-24T17:00:00Z",
+  "scotland_brazil":           "2026-06-24T17:00:00Z",
+  "turkey_morocco":            "2026-06-24T21:00:00Z",
+  "new zealand_paraguay":      "2026-06-24T21:00:00Z",
+  // June 25
+  "curacao_ivory coast":       "2026-06-25T17:00:00Z",
+  "ecuador_germany":           "2026-06-25T17:00:00Z",
+  "sweden_iran":               "2026-06-25T21:00:00Z",
+  "tunisia_netherlands":       "2026-06-25T21:00:00Z",
+  // June 26
+  "cape verde_saudi arabia":   "2026-06-26T17:00:00Z",
+  "egypt_spain":               "2026-06-26T17:00:00Z",
+  "new zealand_belgium":       "2026-06-26T21:00:00Z",
+  "uruguay_iran":              "2026-06-26T21:00:00Z",
+  // June 27
+  "senegal_france":            "2026-06-27T17:00:00Z",
+  "norway_iraq":               "2026-06-27T17:00:00Z",
+  "jordan_algeria":            "2026-06-27T21:00:00Z",
+  "austria_argentina":         "2026-06-27T21:00:00Z",
+  // June 28 (Matchday 3 cont.)
+  "colombia_portugal":         "2026-06-28T17:00:00Z",
+  "croatia_uzbekistan":        "2026-06-28T17:00:00Z",
+  "ghana_england":             "2026-06-28T21:00:00Z",
+  "panama_croatia":            "2026-06-28T21:00:00Z",
+  "congo dr_senegal":          "2026-06-29T17:00:00Z",
+  "jordan_austria":            "2026-06-29T17:00:00Z",
+};
+
+function getMatchTime(home, away) {
+  const key1 = `${home.toLowerCase()}_${away.toLowerCase()}`;
+  const key2 = `${away.toLowerCase()}_${home.toLowerCase()}`;
+  return MATCH_TIMES[key1] || MATCH_TIMES[key2] || null;
+}
+
+function formatMatchTime(utcString) {
+  if (!utcString) return null;
+  const date = new Date(utcString);
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  return timeStr;
+}
 async function loadMatchday(num, btn) {
   if (btn) {
     document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
@@ -533,6 +637,8 @@ async function loadMatchday(num, btn) {
             </div>`).join('')
           : `<div class="picker-none">No one</div>`;
 
+        const matchTime = getMatchTime(b, e);
+        const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
         const uid = Math.random().toString(36).slice(2,8);
         html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
@@ -548,7 +654,7 @@ async function loadMatchday(num, btn) {
               <span class="sep">:</span>
               <span class="s">${hasScore?d:'–'}</span>
             </div>
-            ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">Upcoming</div>`}
+            ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
           </div>
           <div class="away-side">
             <div class="match-group"></div>
@@ -1128,6 +1234,8 @@ async function openCountryPage(countryName, e) {
       const homePickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === m.home.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
       const awayPickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === m.away.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
       const pickerRows = (arr) => arr.length ? arr.map(p => `<div class="picker-player"><span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span><span class="picker-player-pts">${p.pts}</span></div>`).join('') : `<div class="picker-none">No one</div>`;
+      const matchTime = getMatchTime(m.home, m.away);
+      const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
       matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
         <div class="home-side">
           <div class="match-group">${m.group}</div>
@@ -1135,7 +1243,7 @@ async function openCountryPage(countryName, e) {
         </div>
         <div class="match-score-wrap">
           <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
-          ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">Upcoming</div>`}
+          ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
         </div>
         <div class="away-side">
           <div class="match-group"></div>
