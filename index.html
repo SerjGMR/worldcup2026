@@ -502,14 +502,14 @@ async function loadMatchday(num, btn) {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
 
-      // Date row: col B has a date, cols C-E empty, col A empty
-      if (b && /june|july|august/i.test(b) && !c && !e) {
-        currentDate = b;
-        html += `<div class="date-header">📅 ${b}</div>`;
+      // Date row: col A has a date
+      if (a && /june|july|august/i.test(a) && !b && !e) {
+        currentDate = a;
+        html += `<div class="date-header">📅 ${a}</div>`;
         return;
       }
 
-      // Update persistent group if col A has a group tag
+      // Update persistent group if col A has a group tag (not a date)
       if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
 
       if (b && e) {
@@ -1054,9 +1054,9 @@ async function openCountryPage(countryName, e) {
     rows.forEach(row => {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e2=(row[4]||'').trim(), f=(row[5]||'').trim();
-      // Date row
-      if (b && /june|july|august/i.test(b) && !c && !e2) {
-        currentDate = b; return;
+      // Date row: col A has a date
+      if (a && /june|july|august/i.test(a) && !b && !e2) {
+        currentDate = a; return;
       }
       // Persistent group
       if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
