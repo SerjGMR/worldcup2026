@@ -609,7 +609,7 @@ async function loadMatchday(num, btn) {
       // Date row: col A has a date
       if (a && /june|july|august/i.test(a) && !b && !e) {
         currentDate = a;
-        html += `<div class="date-header">📅 ${a}</div>`;
+        html += `<div class="date-header">${a}</div>`;
         return;
       }
 
@@ -1225,7 +1225,7 @@ async function openCountryPage(countryName, e) {
     let lastDate = '';
     allMatches.forEach(m => {
       if (m.date && m.date !== lastDate) {
-        matchesHTML += `<div class="date-header">📅 ${m.date}</div>`;
+        matchesHTML += `<div class="date-header">${m.date}</div>`;
         lastDate = m.date;
       }
       const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
