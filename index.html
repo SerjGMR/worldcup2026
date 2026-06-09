@@ -1174,6 +1174,7 @@ async function openPlayerPage(playerName, e) {
           <div class="home-side">
             <div class="match-group">${m.group}</div>
             <div class="match-team-name home" style="${homeIsPlayer?'color:var(--gold)':''}">
+              ${homeIsPlayer ? playerAvatar(playerName, 24) : ''}
               <span>${m.home}</span>
               <img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
             </div>
@@ -1187,6 +1188,7 @@ async function openPlayerPage(playerName, e) {
             <div class="match-team-name" style="${awayIsPlayer?'color:var(--gold)':''}">
               <img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
               <span>${m.away}</span>
+              ${awayIsPlayer ? playerAvatar(playerName, 24) : ''}
             </div>
           </div>
           <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
