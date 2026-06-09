@@ -1167,6 +1167,9 @@ async function openPlayerPage(playerName, e) {
         const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
         const homeIsPlayer = playerTeams.includes(m.home.toLowerCase());
         const awayIsPlayer = playerTeams.includes(m.away.toLowerCase());
+        const homePickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === m.home.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
+        const awayPickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === m.away.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
+        const pickerRows = (arr) => arr.length ? arr.map(p => `<div class="picker-player"><span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span><span class="picker-player-pts">${p.pts}</span></div>`).join('') : `<div class="picker-none">No one</div>`;
         matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
             <div class="match-group">${m.group}</div>
@@ -1187,8 +1190,8 @@ async function openPlayerPage(playerName, e) {
             </div>
           </div>
           <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
-            <div class="picker-col"><h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5></div>
-            <div class="picker-col"><h5><img src="${flag(m.away)}" onerror="this.style.display='none'">${m.away}</h5></div>
+            <div class="picker-col"><h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5>${pickerRows(homePickers)}</div>
+            <div class="picker-col"><h5><img src="${flag(m.away)}" onerror="this.style.display='none'">${m.away}</h5>${pickerRows(awayPickers)}</div>
           </div>
         </div>`;
       });
