@@ -496,18 +496,27 @@ async function loadMatchday(num, btn) {
   try {
     const rows = await fetchCSV(GIDS['md'+num]);
     let html = `<div class="matches-container">`;
+    let currentGroup = '';
+    let currentDate = '';
     rows.forEach(row => {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
-      if (!a && b && /june|july|august|\d{1,2}/i.test(b) && !c && !d) {
+
+      // Date row: only col B has content and looks like a date
+      if (!a && b && /june|july|august|\d{1,2}/i.test(b) && !c && !d && !e) {
+        currentDate = b;
         html += `<div class="date-header">📅 ${b}</div>`;
         return;
       }
+
+      // Update persistent group if col A has a group tag
+      if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
+
       if (b && e) {
         const isLive = /live/i.test(f);
         const hasScore = c !== '' || d !== '';
+        const displayGroup = currentGroup;
 
-        // Build picker lists
         const homePickers = PLAYERS
           .filter(p => p.teams.some(t => t.toLowerCase() === b.toLowerCase()))
           .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
@@ -527,7 +536,7 @@ async function loadMatchday(num, btn) {
         const uid = Math.random().toString(36).slice(2,8);
         html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
-            <div class="match-group">${a}</div>
+            <div class="match-group">${displayGroup}</div>
             <div class="match-team-name home">
               <span>${b}</span>
               <img class="match-team-flag" src="${flag(b)}" alt="${b}" onerror="this.style.display='none'">
@@ -1036,22 +1045,56 @@ async function openCountryPage(countryName, e) {
   showSection('country-page', null);
   window.scrollTo(0, 0);
 
-  // Gather all matches across all matchdays
+  // Gather all matches across all matchdays with date and persistent group
   const allMatches = [];
   for (let md = 1; md <= 3; md++) {
     const rows = await ensureMatchRows(md);
+    let currentDate = '';
+    let currentGroup = '';
     rows.forEach(row => {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e2=(row[4]||'').trim(), f=(row[5]||'').trim();
+      // Date row
+      if (!a && b && /june|july|august|\d{1,2}/i.test(b) && !c && !d && !e2) {
+        currentDate = b; return;
+      }
+      // Persistent group
+      if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
       if (b && e2) {
         const isHome = b.toLowerCase() === countryName.toLowerCase();
         const isAway = e2.toLowerCase() === countryName.toLowerCase();
         if (isHome || isAway) {
-          allMatches.push({ group: a, home: b, away: e2, scoreHome: c, scoreAway: d, status: f, md });
+          allMatches.push({ group: currentGroup, date: currentDate, home: b, away: e2, scoreHome: c, scoreAway: d, status: f, md });
         }
       }
     });
   }
+
+  // Find group standing for this country from GROUPS data
+  let groupStanding = null;
+  try {
+    const gRows = await fetchCSV(GIDS.groups);
+    const groupCols = [0, 10, 20];
+    let currentGroups = {};
+    gRows.forEach(row => {
+      groupCols.forEach(offset => {
+        const cell = (row[offset]||'').trim();
+        if (/^group\s+[a-z]/i.test(cell)) {
+          currentGroups[offset] = cell;
+        } else if (cell && currentGroups[offset] && !/^mp$|^w$|^d$|^l$/i.test(cell)) {
+          if (cell.toLowerCase() === countryName.toLowerCase()) {
+            groupStanding = {
+              group: currentGroups[offset],
+              mp: row[offset+1]||'0', w: row[offset+2]||'0',
+              d: row[offset+3]||'0', l: row[offset+4]||'0',
+              gf: row[offset+5]||'0', ga: row[offset+6]||'0',
+              gd: row[offset+7]||'0', pts: row[offset+8]||'0'
+            };
+          }
+        }
+      });
+    });
+  } catch(e) { console.warn('Could not load group standing', e); }
 
   const totalPts = TEAM_POINTS[countryName] || 0;
 
@@ -1069,7 +1112,6 @@ async function openCountryPage(countryName, e) {
     .map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 }))
     .sort((a,b) => b.pts - a.pts);
 
-  // Build match cards with dropdown pickers (same style as matches tab)
   const matchesHTML = allMatches.length ? allMatches.map(m => {
     const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
     const isLive = /live/i.test(m.status);
@@ -1093,7 +1135,7 @@ async function openCountryPage(countryName, e) {
 
     return `<div class="match-card" onclick="togglePicker('${uid}')">
       <div class="home-side">
-        <div class="match-group">${m.group}</div>
+        <div class="match-group">${m.group}${m.date ? ` · ${m.date}` : ''}</div>
         <div class="match-team-name home">
           <span>${m.home}</span>
           <img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
@@ -1161,6 +1203,27 @@ async function openCountryPage(countryName, e) {
     </div>
 
     ${breakdownHTML}
+
+    ${groupStanding ? `
+    <div class="country-block">
+      <div class="country-section-title">${groupStanding.group} Standing</div>
+      <div class="team-breakdown-wrap">
+        <table class="team-breakdown-table">
+          <thead><tr><th style="text-align:left">Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+          <tbody><tr>
+            <td><img class="team-breakdown-flag" src="${flag(countryName)}" onerror="this.style.display='none'">${countryName}</td>
+            <td style="text-align:center">${groupStanding.mp}</td>
+            <td style="text-align:center">${groupStanding.w}</td>
+            <td style="text-align:center">${groupStanding.d}</td>
+            <td style="text-align:center">${groupStanding.l}</td>
+            <td style="text-align:center">${groupStanding.gf}</td>
+            <td style="text-align:center">${groupStanding.ga}</td>
+            <td style="text-align:center">${groupStanding.gd}</td>
+            <td class="total-col">${groupStanding.pts}</td>
+          </tr></tbody>
+        </table>
+      </div>
+    </div>` : ''}
 
     <div class="country-block">
       <div class="country-section-title">Matches</div>
