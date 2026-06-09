@@ -1131,6 +1131,71 @@ async function openPlayerPage(playerName, e) {
     </div>
     ${teamsSection}`;
 
+  // Build player matches section — all matches involving any of their teams
+  if (player) {
+    const playerTeams = player.teams.map(t => t.toLowerCase());
+    const playerMatches = [];
+    for (let md = 1; md <= 3; md++) {
+      const rows = await ensureMatchRows(md);
+      let currentDate = '';
+      let currentGroup = '';
+      rows.forEach(row => {
+        const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
+              d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
+        if (a && /june|july|august/i.test(a) && !b && !e) { currentDate = a; return; }
+        if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
+        if (b && e) {
+          if (playerTeams.includes(b.toLowerCase()) || playerTeams.includes(e.toLowerCase())) {
+            playerMatches.push({ group: currentGroup, date: currentDate, home: b, away: e, scoreHome: c, scoreAway: d, status: f });
+          }
+        }
+      });
+    }
+
+    if (playerMatches.length) {
+      let matchesHTML = '';
+      let lastDate = '';
+      playerMatches.forEach(m => {
+        if (m.date && m.date !== lastDate) {
+          matchesHTML += `<div class="date-header">${m.date}</div>`;
+          lastDate = m.date;
+        }
+        const hasScore = m.scoreHome !== '' || m.scoreAway !== '';
+        const isLive = /live/i.test(m.status);
+        const uid = Math.random().toString(36).slice(2,8);
+        const matchTime = getMatchTime(m.home, m.away);
+        const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
+        const homeIsPlayer = playerTeams.includes(m.home.toLowerCase());
+        const awayIsPlayer = playerTeams.includes(m.away.toLowerCase());
+        matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
+          <div class="home-side">
+            <div class="match-group">${m.group}</div>
+            <div class="match-team-name home" style="${homeIsPlayer?'color:var(--gold)':''}">
+              <span>${m.home}</span>
+              <img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="match-score-wrap">
+            <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
+            ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
+          </div>
+          <div class="away-side">
+            <div class="match-group"></div>
+            <div class="match-team-name" style="${awayIsPlayer?'color:var(--gold)':''}">
+              <img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
+              <span>${m.away}</span>
+            </div>
+          </div>
+          <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
+            <div class="picker-col"><h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5></div>
+            <div class="picker-col"><h5><img src="${flag(m.away)}" onerror="this.style.display='none'">${m.away}</h5></div>
+          </div>
+        </div>`;
+      });
+      html += `<div class="country-block"><div class="country-section-title">All Matches (${playerMatches.length})</div>${matchesHTML}</div>`;
+    }
+  }
+
   el.innerHTML = html;
 }
 let ALL_MATCH_ROWS = {};
