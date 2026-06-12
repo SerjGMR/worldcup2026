@@ -452,7 +452,7 @@ async function loadLeaderboard() {
     const rows = await fetchCSV(GIDS.leaderboard);
     const data = rows.slice(2).filter(r => r[3] && r[3].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
-      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Points</th><th>Prize</th></tr></thead><tbody>`;
+      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Points</th><th>GD</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row) => {
       const sheetRank = row[2]||'—';
       const rankNum = parseInt(sheetRank)||99;
@@ -460,13 +460,18 @@ async function loadLeaderboard() {
       const name = row[3]||'';
       const teamsIn = row[4]||'—';
       const pts = row[5]||'0';
-      const prize = row[6]||'';
+      const gd = row[6]||'0';
+      const prize = row[7]||'';
+      const gdNum = parseInt(gd)||0;
+      const gdDisplay = gdNum > 0 ? `+${gd}` : gd;
+      const gdColor = gdNum > 0 ? 'var(--green)' : gdNum < 0 ? 'var(--red)' : 'var(--muted)';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
         <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
+        <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${gdColor}">${gdDisplay}</span></td>
         <td><span class="lb-prize">${prize}</span></td>
       </tr>`;
     });
