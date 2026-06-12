@@ -463,7 +463,7 @@ async function loadLeaderboard() {
       const gd = row[6]||'0';
       const prize = row[7]||'';
       const gdNum = parseInt(gd)||0;
-      const gdDisplay = gdNum > 0 ? `+${gd}` : gd;
+      const gdDisplay = gdNum > 0 ? `+${gdNum}` : gd;
       const gdColor = gdNum > 0 ? 'var(--green)' : gdNum < 0 ? 'var(--red)' : 'var(--muted)';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
