@@ -502,9 +502,12 @@ async function updateLiveTicker() {
       <img class="live-ticker-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
     </div>`).join('');
 
-  // Re-render leaderboard if visible to show live indicators
+  // Re-render leaderboard and groups if visible to show live indicators
   if (document.getElementById('leaderboard').classList.contains('active')) {
     loadLeaderboard();
+  }
+  if (document.getElementById('groups').classList.contains('active')) {
+    loadGroups();
   }
 }
 
@@ -536,15 +539,11 @@ async function loadLeaderboard() {
         if (player.teams.some(t => t.toLowerCase() === m.away.toLowerCase())) teams.push(m.away);
         return teams;
       }) : [];
-      const liveHTML = liveTeams.map(t => `
-        <span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px">
-          <span class="live-dot" style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite"></span>
-          <img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'">
-        </span>`).join('');
+      const liveHTML = liveTeams.length ? `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle;flex-wrap:nowrap">${liveTeams.map(t => `<span style="display:inline-flex;align-items:center;gap:2px"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>`).join('')}</span>` : '';
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
-        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</td>
+        <td style="white-space:nowrap"><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
         <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${gdColor}">${gdDisplay}</span></td>
@@ -792,7 +791,11 @@ async function loadGroups() {
       const teams = groups[gname];
       html += `<div class="group-card"><div class="group-card-header">${gname}</div><table class="group-table"><thead><tr><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;
       teams.forEach(t => {
-        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
+        // Check if this team is currently live and find their opponent
+        const liveMatch = LIVE_MATCHES.find(m => m.home.toLowerCase() === t.name.toLowerCase() || m.away.toLowerCase() === t.name.toLowerCase());
+        const opponent = liveMatch ? (liveMatch.home.toLowerCase() === t.name.toLowerCase() ? liveMatch.away : liveMatch.home) : null;
+        const liveIndicator = opponent ? `<span style="display:inline-flex;align-items:center;gap:2px;margin-left:5px;vertical-align:middle"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(opponent)}" style="width:16px;height:11px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>` : '';
+        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td style="white-space:nowrap"><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}${liveIndicator}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
       });
       html += `</tbody></table></div>`;
     });
