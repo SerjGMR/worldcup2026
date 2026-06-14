@@ -82,7 +82,7 @@
   .lb-table tbody td { padding: 16px 20px; vertical-align: middle; }
   .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--muted); }
   .lb-rank.r1 { color: #F5C518; } .lb-rank.r2 { color: #C0C0C0; } .lb-rank.r3 { color: #CD7F32; }
-  .lb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+  .lb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; display: inline; vertical-align: middle; }
   .lb-pts { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--gold); }
   .lb-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; color: var(--muted); }
   .lb-prize { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--green); }
@@ -543,7 +543,7 @@ async function loadLeaderboard() {
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
-        <td style="white-space:nowrap"><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</td>
+        <td style="white-space:nowrap;vertical-align:middle"><span style="display:inline-flex;align-items:center;gap:0"><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
         <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${gdColor}">${gdDisplay}</span></td>
@@ -1063,7 +1063,13 @@ function showSection(id, btn) {
   document.getElementById(id).classList.add('active');
   if (btn) { btn.classList.add('active'); lastBtn = btn; }
   if (id !== 'country-page' && id !== 'player-page') lastSection = id;
-  if (!sectionLoaded[id]) { sectionLoaded[id]=true; loadSection(id); }
+  // Always reload groups and leaderboard so live indicators are fresh
+  if (id === 'groups' || id === 'leaderboard') {
+    loadSection(id);
+  } else if (!sectionLoaded[id]) {
+    sectionLoaded[id] = true;
+    loadSection(id);
+  }
 }
 function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
@@ -1498,8 +1504,7 @@ function goBack() {
 }
 
 // INIT
-loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => loadLeaderboard().then(() => renderPicks()))));
-updateLiveTicker();
+loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => renderPicks())))));
 setInterval(updateLiveTicker, 30000);
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
