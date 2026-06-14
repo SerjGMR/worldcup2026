@@ -21,6 +21,16 @@
     --green: #2ecc71;
     --red: #e74c3c;
   }
+  body.light-mode {
+    --darker: #f0f2f5;
+    --dark: #ffffff;
+    --mid: #e4e6ea;
+    --card: #ffffff;
+    --border: #d0d4db;
+    --text: #1a1a2e;
+    --muted: #666677;
+  }
+  body { transition: background 0.3s, color 0.3s; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--darker); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
@@ -48,6 +58,22 @@
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
   nav button.active { color: var(--gold); }
   nav button.active::after { content: ''; position: absolute; bottom: -2px; left: 16px; right: 16px; height: 2px; background: var(--gold); }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; flex-shrink: 0; }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* GLOBAL SEARCH */
+  .global-search-wrap { position: relative; margin-bottom: 32px; }
+  .global-search-input { width: 100%; padding: 16px 24px; background: var(--card); border: 2px solid var(--border); border-radius: 30px; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 16px; outline: none; transition: border-color 0.2s; }
+  .global-search-input:focus { border-color: var(--gold); }
+  .global-search-input::placeholder { color: var(--muted); }
+  .search-results { display: flex; flex-direction: column; gap: 8px; }
+  .search-result-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+  .search-result-item:hover { border-color: rgba(245,197,24,0.4); transform: translateX(4px); }
+  .search-result-type { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); background: var(--mid); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+  .search-result-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; }
+  .search-result-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+  .search-empty { text-align: center; padding: 40px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; }
 
   /* MAIN */
   main { max-width: 1300px; margin: 0 auto; padding: 40px 40px 80px; }
@@ -338,6 +364,10 @@
       <button onclick="showSection('probs',this)">Probabilities</button>
       <button onclick="showSection('bracket',this)">Bracket</button>
     </nav>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="showSection('search', this)" title="Search">🔍</button>
+      <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
   </div>
 </header>
 
@@ -391,6 +421,17 @@
   <div class="section" id="bracket">
     <div class="section-header"><h2>Bracket</h2><p>Knockout stage</p></div>
     <div id="bracket-content"><div class="loading"><div class="spinner"></div>Loading bracket…</div></div>
+  </div>
+
+  <!-- GLOBAL SEARCH -->
+  <div class="section" id="search">
+    <div class="section-header"><h2>Search</h2><p>Players & countries</p></div>
+    <div class="global-search-wrap">
+      <input class="global-search-input" type="text" placeholder="🔍  Search players, countries, groups..." oninput="globalSearch(this.value)" autofocus>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-empty">Start typing to search…</div>
+    </div>
   </div>
 
   <!-- COUNTRY PAGE -->
@@ -568,94 +609,83 @@ async function loadLeaderboard() {
 
 // MATCH TIMES - stored as UTC ISO strings
 const MATCH_TIMES = {
-  // June 11
-  "mexico_south africa":       "2026-06-11T19:00:00Z",
-  "south korea_czechia":       "2026-06-12T02:00:00Z",
-  // June 12
-  "canada_bosnia-herzegovina": "2026-06-12T19:00:00Z",
-  "united states_paraguay":    "2026-06-13T01:00:00Z",
-  // June 13
-  "qatar_switzerland":         "2026-06-13T19:00:00Z",
-  "brazil_morocco":            "2026-06-13T22:00:00Z",
-  "haiti_scotland":            "2026-06-14T01:00:00Z",
-  "australia_turkey":          "2026-06-14T04:00:00Z",
-  // June 14
-  "germany_curacao":           "2026-06-14T17:00:00Z",
-  "ivory coast_ecuador":       "2026-06-14T23:00:00Z",
-  "netherlands_japan":         "2026-06-14T20:00:00Z",
-  "sweden_tunisia":            "2026-06-15T02:00:00Z",
-  // June 15
-  "spain_cape verde":          "2026-06-15T17:00:00Z",
-  "belgium_egypt":             "2026-06-15T22:00:00Z",
-  "saudi arabia_uruguay":      "2026-06-16T01:00:00Z",
-  "iran_new zealand":          "2026-06-16T04:00:00Z",
-  // June 16
-  "france_senegal":            "2026-06-16T17:00:00Z",
-  "iraq_norway":               "2026-06-16T20:00:00Z",
-  "argentina_algeria":         "2026-06-16T23:00:00Z",
-  "austria_jordan":            "2026-06-17T02:00:00Z",
-  // June 17
-  "portugal_congo dr":         "2026-06-17T17:00:00Z",
-  "uzbekistan_colombia":       "2026-06-17T20:00:00Z",
-  "england_croatia":           "2026-06-17T23:00:00Z",
-  "ghana_panama":              "2026-06-18T02:00:00Z",
-  // June 18
-  "spain_senegal":             "2026-06-18T17:00:00Z",
-  "france_iraq":               "2026-06-18T20:00:00Z",
-  "germany_south africa":      "2026-06-18T23:00:00Z",
-  "mexico_south korea":        "2026-06-19T02:00:00Z",
-  // June 19
-  "iran_scotland":             "2026-06-19T17:00:00Z",
-  "sweden_canada":             "2026-06-19T20:00:00Z",
-  "belgium_saudi arabia":      "2026-06-20T01:00:00Z",
-  "uruguay_egypt":             "2026-06-20T01:00:00Z",
-  // June 20
-  "netherlands_czechia":       "2026-06-20T17:00:00Z",
-  "turkey_haiti":              "2026-06-20T20:00:00Z",
-  "brazil_australia":          "2026-06-20T23:00:00Z",
-  "morocco_new zealand":       "2026-06-21T02:00:00Z",
-  // June 21
-  "japan_ivory coast":         "2026-06-21T17:00:00Z",
-  "ecuador_netherlands":       "2026-06-21T20:00:00Z",
-  "portugal_uzbekistan":       "2026-06-21T23:00:00Z",
-  "colombia_england":          "2026-06-22T02:00:00Z",
-  // June 22
-  "norway_austria":            "2026-06-22T17:00:00Z",
-  "jordan_argentina":          "2026-06-22T20:00:00Z",
-  "senegal_ghana":             "2026-06-22T23:00:00Z",
-  "panama_congo dr":           "2026-06-23T02:00:00Z",
-  // June 23
-  "south africa_czechia":      "2026-06-23T17:00:00Z",
-  "south korea_mexico":        "2026-06-23T17:00:00Z",
-  "canada_qatar":              "2026-06-23T21:00:00Z",
-  "switzerland_bosnia-herzegovina": "2026-06-23T21:00:00Z",
-  // June 24
-  "haiti_australia":           "2026-06-24T17:00:00Z",
-  "scotland_brazil":           "2026-06-24T17:00:00Z",
-  "turkey_morocco":            "2026-06-24T21:00:00Z",
-  "new zealand_paraguay":      "2026-06-24T21:00:00Z",
-  // June 25
-  "curacao_ivory coast":       "2026-06-25T17:00:00Z",
-  "ecuador_germany":           "2026-06-25T17:00:00Z",
-  "sweden_iran":               "2026-06-25T21:00:00Z",
-  "tunisia_netherlands":       "2026-06-25T21:00:00Z",
-  // June 26
-  "cape verde_saudi arabia":   "2026-06-26T17:00:00Z",
-  "egypt_spain":               "2026-06-26T17:00:00Z",
-  "new zealand_belgium":       "2026-06-26T21:00:00Z",
-  "uruguay_iran":              "2026-06-26T21:00:00Z",
-  // June 27
-  "senegal_france":            "2026-06-27T17:00:00Z",
-  "norway_iraq":               "2026-06-27T17:00:00Z",
-  "jordan_algeria":            "2026-06-27T21:00:00Z",
-  "austria_argentina":         "2026-06-27T21:00:00Z",
-  // June 28 (Matchday 3 cont.)
-  "colombia_portugal":         "2026-06-28T17:00:00Z",
-  "croatia_uzbekistan":        "2026-06-28T17:00:00Z",
-  "ghana_england":             "2026-06-28T21:00:00Z",
-  "panama_croatia":            "2026-06-28T21:00:00Z",
-  "congo dr_senegal":          "2026-06-29T17:00:00Z",
-  "jordan_austria":            "2026-06-29T17:00:00Z",
+  // MATCHDAY 1
+  "mexico_south africa":            "2026-06-11T19:00:00Z",
+  "south korea_czechia":            "2026-06-12T02:00:00Z",
+  "canada_bosnia-herzegovina":      "2026-06-12T19:00:00Z",
+  "united states_paraguay":         "2026-06-13T01:00:00Z",
+  "qatar_switzerland":              "2026-06-13T19:00:00Z",
+  "brazil_morocco":                 "2026-06-13T22:00:00Z",
+  "haiti_scotland":                 "2026-06-14T01:00:00Z",
+  "australia_turkey":               "2026-06-14T04:00:00Z",
+  "germany_curacao":                "2026-06-14T17:00:00Z",
+  "netherlands_japan":              "2026-06-14T20:00:00Z",
+  "ivory coast_ecuador":            "2026-06-14T23:00:00Z",
+  "sweden_tunisia":                 "2026-06-15T02:00:00Z",
+  "spain_cape verde":               "2026-06-15T16:00:00Z",
+  "belgium_egypt":                  "2026-06-15T19:00:00Z",
+  "saudi arabia_uruguay":           "2026-06-15T22:00:00Z",
+  "iran_new zealand":               "2026-06-16T01:00:00Z",
+  "france_senegal":                 "2026-06-16T19:00:00Z",
+  "iraq_norway":                    "2026-06-16T22:00:00Z",
+  "argentina_algeria":              "2026-06-17T01:00:00Z",
+  "austria_jordan":                 "2026-06-17T04:00:00Z",
+  "portugal_congo dr":              "2026-06-17T17:00:00Z",
+  "england_croatia":                "2026-06-17T20:00:00Z",
+  "ghana_panama":                   "2026-06-17T23:00:00Z",
+  "uzbekistan_colombia":            "2026-06-18T02:00:00Z",
+
+  // MATCHDAY 2
+  "south africa_czechia":           "2026-06-18T16:00:00Z",
+  "switzerland_bosnia-herzegovina": "2026-06-18T19:00:00Z",
+  "canada_qatar":                   "2026-06-18T23:00:00Z",
+  "mexico_south korea":             "2026-06-19T02:00:00Z",
+  "united states_australia":        "2026-06-19T19:00:00Z",
+  "scotland_morocco":               "2026-06-19T22:00:00Z",
+  "brazil_haiti":                   "2026-06-20T01:00:00Z",
+  "turkey_paraguay":                "2026-06-20T04:00:00Z",
+  "netherlands_sweden":             "2026-06-20T17:00:00Z",
+  "germany_ivory coast":            "2026-06-20T20:00:00Z",
+  "ecuador_curacao":                "2026-06-21T00:00:00Z",
+  "tunisia_japan":                  "2026-06-21T02:00:00Z",
+  "spain_saudi arabia":             "2026-06-21T16:00:00Z",
+  "belgium_iran":                   "2026-06-21T19:00:00Z",
+  "uruguay_cape verde":             "2026-06-21T22:00:00Z",
+  "new zealand_egypt":              "2026-06-22T01:00:00Z",
+  "argentina_austria":              "2026-06-22T17:00:00Z",
+  "france_iraq":                    "2026-06-22T21:00:00Z",
+  "norway_senegal":                 "2026-06-23T00:00:00Z",
+  "jordan_algeria":                 "2026-06-23T03:00:00Z",
+  "portugal_uzbekistan":            "2026-06-23T17:00:00Z",
+  "england_ghana":                  "2026-06-23T20:00:00Z",
+  "panama_croatia":                 "2026-06-23T23:00:00Z",
+  "colombia_congo dr":              "2026-06-24T02:00:00Z",
+
+  // MATCHDAY 3
+  "czechia_south africa":           "2026-06-24T21:00:00Z",
+  "mexico_south korea":             "2026-06-24T21:00:00Z",
+  "bosnia-herzegovina_switzerland": "2026-06-25T01:00:00Z",
+  "qatar_canada":                   "2026-06-25T01:00:00Z",
+  "australia_haiti":                "2026-06-25T21:00:00Z",
+  "brazil_scotland":                "2026-06-25T21:00:00Z",
+  "morocco_turkey":                 "2026-06-26T01:00:00Z",
+  "new zealand_paraguay":           "2026-06-26T01:00:00Z",
+  "curacao_ivory coast":            "2026-06-26T21:00:00Z",
+  "ecuador_germany":                "2026-06-26T21:00:00Z",
+  "iran_sweden":                    "2026-06-27T01:00:00Z",
+  "japan_netherlands":              "2026-06-27T01:00:00Z",
+  "spain_egypt":                    "2026-06-27T16:00:00Z",
+  "saudi arabia_cape verde":        "2026-06-27T16:00:00Z",
+  "belgium_new zealand":            "2026-06-27T20:00:00Z",
+  "iran_uruguay":                   "2026-06-27T20:00:00Z",
+  "england_panama":                 "2026-06-27T21:00:00Z",
+  "croatia_ghana":                  "2026-06-27T21:00:00Z",
+  "colombia_portugal":              "2026-06-27T23:30:00Z",
+  "congo dr_uzbekistan":            "2026-06-27T23:30:00Z",
+  "algeria_austria":                "2026-06-28T02:00:00Z",
+  "jordan_argentina":               "2026-06-28T02:00:00Z",
+  "france_norway":                  "2026-06-28T19:00:00Z",
+  "senegal_iraq":                   "2026-06-28T19:00:00Z",
 };
 
 function getMatchTime(home, away) {
@@ -1048,7 +1078,79 @@ function filterPicks(q) {
   document.getElementById('no-results').style.display=v===0?'block':'none';
 }
 
-// NAV
+// THEME TOGGLE
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  document.getElementById('theme-toggle').textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+// Apply saved theme on load
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-mode');
+  document.getElementById('theme-toggle').textContent = '☀️';
+}
+
+// GLOBAL SEARCH
+const ALL_COUNTRIES = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
+
+function globalSearch(q) {
+  const el = document.getElementById('search-results');
+  q = q.trim().toLowerCase();
+  if (!q) { el.innerHTML = '<div class="search-empty">Start typing to search…</div>'; return; }
+
+  const results = [];
+
+  // Search players
+  PLAYERS.forEach(p => {
+    if (p.name.toLowerCase().includes(q)) {
+      const lb = LB_ORDER[p.name.toLowerCase()];
+      results.push({
+        type: 'Player', name: p.name,
+        sub: lb ? `Rank #${lb.rank} · ${lb.pts} pts` : '8 teams',
+        img: playerAvatar(p.name, 32),
+        action: () => openPlayerPage(p.name, null)
+      });
+    }
+  });
+
+  // Search countries
+  ALL_COUNTRIES.forEach(country => {
+    if (country.toLowerCase().includes(q)) {
+      const pts = TEAM_POINTS[country] || 0;
+      const pickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === country.toLowerCase())).length;
+      results.push({
+        type: 'Country', name: country,
+        sub: `${pickers} players · ${pts} pts`,
+        flag: flag(country),
+        action: () => openCountryPage(country, null)
+      });
+    }
+  });
+
+  if (results.length === 0) {
+    el.innerHTML = '<div class="search-empty">No results found</div>';
+    return;
+  }
+
+  el.innerHTML = results.map((r, i) => `
+    <div class="search-result-item" onclick="searchResultClick(${i})">
+      ${r.flag ? `<img src="${r.flag}" style="width:36px;height:24px;object-fit:cover;border-radius:3px;flex-shrink:0" onerror="this.style.display='none'">` : r.img}
+      <div>
+        <div class="search-result-name">${r.name}</div>
+        <div class="search-result-sub">${r.sub}</div>
+      </div>
+      <span class="search-result-type">${r.type}</span>
+    </div>`).join('');
+
+  // Store results for click handler
+  window._searchResults = results;
+}
+
+function searchResultClick(i) {
+  if (window._searchResults && window._searchResults[i]) {
+    window._searchResults[i].action();
+  }
+}
 function togglePicker(uid) {
   const el = document.getElementById('picker-'+uid);
   el.classList.toggle('open');
@@ -1078,6 +1180,7 @@ function loadSection(id) {
   else if (id==='groups') loadGroups();
   else if (id==='probs') loadProbabilities();
   else if (id==='bracket') loadBracket();
+  // search has no data to load
 }
 
 let PROBS_DATA = {}; // name -> { rank, winChance, firstPick, teamsIn, prize }
