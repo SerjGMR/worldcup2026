@@ -21,16 +21,6 @@
     --green: #2ecc71;
     --red: #e74c3c;
   }
-  body.light-mode {
-    --darker: #f0f2f5;
-    --dark: #ffffff;
-    --mid: #e4e6ea;
-    --card: #ffffff;
-    --border: #d0d4db;
-    --text: #1a1a2e;
-    --muted: #666677;
-  }
-  body { transition: background 0.3s, color 0.3s; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--darker); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
@@ -58,10 +48,6 @@
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
   nav button.active { color: var(--gold); }
   nav button.active::after { content: ''; position: absolute; bottom: -2px; left: 16px; right: 16px; height: 2px; background: var(--gold); }
-  .header-actions { display: flex; align-items: center; gap: 8px; }
-  .icon-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; flex-shrink: 0; }
-  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
-
   /* GLOBAL SEARCH */
   .global-search-wrap { position: relative; margin-bottom: 32px; }
   .global-search-input { width: 100%; padding: 16px 24px; background: var(--card); border: 2px solid var(--border); border-radius: 30px; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 16px; outline: none; transition: border-color 0.2s; }
@@ -363,11 +349,8 @@
       <button onclick="showSection('groups',this)">Groups</button>
       <button onclick="showSection('probs',this)">Probabilities</button>
       <button onclick="showSection('bracket',this)">Bracket</button>
+      <button onclick="showSection('search',this)">Search</button>
     </nav>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="showSection('search', this)" title="Search">🔍</button>
-      <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-    </div>
   </div>
 </header>
 
@@ -1076,18 +1059,6 @@ function filterPicks(q) {
     c.style.display=show?'':'none'; if(show)v++;
   });
   document.getElementById('no-results').style.display=v===0?'block':'none';
-}
-
-// THEME TOGGLE
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light-mode');
-  document.getElementById('theme-toggle').textContent = isLight ? '☀️' : '🌙';
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-}
-// Apply saved theme on load
-if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-  document.getElementById('theme-toggle').textContent = '☀️';
 }
 
 // GLOBAL SEARCH
