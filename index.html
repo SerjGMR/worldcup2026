@@ -473,7 +473,8 @@ async function updateLiveTicker() {
       const rows = await fetchCSV(GIDS['md'+md]);
       rows.forEach(row => {
         const b=(row[1]||'').trim(), c=(row[2]||'').trim(),
-              d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
+              d=(row[3]||'').trim(), e=(row[4]||'').trim();
+        const f=(row[5]||'').trim()||(row[6]||'').trim();
         if (b && e && /live/i.test(f)) {
           newLive.push({ home: b, away: e, scoreHome: c, scoreAway: d });
         }
