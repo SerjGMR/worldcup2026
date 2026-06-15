@@ -806,6 +806,9 @@ async function loadKnockoutRound(roundName, btn) {
 
       if (!inRound) return;
 
+      // DEBUG: log what we see when inRound is true
+      if (inRound && a) console.log('Knockout row:', JSON.stringify({a,b,c,d,e,f}));
+
       // Date row
       if (a && /june|july|august/i.test(a) && !b) {
         currentDate = a;
