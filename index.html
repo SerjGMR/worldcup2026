@@ -737,10 +737,56 @@ const MATCH_TIMES = {
   "senegal_iraq":                   "2026-06-28T19:00:00Z",
 };
 
+// KNOCKOUT MATCH TIMES by match number (ET = UTC-4)
+const KNOCKOUT_TIMES = {
+  // Round of 32
+  'match 73': '2026-06-28T19:00:00Z', // 3pm ET Jun 28
+  'match 76': '2026-06-29T17:00:00Z', // 1pm ET Jun 29
+  'match 74': '2026-06-29T20:30:00Z', // 4:30pm ET Jun 29
+  'match 75': '2026-06-30T01:00:00Z', // 9pm ET Jun 29
+  'match 78': '2026-06-30T17:00:00Z', // 1pm ET Jun 30
+  'match 77': '2026-06-30T21:00:00Z', // 5pm ET Jun 30
+  'match 79': '2026-07-01T01:00:00Z', // 9pm ET Jun 30
+  'match 80': '2026-07-01T16:00:00Z', // 12pm ET Jul 1
+  'match 82': '2026-07-01T20:00:00Z', // 4pm ET Jul 1
+  'match 81': '2026-07-02T00:00:00Z', // 8pm ET Jul 1
+  'match 83': '2026-07-02T17:00:00Z', // 1pm ET Jul 2
+  'match 84': '2026-07-02T19:00:00Z', // 3pm ET Jul 2  
+  'match 86': '2026-07-02T21:00:00Z', // 5pm ET Jul 2
+  'match 85': '2026-07-03T01:00:00Z', // 9pm ET Jul 2
+  'match 88': '2026-07-03T17:00:00Z', // 1pm ET Jul 3
+  'match 87': '2026-07-03T20:30:00Z', // 4:30pm ET Jul 3
+  // Round of 16
+  'match 90': '2026-07-04T17:00:00Z', // 1pm ET Jul 4
+  'match 89': '2026-07-04T21:00:00Z', // 5pm ET Jul 4
+  'match 91': '2026-07-05T20:00:00Z', // 4pm ET Jul 5
+  'match 92': '2026-07-06T00:00:00Z', // 8pm ET Jul 5
+  'match 93': '2026-07-06T19:00:00Z', // 3pm ET Jul 6
+  'match 94': '2026-07-07T00:00:00Z', // 8pm ET Jul 6
+  'match 95': '2026-07-07T16:00:00Z', // 12pm ET Jul 7
+  'match 96': '2026-07-07T20:00:00Z', // 4pm ET Jul 7
+  // Quarter Finals
+  'match 97': '2026-07-09T20:00:00Z', // 4pm ET Jul 9
+  'match 98': '2026-07-10T20:00:00Z', // 4pm ET Jul 10
+  'match 99': '2026-07-10T23:00:00Z', // 7pm ET Jul 10
+  'match 100': '2026-07-11T20:00:00Z', // 4pm ET Jul 11
+  // Semi Finals
+  'match 101': '2026-07-14T20:00:00Z', // 4pm ET Jul 14
+  'match 102': '2026-07-15T20:00:00Z', // 4pm ET Jul 15
+  // 3rd Place & Final
+  'match 103': '2026-07-18T19:00:00Z', // 3pm ET Jul 18
+  'match 104': '2026-07-19T19:00:00Z', // 3pm ET Jul 19
+};
+
 function getMatchTime(home, away) {
   const key1 = `${home.toLowerCase()}_${away.toLowerCase()}`;
   const key2 = `${away.toLowerCase()}_${home.toLowerCase()}`;
   return MATCH_TIMES[key1] || MATCH_TIMES[key2] || null;
+}
+
+function getKnockoutTime(matchLabel) {
+  if (!matchLabel) return null;
+  return KNOCKOUT_TIMES[matchLabel.toLowerCase()] || null;
 }
 
 function formatMatchTime(utcString) {
@@ -824,7 +870,7 @@ async function loadKnockoutRound(roundName, btn) {
         const hasScore = c !== '' || d !== '';
         const isLive = f && f.trim() !== '';
         const liveMinute = isLive ? f.trim() : '';
-        const matchTime = (homeTeam && awayTeam) ? getMatchTime(homeTeam, awayTeam) : null;
+        const matchTime = (homeTeam && awayTeam) ? getMatchTime(homeTeam, awayTeam) : getKnockoutTime(matchLabel);
         const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
 
         const homePickers = homeTeam ? PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === homeTeam.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts) : [];
