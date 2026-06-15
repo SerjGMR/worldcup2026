@@ -788,10 +788,12 @@ async function loadKnockoutRound(roundName, btn) {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
 
-      // Round header row — single cell, no team data
-      if (a && /round of|quarter|semi|final|3rd/i.test(a) && !b && !e) {
+      // Round header row — could be in col A or col B (merged/centered)
+      const roundHeader = (a && /round of|quarter|semi|final|3rd/i.test(a)) ? a :
+                          (b && /round of|quarter|semi|final|3rd/i.test(b) && !e) ? b : null;
+      if (roundHeader) {
         const rn = roundName.toLowerCase();
-        const ah = a.toLowerCase();
+        const ah = roundHeader.toLowerCase();
         inRound = ah.includes(rn) || rn.includes(ah) ||
           (rn.includes('32') && ah.includes('32')) ||
           (rn.includes('16') && ah.includes('16')) ||
