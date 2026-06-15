@@ -357,7 +357,7 @@
 <!-- LIVE TICKER -->
 <div id="live-ticker">
   <div class="live-ticker-inner">
-    <div class="live-ticker-label"><div class="live-dot"></div>LIVE</div>
+    <div class="live-ticker-label"><div class="live-dot"></div>LIVE NOW</div>
     <div class="live-ticker-matches" id="live-ticker-matches"></div>
   </div>
 </div>
@@ -499,8 +499,8 @@ async function updateLiveTicker() {
         const b=(row[1]||'').trim(), c=(row[2]||'').trim(),
               d=(row[3]||'').trim(), e=(row[4]||'').trim();
         const f=(row[5]||'').trim()||(row[6]||'').trim();
-        if (b && e && /live/i.test(f)) {
-          newLive.push({ home: b, away: e, scoreHome: c, scoreAway: d });
+        if (b && e && f && f.trim() !== '') {
+          newLive.push({ home: b, away: e, scoreHome: c, scoreAway: d, minute: f });
         }
       });
     } catch(e) {}
@@ -525,6 +525,7 @@ async function updateLiveTicker() {
       <span class="live-ticker-score">${m.scoreAway||'0'}</span>
       <span class="live-ticker-team">${m.away}</span>
       <img class="live-ticker-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
+      ${m.minute ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#e88;margin-left:4px">${m.minute}</span>` : ''}
     </div>`).join('');
 
   // Re-render leaderboard and groups if visible to show live indicators
@@ -684,7 +685,10 @@ function formatMatchTime(utcString) {
   const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
   return timeStr;
 }
+let currentMatchday = 1;
+
 async function loadMatchday(num, btn) {
+  currentMatchday = num;
   if (btn) {
     document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -711,7 +715,8 @@ async function loadMatchday(num, btn) {
       if (/^group\s+[a-z]/i.test(a)) currentGroup = a;
 
       if (b && e) {
-        const isLive = /live/i.test(f);
+        const isLive = f && f.trim() !== '';
+        const liveMinute = isLive ? f.trim() : '';
         const hasScore = c !== '' || d !== '';
         const displayGroup = currentGroup;
 
@@ -748,7 +753,7 @@ async function loadMatchday(num, btn) {
               <span class="sep">:</span>
               <span class="s">${hasScore?d:'–'}</span>
             </div>
-            ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
+            ${isLive?`<div class="live-badge"><div class="live-dot"></div>${liveMinute}</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
           </div>
           <div class="away-side">
             <div class="match-group"></div>
@@ -1346,7 +1351,7 @@ async function openPlayerPage(playerName, e) {
           </div>
           <div class="match-score-wrap">
             <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
-            ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
+            ${isLive?`<div class="live-badge"><div class="live-dot"></div>${liveMinute}</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
           </div>
           <div class="away-side">
             <div class="match-group"></div>
@@ -1478,7 +1483,7 @@ async function openCountryPage(countryName, e) {
         </div>
         <div class="match-score-wrap">
           <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
-          ${isLive?`<div class="live-badge"><div class="live-dot"></div>Live</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
+          ${isLive?`<div class="live-badge"><div class="live-dot"></div>${liveMinute}</div>`:hasScore?'':`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
         </div>
         <div class="away-side">
           <div class="match-group"></div>
@@ -1580,6 +1585,7 @@ function goBack() {
 
 // INIT
 loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => renderPicks())))));
+
 setInterval(updateLiveTicker, 30000);
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
@@ -1588,6 +1594,20 @@ setInterval(() => {
 setInterval(() => {
   if (document.getElementById('bracket').classList.contains('active')) loadBracket();
 }, 30000);
+setInterval(() => {
+  if (document.getElementById('matches').classList.contains('active')) {
+    // Clear cached match rows so fresh data is fetched
+    ALL_MATCH_ROWS = {};
+    loadMatchday(currentMatchday);
+  }
+}, 30000);
+setInterval(() => {
+  if (document.getElementById('groups').classList.contains('active')) loadGroups();
+}, 30000);
+// Also refresh team points (for extended LB flag scores) every 60s
+setInterval(() => {
+  loadTeamPoints().then(() => renderPicks());
+}, 60000);
 </script>
 </body>
 </html>
