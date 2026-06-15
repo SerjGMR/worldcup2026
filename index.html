@@ -772,7 +772,6 @@ async function loadKnockoutRound(roundName, btn) {
     document.querySelectorAll('#knockout-sub-tabs .sub-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
-  // Deactivate matchday tabs
   document.querySelectorAll('.sub-tabs:first-child .sub-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('knockouts-btn').classList.add('active');
 
@@ -784,16 +783,22 @@ async function loadKnockoutRound(roundName, btn) {
     let html = `<div class="matches-container">`;
     let inRound = false;
     let currentDate = '';
-    let currentGroup = '';
 
     rows.forEach(row => {
       const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
             d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
 
-      // Round header — check if we're entering/leaving the target round
-      if (!b && !c && !d && !e && a && /round of|quarter|semi|final|3rd/i.test(a)) {
-        inRound = a.toLowerCase().includes(roundName.toLowerCase()) ||
-                  roundName.toLowerCase().includes(a.toLowerCase().replace(/\s+/g,' ').trim());
+      // Round header row — single cell, no team data
+      if (a && /round of|quarter|semi|final|3rd/i.test(a) && !b && !e) {
+        const rn = roundName.toLowerCase();
+        const ah = a.toLowerCase();
+        inRound = ah.includes(rn) || rn.includes(ah) ||
+          (rn.includes('32') && ah.includes('32')) ||
+          (rn.includes('16') && ah.includes('16')) ||
+          (rn.includes('quarter') && ah.includes('quarter')) ||
+          (rn.includes('semi') && ah.includes('semi')) ||
+          (rn.includes('final') && ah.includes('final') && !ah.includes('semi') && !ah.includes('quarter')) ||
+          (rn.includes('3rd') && ah.includes('3rd'));
         return;
       }
 
@@ -806,44 +811,49 @@ async function loadKnockoutRound(roundName, btn) {
         return;
       }
 
-      // Match label row (Match 73, Match 74 etc.) — skip
-      if (a && /^match\s+\d+/i.test(a) && !b) return;
-
-      // Match row
-      if (b && e) {
+      // Match label row (Match 73 etc.) — this IS the match, teams may be in B/E or TBD
+      if (a && /^match\s+\d+/i.test(a)) {
+        const matchLabel = a; // e.g. "Match 73"
+        const homeTeam = b || '';
+        const awayTeam = e || '';
+        const hasScore = c !== '' || d !== '';
         const isLive = f && f.trim() !== '';
         const liveMinute = isLive ? f.trim() : '';
-        const hasScore = c !== '' || d !== '';
-        const matchTime = getMatchTime(b, e);
+        const matchTime = (homeTeam && awayTeam) ? getMatchTime(homeTeam, awayTeam) : null;
         const timeDisplay = matchTime ? formatMatchTime(matchTime) : null;
 
-        const homePickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === b.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
-        const awayPickers = PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === e.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts);
-        const pickerRows = (arr) => arr.length ? arr.map(p => `<div class="picker-player"><span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span><span class="picker-player-pts">${p.pts}</span></div>`).join('') : `<div class="picker-none">No one</div>`;
+        const homePickers = homeTeam ? PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === homeTeam.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts) : [];
+        const awayPickers = awayTeam ? PLAYERS.filter(p => p.teams.some(t => t.toLowerCase() === awayTeam.toLowerCase())).map(p => ({ name: p.name, pts: LB_ORDER[p.name.toLowerCase()]?.pts ?? 0 })).sort((a,b) => b.pts - a.pts) : [];
+        const pickerRows = (arr) => arr.length ? arr.map(p => `<div class="picker-player"><span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="openPlayerPage('${p.name.replace(/'/g,"\\'")}',event)">${playerAvatar(p.name,24)}<span class="picker-player-name clickable-player">${p.name}</span></span><span class="picker-player-pts">${p.pts}</span></div>`).join('') : `<div class="picker-none">No one picked this team yet</div>`;
 
         const uid = Math.random().toString(36).slice(2,8);
+        const homeFlag = homeTeam ? `<img class="match-team-flag" src="${flag(homeTeam)}" onerror="this.style.display='none'">` : `<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`;
+        const awayFlag = awayTeam ? `<img class="match-team-flag" src="${flag(awayTeam)}" onerror="this.style.display='none'">` : `<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`;
+        const homeName = homeTeam || '<span style="color:var(--muted);font-style:italic">TBD</span>';
+        const awayName = awayTeam || '<span style="color:var(--muted);font-style:italic">TBD</span>';
+
         html += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
-            <div class="match-group">${roundName}</div>
+            <div class="match-group">${matchLabel}</div>
             <div class="match-team-name home">
-              <span>${b}</span>
-              <img class="match-team-flag" src="${flag(b)}" onerror="this.style.display='none'">
+              ${homeName}
+              ${homeFlag}
             </div>
           </div>
           <div class="match-score-wrap">
             <div class="match-score"><span class="s">${hasScore?c:'–'}</span><span class="sep">:</span><span class="s">${hasScore?d:'–'}</span></div>
-            ${isLive?`<div class="live-badge"><div class="live-dot"></div>${liveMinute}</div>`:hasScore?`<div class="upcoming-badge" style="color:var(--green)">FT</div>`:`<div class="upcoming-badge">${timeDisplay||'Upcoming'}</div>`}
+            ${isLive?`<div class="live-badge"><div class="live-dot"></div>${liveMinute}</div>`:hasScore?`<div class="upcoming-badge" style="color:var(--green)">FT</div>`:`<div class="upcoming-badge">${timeDisplay||'TBD'}</div>`}
           </div>
           <div class="away-side">
             <div class="match-group"></div>
             <div class="match-team-name">
-              <img class="match-team-flag" src="${flag(e)}" onerror="this.style.display='none'">
-              <span>${e}</span>
+              ${awayFlag}
+              ${awayName}
             </div>
           </div>
           <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
-            <div class="picker-col"><h5><img src="${flag(b)}" onerror="this.style.display='none'">${b}</h5>${pickerRows(homePickers)}</div>
-            <div class="picker-col"><h5><img src="${flag(e)}" onerror="this.style.display='none'">${e}</h5>${pickerRows(awayPickers)}</div>
+            <div class="picker-col"><h5>${homeTeam||'TBD'}</h5>${pickerRows(homePickers)}</div>
+            <div class="picker-col"><h5>${awayTeam||'TBD'}</h5>${pickerRows(awayPickers)}</div>
           </div>
         </div>`;
       }
