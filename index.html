@@ -498,7 +498,7 @@ async function updateLiveTicker() {
       rows.forEach(row => {
         const b=(row[1]||'').trim(), c=(row[2]||'').trim(),
               d=(row[3]||'').trim(), e=(row[4]||'').trim();
-        const f=(row[5]||'').trim()||(row[6]||'').trim();
+        const f=(row[5]||'').trim();
         if (b && e && f && f.trim() !== '') {
           newLive.push({ home: b, away: e, scoreHome: c, scoreAway: d, minute: f });
         }
