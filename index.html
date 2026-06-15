@@ -269,7 +269,8 @@
   .live-ticker-team { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
   .live-ticker-score { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: #fff; letter-spacing: 1px; }
   .live-ticker-sep { color: var(--muted); font-size: 12px; }
-  @media (max-width: 768px) { .live-ticker-inner { padding: 0 16px; gap: 10px; } }
+  @media (max-width: 768px) {
+    #progress-bar-wrap > div { padding: 0 16px; gap: 8px; } .live-ticker-inner { padding: 0 16px; gap: 10px; } }
     /* HEADER */
     .header-inner { padding: 10px 16px; gap: 8px; }
     .logo-icon { width: 36px; height: 36px; font-size: 18px; }
@@ -359,6 +360,18 @@
   <div class="live-ticker-inner">
     <div class="live-ticker-label"><div class="live-dot"></div>LIVE NOW</div>
     <div class="live-ticker-matches" id="live-ticker-matches"></div>
+  </div>
+</div>
+
+<!-- GROUP STAGE PROGRESS BAR -->
+<div id="progress-bar-wrap" style="background:var(--mid);border-bottom:1px solid var(--border);padding:7px 0;">
+  <div style="max-width:1300px;margin:0 auto;padding:0 40px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0" id="progress-label">Group Stage</span>
+    <div style="flex:1;min-width:120px;background:var(--border);border-radius:4px;height:5px;overflow:hidden;">
+      <div id="progress-fill" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width 0.6s ease;"></div>
+    </div>
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);flex-shrink:0" id="progress-pct">0%</span>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:1px;flex-shrink:0" id="progress-detail"></span>
   </div>
 </div>
 
@@ -489,6 +502,36 @@ async function fetchCSV(gid) {
 }
 
 let LIVE_MATCHES = []; // [{home, away, scoreHome, scoreAway}]
+
+// GROUP STAGE PROGRESS BAR
+const TOTAL_GROUP_MATCHES = 72;
+
+async function updateProgressBar() {
+  try {
+    let played = 0, live = 0;
+    for (let md = 1; md <= 3; md++) {
+      const rows = await fetchCSV(GIDS['md'+md]);
+      rows.forEach(row => {
+        const b=(row[1]||'').trim(), c=(row[2]||'').trim(),
+              d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
+        if (b && e) {
+          if (c !== '' || d !== '') played++;
+          if (f && f.trim() !== '') live++;
+        }
+      });
+    }
+    const pct = Math.round((played / TOTAL_GROUP_MATCHES) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    const matchday = played < 24 ? 1 : played < 48 ? 2 : 3;
+    const detail = `Matchday ${matchday} · ${played}/${TOTAL_GROUP_MATCHES} played${live > 0 ? ` · ${live} live` : ''}`;
+    document.getElementById('progress-detail').textContent = detail;
+    if (played >= TOTAL_GROUP_MATCHES) {
+      document.getElementById('progress-label').textContent = 'Group Stage Complete';
+      document.getElementById('progress-label').style.color = 'var(--gold)';
+    }
+  } catch(e) { console.warn('Progress bar error', e); }
+}
 
 async function updateLiveTicker() {
   const newLive = [];
@@ -1584,9 +1627,10 @@ function goBack() {
 }
 
 // INIT
-loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => renderPicks())))));
+loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => { renderPicks(); updateProgressBar(); })))));
 
 setInterval(updateLiveTicker, 30000);
+setInterval(updateProgressBar, 60000);
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
   if (document.getElementById('probs').classList.contains('active')) loadProbabilities();
