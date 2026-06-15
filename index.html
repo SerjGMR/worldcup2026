@@ -150,6 +150,7 @@
   .group-table tbody td:first-child { text-align: left; font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .group-flag { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
   .pts-col { color: var(--text); font-weight: 700; font-size: 15px; }
+  @media (max-width: 768px) { .hide-mobile { display: none; } }
 
   /* PROBABILITIES */
   .prob-bar-wrap { width: 100px; background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
@@ -1025,7 +1026,7 @@ async function loadGroups() {
         if (/^group\s+[a-z]/i.test(cell)) {
           if (!groups[cell]) groups[cell] = [];
           currentGroups[offset] = cell;
-        } else if (cell && currentGroups[offset] && !/^mp$|^w$|^d$|^l$/i.test(cell)) {
+        } else if (cell && currentGroups[offset] && !/^mp$|^w$|^d$|^l$|^gf$|^ga$|^gd$|^pts$/i.test(cell)) {
           const g = currentGroups[offset];
           if (g && cell) {
             groups[g].push({ name: cell, mp: row[offset+1]||'0', w: row[offset+2]||'0', d: row[offset+3]||'0', l: row[offset+4]||'0', gf: row[offset+5]||'0', ga: row[offset+6]||'0', gd: row[offset+7]||'0', pts: row[offset+8]||'0' });
@@ -1038,13 +1039,13 @@ async function loadGroups() {
     let html = `<div class="groups-grid">`;
     groupNames.forEach(gname => {
       const teams = groups[gname];
-      html += `<div class="group-card"><div class="group-card-header">${gname}</div><table class="group-table"><thead><tr><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;
+      html += `<div class="group-card"><div class="group-card-header">${gname}</div><table class="group-table"><thead><tr><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th class="hide-mobile">GF</th><th class="hide-mobile">GA</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;
       teams.forEach(t => {
         // Check if this team is currently live and find their opponent
         const liveMatch = LIVE_MATCHES.find(m => m.home.toLowerCase() === t.name.toLowerCase() || m.away.toLowerCase() === t.name.toLowerCase());
         const opponent = liveMatch ? (liveMatch.home.toLowerCase() === t.name.toLowerCase() ? liveMatch.away : liveMatch.home) : null;
         const liveIndicator = opponent ? `<span style="display:inline-flex;align-items:center;gap:2px;margin-left:5px;vertical-align:middle"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(opponent)}" style="width:16px;height:11px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>` : '';
-        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td style="white-space:nowrap"><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}${liveIndicator}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
+        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td style="white-space:nowrap"><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}${liveIndicator}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td class="hide-mobile">${t.gf}</td><td class="hide-mobile">${t.ga}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
       });
       html += `</tbody></table></div>`;
     });
@@ -1660,7 +1661,7 @@ async function openCountryPage(countryName, e) {
         if (/^group\s+[a-z]/i.test(cell)) {
           currentGroups[offset] = cell;
           if (!groupTeams[cell]) groupTeams[cell] = [];
-        } else if (cell && currentGroups[offset] && !/^mp$|^w$|^d$|^l$/i.test(cell)) {
+        } else if (cell && currentGroups[offset] && !/^mp$|^w$|^d$|^l$|^gf$|^ga$|^gd$|^pts$/i.test(cell)) {
           const g = currentGroups[offset];
           const teamData = { name: cell, mp: row[offset+1]||'0', w: row[offset+2]||'0', d: row[offset+3]||'0', l: row[offset+4]||'0', gf: row[offset+5]||'0', ga: row[offset+6]||'0', gd: row[offset+7]||'0', pts: row[offset+8]||'0' };
           groupTeams[g].push(teamData);
@@ -1769,15 +1770,15 @@ async function openCountryPage(countryName, e) {
       <div class="country-section-title">${groupStanding.group} Standings</div>
       <div class="team-breakdown-wrap">
         <table class="team-breakdown-table">
-          <thead><tr><th style="text-align:left">Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+          <thead><tr><th style="text-align:left">Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th class="hide-mobile">GF</th><th class="hide-mobile">GA</th><th>GD</th><th>Pts</th></tr></thead>
           <tbody>${fullGroup.map(t => `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)" style="${t.name.toLowerCase()===countryName.toLowerCase()?'background:rgba(245,197,24,0.08)':''}">
             <td><img class="team-breakdown-flag" src="${flag(t.name)}" onerror="this.style.display='none'">${t.name}</td>
             <td style="text-align:center">${t.mp}</td>
             <td style="text-align:center">${t.w}</td>
             <td style="text-align:center">${t.d}</td>
             <td style="text-align:center">${t.l}</td>
-            <td style="text-align:center">${t.gf}</td>
-            <td style="text-align:center">${t.ga}</td>
+            <td style="text-align:center" class="hide-mobile">${t.gf}</td>
+            <td style="text-align:center" class="hide-mobile">${t.ga}</td>
             <td style="text-align:center">${t.gd}</td>
             <td class="total-col">${t.pts}</td>
           </tr>`).join('')}</tbody>
