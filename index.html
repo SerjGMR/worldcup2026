@@ -460,7 +460,7 @@
 
 <script>
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6F2WCGWZxZgg6TCnjpODIAT4TNxR53OFNUtLFaeElyAthAYoTudjKQr-kVEGlZH3rf2IDieTerOAx/pub?output=csv&gid=';
-const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806', extlb:'1764237413', knockouts:'912894311' };
+const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806', extlb:'1764237413', knockouts:'912894311', eliminated:'418209221' };
 
 const FLAGS = {
   "Argentina":"ar","Belgium":"be","Uruguay":"uy","Sweden":"se","Algeria":"dz","Egypt":"eg","Panama":"pa","Jordan":"jo",
@@ -472,6 +472,35 @@ const FLAGS = {
   "France":"fr","Iran":"ir","Bosnia Herzegovina":"ba","Ivory coast":"ci"
 };
 function flag(c) { const code=FLAGS[c]||FLAGS[c?.trim()]; return code?`https://flagcdn.com/w40/${code}.png`:'https://flagcdn.com/w40/un.png'; }
+
+// ELIMINATED TEAMS
+let ELIMINATED_TEAMS = new Set();
+
+async function loadEliminatedTeams() {
+  try {
+    const rows = await fetchCSV(GIDS.eliminated);
+    const newSet = new Set();
+    rows.forEach(row => {
+      const name = (row[0]||'').trim();
+      if (name && name.toLowerCase() !== 'eliminated teams') {
+        newSet.add(name.toLowerCase());
+      }
+    });
+    ELIMINATED_TEAMS = newSet;
+  } catch(e) { console.warn('Could not load eliminated teams', e); }
+}
+
+function isEliminated(teamName) {
+  return teamName && ELIMINATED_TEAMS.has(teamName.toLowerCase());
+}
+
+// Wraps a flag <img> tag string with an eliminated badge if the team is out.
+// Pass the already-built <img ...> tag and the team name.
+function wrapFlagElim(imgTag, teamName, size) {
+  if (!isEliminated(teamName)) return imgTag;
+  const badgeSize = Math.max(10, Math.round((size||24) * 0.5));
+  return `<span style="position:relative;display:inline-flex;flex-shrink:0">${imgTag}<span style="position:absolute;bottom:-3px;right:-3px;width:${badgeSize}px;height:${badgeSize}px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--darker);line-height:1;font-size:${Math.round(badgeSize*0.7)}px;color:#fff;font-weight:900;">✕</span></span>`;
+}
 
 // PLAYER COLORS & AVATARS
 // Just upload [name]worldcup.jpg to the repo root — no code changes needed!
@@ -991,7 +1020,7 @@ async function loadMatchday(num, btn) {
             <div class="match-group">${displayGroup}</div>
             <div class="match-team-name home">
               <span>${b}</span>
-              <img class="match-team-flag" src="${flag(b)}" alt="${b}" onerror="this.style.display='none'">
+              ${wrapFlagElim(`<img class="match-team-flag" src="${flag(b)}" alt="${b}" onerror="this.style.display='none'">`, b, 24)}
             </div>
           </div>
           <div class="match-score-wrap">
@@ -1005,7 +1034,7 @@ async function loadMatchday(num, btn) {
           <div class="away-side">
             <div class="match-group"></div>
             <div class="match-team-name">
-              <img class="match-team-flag" src="${flag(e)}" alt="${e}" onerror="this.style.display='none'">
+              ${wrapFlagElim(`<img class="match-team-flag" src="${flag(e)}" alt="${e}" onerror="this.style.display='none'">`, e, 24)}
               <span>${e}</span>
             </div>
           </div>
@@ -1061,7 +1090,7 @@ async function loadGroups() {
         const liveMatch = LIVE_MATCHES.find(m => m.home.toLowerCase() === t.name.toLowerCase() || m.away.toLowerCase() === t.name.toLowerCase());
         const opponent = liveMatch ? (liveMatch.home.toLowerCase() === t.name.toLowerCase() ? liveMatch.away : liveMatch.home) : null;
         const liveIndicator = opponent ? `<span style="display:inline-flex;align-items:center;gap:2px;margin-left:5px;vertical-align:middle"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(opponent)}" style="width:16px;height:11px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>` : '';
-        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td style="white-space:nowrap"><img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">${t.name}${liveIndicator}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td class="hide-mobile">${t.gf}</td><td class="hide-mobile">${t.ga}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
+        html += `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)"><td style="white-space:nowrap">${wrapFlagElim(`<img class="group-flag" src="${flag(t.name)}" alt="${t.name}" onerror="this.style.display='none'">`, t.name, 22)}${t.name}${liveIndicator}</td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td class="hide-mobile">${t.gf}</td><td class="hide-mobile">${t.ga}</td><td>${t.gd}</td><td class="pts-col">${t.pts}</td></tr>`;
       });
       html += `</tbody></table></div>`;
     });
@@ -1140,8 +1169,8 @@ async function loadBracket() {
       return pairs.map(([r1,r2]) => {
         const t1 = team(r1,col), t2 = team(r2,col);
         return `<div class="bracket-matchup">
-          <div class="bracket-team ${t1?'clickable-country':'empty'}" ${t1?`onclick="openCountryPage('${t1.replace(/'/g,"\\'")}',event)"`:''}>${t1?`<img src="${flag(t1)}" onerror="this.style.display='none'">${t1}`:'TBD'}</div>
-          <div class="bracket-team ${t2?'clickable-country':'empty'}" ${t2?`onclick="openCountryPage('${t2.replace(/'/g,"\\'")}',event)"`:''}>${t2?`<img src="${flag(t2)}" onerror="this.style.display='none'">${t2}`:'TBD'}</div>
+          <div class="bracket-team ${t1?'clickable-country':'empty'}" ${t1?`onclick="openCountryPage('${t1.replace(/'/g,"\\'")}',event)"`:''}>${t1?`${wrapFlagElim(`<img src="${flag(t1)}" onerror="this.style.display='none'">`, t1, 20)}${t1}`:'TBD'}</div>
+          <div class="bracket-team ${t2?'clickable-country':'empty'}" ${t2?`onclick="openCountryPage('${t2.replace(/'/g,"\\'")}',event)"`:''}>${t2?`${wrapFlagElim(`<img src="${flag(t2)}" onerror="this.style.display='none'">`, t2, 20)}${t2}`:'TBD'}</div>
         </div>`;
       }).join('');
     }
@@ -1273,7 +1302,7 @@ function buildCard(p, i) {
   const teams = p.teams.map(t => {
     const pts = TEAM_POINTS[t]||0;
     return `<div class="team-cell clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
-      <img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">
+      wrapFlagElim(`<img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">`, t, 36)
       <div class="team-name">${t}</div>
       <div class="team-pts" style="color:${pts>0?'var(--gold)':'var(--muted)'}">${pts > 0 ? '+'+pts : '0'} pts</div>
     </div>`;
@@ -1484,7 +1513,7 @@ async function openPlayerPage(playerName, e) {
   if (extTeams.length > 0) {
     const rows = extTeams.map(t => `
       <tr class="clickable-country" onclick="openCountryPage('${t.team.replace(/'/g,"\\'")}',event)">
-        <td><img class="team-breakdown-flag" src="${flag(t.team)}" onerror="this.style.display='none'">${t.team}</td>
+        <td>${wrapFlagElim(`<img class="team-breakdown-flag" src="${flag(t.team)}" onerror="this.style.display='none'">`, t.team, 24)}${t.team}</td>
         <td>${t.groupStage}</td>
         <td>${t.ro32}</td>
         <td>${t.ro16}</td>
@@ -1512,7 +1541,7 @@ async function openPlayerPage(playerName, e) {
     const flagsHTML = player.teams.map(t => {
       const pts = TEAM_POINTS[t]||0;
       return `<div class="player-page-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
-        <img src="${flag(t)}" onerror="this.style.display='none'">
+        ${wrapFlagElim(`<img src="${flag(t)}" onerror="this.style.display='none'">`, t, 42)}
         <div class="player-page-team-name">${t}</div>
         ${pts > 0 ? `<div class="player-page-team-pts">+${pts}</div>` : ''}
       </div>`;
@@ -1734,7 +1763,7 @@ async function openCountryPage(countryName, e) {
       matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
         <div class="home-side">
           <div class="match-group">${m.group}</div>
-          <div class="match-team-name home"><span>${m.home}</span><img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'"></div>
+          <div class="match-team-name home"><span>${m.home}</span>${wrapFlagElim(`<img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">`, m.home, 24)}</div>
         </div>
         <div class="match-score-wrap">
           <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
@@ -1742,7 +1771,7 @@ async function openCountryPage(countryName, e) {
         </div>
         <div class="away-side">
           <div class="match-group"></div>
-          <div class="match-team-name"><img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'"><span>${m.away}</span></div>
+          <div class="match-team-name">${wrapFlagElim(`<img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">`, m.away, 24)}<span>${m.away}</span></div>
         </div>
         <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
           <div class="picker-col"><h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5>${pickerRows(homePickers)}</div>
@@ -1779,7 +1808,7 @@ async function openCountryPage(countryName, e) {
   let html = `
     <button class="country-back" onclick="goBack()">← Back</button>
     <div class="country-hero">
-      <img class="country-hero-flag" src="${flag(countryName)}" onerror="this.style.display='none'">
+      ${wrapFlagElim(`<img class="country-hero-flag" src="${flag(countryName)}" onerror="this.style.display='none'">`, countryName, 80)}
       <div class="country-hero-info">
         <h2>${countryName}</h2>
         <p>World Cup 2026</p>
@@ -1796,7 +1825,7 @@ async function openCountryPage(countryName, e) {
         <table class="team-breakdown-table">
           <thead><tr><th style="text-align:left">Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th class="hide-mobile">GF</th><th class="hide-mobile">GA</th><th>GD</th><th>Pts</th></tr></thead>
           <tbody>${fullGroup.map(t => `<tr class="clickable-country" onclick="openCountryPage('${t.name.replace(/'/g,"\\'")}',event)" style="${t.name.toLowerCase()===countryName.toLowerCase()?'background:rgba(245,197,24,0.08)':''}">
-            <td><img class="team-breakdown-flag" src="${flag(t.name)}" onerror="this.style.display='none'">${t.name}</td>
+            <td>${wrapFlagElim(`<img class="team-breakdown-flag" src="${flag(t.name)}" onerror="this.style.display='none'">`, t.name, 24)}${t.name}</td>
             <td style="text-align:center">${t.mp}</td>
             <td style="text-align:center">${t.w}</td>
             <td style="text-align:center">${t.d}</td>
@@ -1839,7 +1868,10 @@ function goBack() {
 }
 
 // INIT
-loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => { renderPicks(); updateProgressBar(); })))));
+loadEliminatedTeams().then(() => {
+  loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => { renderPicks(); updateProgressBar(); })))));
+});
+setInterval(loadEliminatedTeams, 60000);
 
 setInterval(updateLiveTicker, 30000);
 setInterval(updateProgressBar, 60000);
