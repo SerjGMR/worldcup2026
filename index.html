@@ -1301,7 +1301,7 @@ function buildCard(p, i) {
   const teams = p.teams.map(t => {
     const pts = TEAM_POINTS[t]||0;
     return `<div class="team-cell clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">
-      wrapFlagElim(`<img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">`, t, 36)
+      ${wrapFlagElim(`<img class="team-flag" src="${flag(t)}" alt="${t}" loading="lazy" onerror="this.src='https://flagcdn.com/w40/un.png'">`, t, 36)}
       <div class="team-name">${t}</div>
       <div class="team-pts" style="color:${pts>0?'var(--gold)':'var(--muted)'}">${pts > 0 ? '+'+pts : '0'} pts</div>
     </div>`;
