@@ -1867,17 +1867,23 @@ function goBack() {
 }
 
 // INIT
+let initDone = false;
+function finishInit() {
+  if (initDone) return;
+  initDone = true;
+  loadLeaderboard();
+  renderPicks();
+  updateProgressBar();
+}
 Promise.all([
   loadEliminatedTeams(),
   loadTeamPoints(),
   loadProbsData(),
   loadExtLBData(),
   updateLiveTicker()
-]).then(() => {
-  loadLeaderboard();
-  renderPicks();
-  updateProgressBar();
-});
+]).then(finishInit).catch(finishInit);
+// Safety net: never let the page hang on the loading spinner more than 8 seconds
+setTimeout(finishInit, 8000);
 setInterval(loadEliminatedTeams, 60000);
 
 setInterval(updateLiveTicker, 30000);
