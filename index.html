@@ -487,7 +487,25 @@ async function loadEliminatedTeams() {
       }
     });
     ELIMINATED_TEAMS = newSet;
-  } catch(e) { console.warn('Could not load eliminated teams', e); }
+    // TEMP DEBUG - shows in a small banner at top of page
+    let debugEl = document.getElementById('elim-debug');
+    if (!debugEl) {
+      debugEl = document.createElement('div');
+      debugEl.id = 'elim-debug';
+      debugEl.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#222;color:#0f0;padding:10px 14px;font-family:monospace;font-size:12px;z-index:9999;border-radius:6px;max-width:90vw;border:1px solid #0f0';
+      document.body.appendChild(debugEl);
+    }
+    debugEl.textContent = 'Eliminated: [' + Array.from(ELIMINATED_TEAMS).join(', ') + '] (raw rows: ' + JSON.stringify(rows) + ')';
+  } catch(e) {
+    let debugEl = document.getElementById('elim-debug');
+    if (!debugEl) {
+      debugEl = document.createElement('div');
+      debugEl.id = 'elim-debug';
+      debugEl.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#222;color:#f55;padding:10px 14px;font-family:monospace;font-size:12px;z-index:9999;border-radius:6px;max-width:90vw;border:1px solid #f55';
+      document.body.appendChild(debugEl);
+    }
+    debugEl.textContent = 'ERROR loading eliminated teams: ' + e.message;
+  }
 }
 
 function isEliminated(teamName) {
@@ -1868,8 +1886,17 @@ function goBack() {
 }
 
 // INIT
-loadEliminatedTeams().then(() => {
-  loadTeamPoints().then(() => loadProbsData().then(() => loadExtLBData().then(() => updateLiveTicker().then(() => loadLeaderboard().then(() => { renderPicks(); updateProgressBar(); })))));
+// Run all independent fetches in parallel instead of chaining sequentially
+Promise.all([
+  loadEliminatedTeams(),
+  loadTeamPoints(),
+  loadProbsData(),
+  loadExtLBData(),
+  updateLiveTicker()
+]).then(() => {
+  loadLeaderboard();
+  renderPicks();
+  updateProgressBar();
 });
 setInterval(loadEliminatedTeams, 60000);
 
