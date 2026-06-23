@@ -412,7 +412,7 @@
   <!-- EXTENDED LEADERBOARD -->
   <div class="section" id="picks">
     <div class="section-header"><h2>Extended Leaderboard</h2><p>Rankings with team picks</p></div>
-    <input class="search-bar" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
+    <input class="search-bar picks-search" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
     <div class="picks-grid" id="picks-grid"></div>
     <div class="no-results" id="no-results" style="display:none">No results found</div>
   </div>
@@ -647,7 +647,49 @@ async function updateLiveTicker() {
   }
 }
 
-// LEADERBOARD
+// RANK MOVEMENT - stores previous day's ranks in localStorage
+let PREV_RANKS = {};
+
+function loadPrevRanks() {
+  try {
+    const stored = localStorage.getItem('wc2026_prev_ranks');
+    if (stored) PREV_RANKS = JSON.parse(stored);
+  } catch(e) {}
+}
+
+function saveCurrentRanks(lbData) {
+  try {
+    // Save at midnight - check if we need to rotate
+    const today = new Date().toDateString();
+    const lastSaved = localStorage.getItem('wc2026_ranks_date');
+    if (lastSaved !== today) {
+      // New day — save yesterday's as previous
+      const current = localStorage.getItem('wc2026_current_ranks');
+      if (current) {
+        localStorage.setItem('wc2026_prev_ranks', current);
+        PREV_RANKS = JSON.parse(current);
+      }
+      localStorage.setItem('wc2026_ranks_date', today);
+    }
+    // Always update current ranks
+    const currentRanks = {};
+    lbData.forEach(row => {
+      const name = (row[3]||'').trim();
+      const rank = parseInt(row[2])||99;
+      if (name) currentRanks[name] = rank;
+    });
+    localStorage.setItem('wc2026_current_ranks', JSON.stringify(currentRanks));
+  } catch(e) {}
+}
+
+function getRankMovement(name, currentRank) {
+  const prev = PREV_RANKS[name];
+  if (!prev || prev === currentRank) return '';
+  const diff = prev - currentRank; // positive = moved up
+  if (diff > 0) return `<span style="color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;margin-left:6px;white-space:nowrap">▲${diff}</span>`;
+  if (diff < 0) return `<span style="color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;margin-left:6px;white-space:nowrap">▼${Math.abs(diff)}</span>`;
+  return '';
+}
 async function loadLeaderboard() {
   try {
     const rows = await fetchCSV(GIDS.leaderboard);
@@ -676,8 +718,9 @@ async function loadLeaderboard() {
         return teams;
       }) : [];
       const liveHTML = liveTeams.length ? `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle;flex-wrap:nowrap">${liveTeams.map(t => `<span style="display:inline-flex;align-items:center;gap:2px"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>`).join('')}</span>` : '';
+      const movement = getRankMovement(name, rankNum);
       html += `<tr>
-        <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
+        <td><span class="lb-rank ${rc}">${sheetRank}</span>${movement}</td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
         <td style="white-space:nowrap;vertical-align:middle"><span style="display:inline-flex;align-items:center;gap:0"><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
@@ -688,6 +731,8 @@ async function loadLeaderboard() {
     });
     html += `</tbody></table></div>`;
     document.getElementById('lb-content').innerHTML = html;
+    // Save current ranks for movement tracking
+    saveCurrentRanks(data);
     // Update LB_ORDER for extended leaderboard sorting
     LB_ORDER = {};
     data.forEach(row => {
@@ -1330,6 +1375,9 @@ function renderPicks() {
     return (LB_ORDER[b.name.toLowerCase()]?.pts??0) - (LB_ORDER[a.name.toLowerCase()]?.pts??0);
   });
   document.getElementById('picks-grid').innerHTML = sorted.map((p,i) => buildCard(p,i)).join('');
+  // Re-apply any active search filter after re-render
+  const searchEl = document.querySelector('.picks-search');
+  if (searchEl && searchEl.value.trim()) filterPicks(searchEl.value);
 }
 
 function filterPicks(q) {
@@ -1867,6 +1915,7 @@ function goBack() {
 }
 
 // INIT
+loadPrevRanks();
 let initDone = false;
 function finishInit() {
   if (initDone) return;
