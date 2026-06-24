@@ -292,13 +292,13 @@
     .section-header p { font-size: 11px; }
 
     /* LEADERBOARD */
-    .lb-table thead th { padding: 10px 10px; font-size: 9px; letter-spacing: 1px; }
+    .lb-table thead th { padding: 10px 10px; font-size: 10px; letter-spacing: 1px; }
     .lb-table tbody td { padding: 10px 10px; }
-    .lb-rank { font-size: 16px; }
-    .lb-name { font-size: 13px; }
+    .lb-rank { font-size: 18px; }
+    .lb-name { font-size: 14px; }
     .lb-pts { font-size: 22px; }
-    .lb-teams { font-size: 11px; }
-    .lb-prize { font-size: 11px; }
+    .lb-teams { font-size: 12px; }
+    .lb-prize { font-size: 12px; }
 
     /* MATCHES */
     .sub-tab { padding: 7px 14px; font-size: 11px; }
@@ -695,7 +695,7 @@ async function loadLeaderboard() {
     const rows = await fetchCSV(GIDS.leaderboard);
     const data = rows.slice(2).filter(r => r[3] && r[3].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
-      <thead><tr><th>#</th><th></th><th>Player</th><th>⭐</th><th>Teams In</th><th>Points</th><th>GD</th><th>Prize</th></tr></thead><tbody>`;
+      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Points</th><th>GD</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row) => {
       const sheetRank = row[2]||'—';
       const rankNum = parseInt(sheetRank)||99;
