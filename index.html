@@ -393,8 +393,8 @@
     <div class="section-header"><h2>Matches</h2><p>Matchday results</p></div>
     <div class="sub-tabs">
       <button class="sub-tab" onclick="loadMatchday(1,this)">Matchday 1</button>
-      <button class="sub-tab active" onclick="loadMatchday(2,this)">Matchday 2</button>
-      <button class="sub-tab" onclick="loadMatchday(3,this)">Matchday 3</button>
+      <button class="sub-tab" onclick="loadMatchday(2,this)">Matchday 2</button>
+      <button class="sub-tab active" onclick="loadMatchday(3,this)">Matchday 3</button>
       <button class="sub-tab" id="knockouts-btn" onclick="toggleKnockouts(this)">Knockouts ▾</button>
     </div>
     <div id="knockout-sub-tabs" style="display:none;margin-bottom:16px;">
@@ -1516,7 +1516,7 @@ function showSection(id, btn) {
 }
 function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
-  else if (id==='matches') loadMatchday(2);
+  else if (id==='matches') loadMatchday(3);
   else if (id==='groups') loadGroups();
   else if (id==='probs') loadProbabilities();
   else if (id==='bracket') loadBracket();
