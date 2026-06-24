@@ -352,9 +352,7 @@
     <nav>
       <button class="active" onclick="showSection('leaderboard',this)">Leaderboard</button>
       <button onclick="showSection('matches',this)">Matches</button>
-      <button onclick="showSection('picks',this)">Extended LB</button>
       <button onclick="showSection('groups',this)">Groups</button>
-      <button onclick="showSection('probs',this)">Probabilities</button>
       <button onclick="showSection('bracket',this)">Bracket</button>
       <button onclick="showSection('search',this)">Search</button>
     </nav>
@@ -385,7 +383,22 @@
   <!-- LEADERBOARD -->
   <div class="section active" id="leaderboard">
     <div class="section-header"><h2>Leaderboard</h2><p>Live standings</p></div>
-    <div id="lb-content"><div class="loading"><div class="spinner"></div>Loading standings…</div></div>
+    <div class="sub-tabs" style="margin-bottom:20px;">
+      <button class="sub-tab active" onclick="switchLBView('points',this)">Points</button>
+      <button class="sub-tab" onclick="switchLBView('picks',this)">Extended</button>
+      <button class="sub-tab" onclick="switchLBView('probs',this)">Probabilities</button>
+    </div>
+    <div id="lb-view-points">
+      <div id="lb-content"><div class="loading"><div class="spinner"></div>Loading standings…</div></div>
+    </div>
+    <div id="lb-view-picks" style="display:none">
+      <input class="search-bar picks-search" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
+      <div class="picks-grid" id="picks-grid"></div>
+      <div class="no-results" id="no-results" style="display:none">No results found</div>
+    </div>
+    <div id="lb-view-probs" style="display:none">
+      <div id="probs-content"><div class="loading"><div class="spinner"></div>Loading probabilities…</div></div>
+    </div>
   </div>
 
   <!-- MATCHES -->
@@ -409,24 +422,10 @@
     <div id="matches-content"><div class="loading"><div class="spinner"></div>Loading matches…</div></div>
   </div>
 
-  <!-- EXTENDED LEADERBOARD -->
-  <div class="section" id="picks">
-    <div class="section-header"><h2>Extended Leaderboard</h2><p>Rankings with team picks</p></div>
-    <input class="search-bar picks-search" type="text" placeholder="🔍  Search by player name or team..." oninput="filterPicks(this.value)">
-    <div class="picks-grid" id="picks-grid"></div>
-    <div class="no-results" id="no-results" style="display:none">No results found</div>
-  </div>
-
   <!-- GROUPS -->
   <div class="section" id="groups">
     <div class="section-header"><h2>Groups</h2><p>Group stage standings</p></div>
     <div id="groups-content"><div class="loading"><div class="spinner"></div>Loading groups…</div></div>
-  </div>
-
-  <!-- PROBABILITIES -->
-  <div class="section" id="probs">
-    <div class="section-header"><h2>Probabilities</h2><p>Win chances</p></div>
-    <div id="probs-content"><div class="loading"><div class="spinner"></div>Loading probabilities…</div></div>
   </div>
 
   <!-- BRACKET -->
@@ -1500,13 +1499,25 @@ let lastSection = 'leaderboard';
 let lastBtn = null;
 
 const sectionLoaded = {};
+let currentLBView = 'points';
+
+function switchLBView(view, btn) {
+  currentLBView = view;
+  document.querySelectorAll('#leaderboard .sub-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('lb-view-points').style.display = view === 'points' ? '' : 'none';
+  document.getElementById('lb-view-picks').style.display = view === 'picks' ? '' : 'none';
+  document.getElementById('lb-view-probs').style.display = view === 'probs' ? '' : 'none';
+  if (view === 'picks' && document.getElementById('picks-grid').children.length === 0) renderPicks();
+  if (view === 'probs' && document.getElementById('probs-content').querySelector('.loading')) loadProbabilities();
+}
+
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (btn) { btn.classList.add('active'); lastBtn = btn; }
   if (id !== 'country-page' && id !== 'player-page') lastSection = id;
-  // Always reload groups and leaderboard so live indicators are fresh
   if (id === 'groups' || id === 'leaderboard') {
     loadSection(id);
   } else if (!sectionLoaded[id]) {
@@ -1518,7 +1529,6 @@ function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
   else if (id==='matches') loadMatchday(3);
   else if (id==='groups') loadGroups();
-  else if (id==='probs') loadProbabilities();
   else if (id==='bracket') loadBracket();
   // search has no data to load
 }
@@ -2037,7 +2047,7 @@ setInterval(updateLiveTicker, 30000);
 setInterval(updateProgressBar, 60000);
 setInterval(loadLeaderboard, 30000);
 setInterval(() => {
-  if (document.getElementById('probs').classList.contains('active')) loadProbabilities();
+  if (document.getElementById('leaderboard').classList.contains('active') && currentLBView === 'probs') loadProbabilities();
 }, 30000);
 setInterval(() => {
   if (document.getElementById('bracket').classList.contains('active')) loadBracket();
