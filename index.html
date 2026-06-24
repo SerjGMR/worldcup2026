@@ -1195,86 +1195,103 @@ async function loadBracket() {
   const el = document.getElementById('bracket-content');
   try {
     const rows = await fetchCSV(GIDS.bracket);
-    const r = (row, col) => (rows[row] && rows[row][col] ? rows[row][col].trim() : '');
-    const team = (row, col) => { const t = r(row, col); return t && !/^\+\d|^round of|^semi final|^quarter final|^3rd place|^champion|^bracket|^final$/i.test(t) ? t : ''; };
+    // r(sheetRow, sheetCol) — sheet rows are 1-based, cols are letters
+    const r = (sheetRow, sheetCol) => {
+      const colMap = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
+      const colIdx = colMap[sheetCol] ?? 0;
+      const row = rows[sheetRow - 1];
+      return row && row[colIdx] ? row[colIdx].trim() : '';
+    };
+    const team = (sheetRow, sheetCol) => {
+      const t = r(sheetRow, sheetCol);
+      return t && !/^\+\d|^round|^semi|^quarter|^3rd|^champion|^bracket|^final|^match/i.test(t) ? t : '';
+    };
 
-    const L32 = [ [7,8],[11,12],[15,16],[19,20],[23,24],[27,28],[31,32],[35,36] ];
-    const L16 = [ [9,10],[17,18],[25,26],[33,34] ];
-    const LQF = [ [13,14],[29,30] ];
-    const LSF = [ [21,22] ];
-    const R32 = [ [7,8],[11,12],[15,16],[19,20],[23,24],[27,28],[31,32],[35,36] ];
-    const R16 = [ [9,10],[17,18],[25,26],[33,34] ];
-    const RQF = [ [13,14],[29,30] ];
-    const RSF = [ [21,22] ];
-    const FINAL = [15,19];
-    const THIRD = [26,28];
-    const CHAMP = 8;
+    // Exact cell positions confirmed
+    const L32r = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
+    const L16r = [[10,11],[18,19],[26,27],[34,35]];
+    const LQFr = [[14,15],[30,31]];
+    const LSFr = [[22,23]];
+    const R32r = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
+    const R16r = [[10,11],[18,19],[26,27],[34,35]];
+    const RQFr = [[14,15],[30,31]];
+    const RSFr = [[22,23]];
 
-    function matchupHTML(pairs, col) {
-      return pairs.map(([r1,r2]) => {
-        const t1 = team(r1,col), t2 = team(r2,col);
-        return `<div class="bracket-matchup">
-          <div class="bracket-team ${t1?'clickable-country':'empty'}" ${t1?`onclick="openCountryPage('${t1.replace(/'/g,"\\'")}',event)"`:''}>${t1?`${wrapFlagElim(`<img src="${flag(t1)}" onerror="this.style.display='none'">`, t1, 20)}${t1}`:'TBD'}</div>
-          <div class="bracket-team ${t2?'clickable-country':'empty'}" ${t2?`onclick="openCountryPage('${t2.replace(/'/g,"\\'")}',event)"`:''}>${t2?`${wrapFlagElim(`<img src="${flag(t2)}" onerror="this.style.display='none'">`, t2, 20)}${t2}`:'TBD'}</div>
-        </div>`;
-      }).join('');
+    function matchCard(t1, t2) {
+      const mk = (t) => t
+        ? `<div class="bracket-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">${wrapFlagElim(`<img src="${flag(t)}" onerror="this.style.display='none'">`,t,20)}${t}</div>`
+        : `<div class="bracket-team empty">TBD</div>`;
+      return `<div class="bracket-matchup">${mk(t1)}${mk(t2)}</div>`;
     }
 
-    function mobileRound(title, pts, pairs, col) {
-      const matches = pairs.map(([r1,r2]) => {
-        const t1 = team(r1,col), t2 = team(r2,col);
-        return `<div class="bracket-matchup">
-          <div class="bracket-team ${t1?'':'empty'}">${t1?`<img src="${flag(t1)}" onerror="this.style.display='none'">${t1}`:'TBD'}</div>
-          <div class="bracket-team ${t2?'':'empty'}">${t2?`<img src="${flag(t2)}" onerror="this.style.display='none'">${t2}`:'TBD'}</div>
-        </div>`;
-      }).join('');
-      return `<div class="bracket-round"><div class="bracket-round-title">${title}</div><div class="bracket-round-pts">${pts}</div><div class="bracket-round-matches">${matches}</div></div>`;
+    function colMatches(pairs, colLetter, gapPx=8) {
+      return pairs.map(([r1,r2],i) =>
+        `<div style="margin-bottom:${i<pairs.length-1?gapPx+'px':'0'}">${matchCard(team(r1,colLetter),team(r2,colLetter))}</div>`
+      ).join('');
     }
 
-    const champ = team(CHAMP, 8);
-    const final1 = team(FINAL[0], 7), final2 = team(FINAL[1], 7);
-    const third1 = team(THIRD[0], 7), third2 = team(THIRD[1], 7);
+    const champ = team(11,'I');
+    const final1 = team(18,'I'), final2 = team(19,'I');
+    const playoff1 = team(30,'I'), playoff2 = team(31,'I');
+    const third = team(27,'I');
+
+    // Each matchup ~80px. Between RO32 pairs, gap is ~8px.
+    // RO16 sits between pairs of RO32 → offset by 44px, gap 88px between RO16 matches
+    // QF sits between pairs of RO16 → offset 132px, gap 264px
+    // SF sits between QF pair → offset 308px
 
     const html = `
-    <div class="bracket-scroll">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 180px 1fr 1fr 1fr 1fr;min-width:900px;gap:0;align-items:start;">
-      <div><div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>${matchupHTML(L32, 0)}</div>
-      <div><div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div><div style="padding-top:40px">${matchupHTML(L16, 2)}</div></div>
-      <div><div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div><div style="padding-top:120px">${matchupHTML(LQF, 4)}</div></div>
-      <div><div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div><div style="padding-top:280px">${matchupHTML(LSF, 6)}</div></div>
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 8px 0;">
-        <div class="champion-box"><div class="pts">+160 pts</div><h3>🏆 Champion</h3><div class="champion-name">${champ||'TBD'}</div></div>
-        <div class="final-box"><div class="pts">+80 pts</div><h4>Final</h4><div class="bracket-matchup" style="margin:4px 0">
-          <div class="bracket-team ${final1?'':'empty'}">${final1?`<img src="${flag(final1)}" onerror="this.style.display='none'">${final1}`:'TBD'}</div>
-          <div class="bracket-team ${final2?'':'empty'}">${final2?`<img src="${flag(final2)}" onerror="this.style.display='none'">${final2}`:'TBD'}</div>
-        </div></div>
-        <div class="final-box"><div class="pts">+20 pts</div><h4>3rd Place</h4><div class="bracket-matchup" style="margin:4px 0">
-          <div class="bracket-team ${third1?'':'empty'}">${third1?`<img src="${flag(third1)}" onerror="this.style.display='none'">${third1}`:'TBD'}</div>
-          <div class="bracket-team ${third2?'':'empty'}">${third2?`<img src="${flag(third2)}" onerror="this.style.display='none'">${third2}`:'TBD'}</div>
-        </div></div>
-      </div>
-      <div><div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div><div style="padding-top:280px">${matchupHTML(RSF, 10)}</div></div>
-      <div><div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div><div style="padding-top:120px">${matchupHTML(RQF, 12)}</div></div>
-      <div><div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div><div style="padding-top:40px">${matchupHTML(R16, 14)}</div></div>
-      <div><div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>${matchupHTML(R32, 16)}</div>
-    </div></div>
-    <div class="bracket-mobile">
-      ${mobileRound('Round of 32','+5 pts per win', L32, 0)}
-      ${mobileRound('Round of 16','+10 pts per win', L16, 2)}
-      ${mobileRound('Quarter Finals','+20 pts per win', LQF, 4)}
-      ${mobileRound('Semi Finals','+40 pts per win', LSF, 6)}
-      <div class="bracket-round"><div class="bracket-round-title">Final & 3rd Place</div><div class="bracket-round-pts">+80 pts / +20 pts</div>
-        <div class="bracket-round-matches">
-          <div class="bracket-matchup">
-            <div class="bracket-team ${final1?'':'empty'}">${final1?`<img src="${flag(final1)}" onerror="this.style.display='none'">${final1}`:'TBD'}</div>
-            <div class="bracket-team ${final2?'':'empty'}">${final2?`<img src="${flag(final2)}" onerror="this.style.display='none'">${final2}`:'TBD'}</div>
-          </div>
-          <div class="bracket-matchup">
-            <div class="bracket-team ${third1?'':'empty'}">${third1?`<img src="${flag(third1)}" onerror="this.style.display='none'">${third1}`:'TBD'}</div>
-            <div class="bracket-team ${third2?'':'empty'}">${third2?`<img src="${flag(third2)}" onerror="this.style.display='none'">${third2}`:'TBD'}</div>
-          </div>
+    <div class="bracket-scroll bracket-desktop">
+    <div style="display:grid;grid-template-columns:repeat(9,1fr);min-width:1100px;gap:6px;align-items:start;">
+      <div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>
+      <div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div>
+      <div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div>
+      <div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div>
+      <div class="bracket-col-label" style="text-align:center"><h4>Champion</h4><span>+160 pts</span></div>
+      <div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div>
+      <div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div>
+      <div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div>
+      <div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>
+
+      <div>${colMatches(L32r,'A',8)}</div>
+      <div style="padding-top:44px">${colMatches(L16r,'C',88)}</div>
+      <div style="padding-top:132px">${colMatches(LQFr,'E',264)}</div>
+      <div style="padding-top:308px">${matchCard(team(LSFr[0][0],'G'),team(LSFr[0][1],'G'))}</div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:0">
+        <div class="champion-box" style="text-align:center;width:100%">
+          <div class="pts">+160 pts</div>
+          <h3>🏆</h3>
+          <div class="champion-name">${champ||'TBD'}</div>
+        </div>
+        <div class="final-box" style="width:100%">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--gold);letter-spacing:1px;text-align:center;margin-bottom:4px">FINAL +80 pts</div>
+          ${matchCard(final1,final2)}
+        </div>
+        <div style="height:160px"></div>
+        <div class="final-box" style="width:100%">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:1px;text-align:center;margin-bottom:4px">3RD PLACE PLAYOFF</div>
+          ${matchCard(playoff1,playoff2)}
+        </div>
+        <div class="final-box" style="width:100%">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--gold);letter-spacing:1px;text-align:center;margin-bottom:4px">3RD PLACE +20 pts</div>
+          <div class="bracket-matchup">${third?`<div class="bracket-team clickable-country" onclick="openCountryPage('${third.replace(/'/g,"\\'")}',event)">${wrapFlagElim(`<img src="${flag(third)}" onerror="this.style.display='none'">`,third,20)}${third}</div>`:`<div class="bracket-team empty">TBD</div>`}</div>
         </div>
       </div>
+
+      <div style="padding-top:308px">${matchCard(team(RSFr[0][0],'K'),team(RSFr[0][1],'K'))}</div>
+      <div style="padding-top:132px">${colMatches(RQFr,'M',264)}</div>
+      <div style="padding-top:44px">${colMatches(R16r,'O',88)}</div>
+      <div>${colMatches(R32r,'Q',8)}</div>
+    </div></div>
+
+    <div class="bracket-mobile">
+      <div class="bracket-round"><div class="bracket-round-title">Round of 32</div><div class="bracket-round-pts">+5 pts</div><div class="bracket-round-matches">${colMatches(L32r,'A')}${colMatches(R32r,'Q')}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Round of 16</div><div class="bracket-round-pts">+10 pts</div><div class="bracket-round-matches">${colMatches(L16r,'C')}${colMatches(R16r,'O')}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Quarter Finals</div><div class="bracket-round-pts">+20 pts</div><div class="bracket-round-matches">${colMatches(LQFr,'E')}${colMatches(RQFr,'M')}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Semi Finals</div><div class="bracket-round-pts">+40 pts</div><div class="bracket-round-matches">${matchCard(team(LSFr[0][0],'G'),team(LSFr[0][1],'G'))}${matchCard(team(RSFr[0][0],'K'),team(RSFr[0][1],'K'))}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${matchCard(playoff1,playoff2)}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${matchCard(final1,final2)}</div></div>
       <div class="champion-box" style="text-align:center;margin-top:8px"><div class="pts">+160 pts</div><h3>🏆 Champion</h3><div class="champion-name">${champ||'TBD'}</div></div>
     </div>`;
 
@@ -1283,6 +1300,7 @@ async function loadBracket() {
     el.innerHTML = `<div class="error">⚠ Could not load bracket data.</div>`;
   }
 }
+
 
 // EXTENDED LEADERBOARD (PLAYER PICKS)
 const COLORS = ['#E74C3C','#E67E22','#F1C40F','#2ECC71','#1ABC9C','#3498DB','#9B59B6','#E91E63','#00BCD4','#FF5722','#8BC34A','#FF9800','#607D8B','#795548','#673AB7','#F06292','#4DB6AC','#FFB74D','#A1887F','#90A4AE','#EF5350','#AB47BC','#42A5F5','#26C6DA','#D4E157','#FF7043','#8D6E63','#78909C','#26A69A','#FFA726'];
