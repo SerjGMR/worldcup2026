@@ -1438,6 +1438,11 @@ function buildCard(p, i) {
 }
 
 function renderPicks() {
+  // If LB_ORDER not loaded yet, wait for leaderboard first then render
+  if (Object.keys(LB_ORDER).length === 0) {
+    loadLeaderboard().then(() => renderPicks());
+    return;
+  }
   const sorted = [...PLAYERS].sort((a, b) => {
     const ra = LB_ORDER[a.name.toLowerCase()]?.rank ?? 999;
     const rb = LB_ORDER[b.name.toLowerCase()]?.rank ?? 999;
