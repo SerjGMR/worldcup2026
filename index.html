@@ -92,12 +92,12 @@
   .lb-table tbody tr:hover { background: rgba(245,197,24,0.03); }
   .lb-table tbody tr:last-child { border-bottom: none; }
   .lb-table tbody td { padding: 16px 20px; vertical-align: middle; }
-  .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--muted); }
+  .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--text); }
   .lb-rank.r1 { color: #F5C518; } .lb-rank.r2 { color: #C0C0C0; } .lb-rank.r3 { color: #CD7F32; }
-  .lb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; display: inline; vertical-align: middle; }
-  .lb-pts { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--gold); }
-  .lb-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; color: var(--muted); }
-  .lb-prize { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--green); }
+  .lb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; display: inline; vertical-align: middle; }
+  .lb-pts { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--gold); }
+  .lb-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; color: var(--text); }
+  .lb-prize { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
 
   /* MATCHES */
   .matches-container { display: flex; flex-direction: column; gap: 0; }
@@ -739,7 +739,8 @@ async function loadLeaderboard() {
       const name = (row[3]||'').trim().toLowerCase();
       const rank = parseInt(row[2])||99;
       const pts = parseFloat(row[5])||0;
-      if (name) LB_ORDER[name] = { rank, pts };
+      const teamsIn = row[4]||'—';
+      if (name) LB_ORDER[name] = { rank, pts, teamsIn };
     });
   } catch(e) {
     document.getElementById('lb-content').innerHTML = `<div class="error">⚠ Could not load leaderboard.</div>`;
@@ -1622,7 +1623,7 @@ async function openPlayerPage(playerName, e) {
         </div>
         <div class="stat-card">
           <div class="stat-card-label">Teams In</div>
-          <div class="stat-card-value white">${probs.teamsIn || '—'}</div>
+          <div class="stat-card-value white">${lb.teamsIn || probs.teamsIn || '—'}</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-label">Win Chance</div>
