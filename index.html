@@ -747,126 +747,126 @@ async function loadLeaderboard() {
   }
 }
 
-// MATCH TIMES - stored as UTC ISO strings
+// MATCH TIMES - verified from CBS Sports, NBC Sports, Yahoo Sports (ET = UTC-4)
 const MATCH_TIMES = {
   // MATCHDAY 1
-  "mexico_south africa":            "2026-06-11T19:00:00Z",
-  "south korea_czechia":            "2026-06-12T02:00:00Z",
-  "canada_bosnia-herzegovina":      "2026-06-12T19:00:00Z",
-  "united states_paraguay":         "2026-06-13T01:00:00Z",
-  "qatar_switzerland":              "2026-06-13T19:00:00Z",
-  "brazil_morocco":                 "2026-06-13T22:00:00Z",
-  "haiti_scotland":                 "2026-06-14T01:00:00Z",
-  "australia_turkey":               "2026-06-14T04:00:00Z",
-  "germany_curacao":                "2026-06-14T17:00:00Z",
-  "netherlands_japan":              "2026-06-14T20:00:00Z",
-  "ivory coast_ecuador":            "2026-06-14T23:00:00Z",
-  "sweden_tunisia":                 "2026-06-15T02:00:00Z",
-  "spain_cape verde":               "2026-06-15T16:00:00Z",
-  "belgium_egypt":                  "2026-06-15T19:00:00Z",
-  "saudi arabia_uruguay":           "2026-06-15T22:00:00Z",
-  "iran_new zealand":               "2026-06-16T01:00:00Z",
-  "france_senegal":                 "2026-06-16T19:00:00Z",
-  "iraq_norway":                    "2026-06-16T22:00:00Z",
-  "argentina_algeria":              "2026-06-17T01:00:00Z",
-  "austria_jordan":                 "2026-06-17T04:00:00Z",
-  "portugal_congo dr":              "2026-06-17T17:00:00Z",
-  "england_croatia":                "2026-06-17T20:00:00Z",
-  "ghana_panama":                   "2026-06-17T23:00:00Z",
-  "uzbekistan_colombia":            "2026-06-18T02:00:00Z",
+  'mexico_south africa':            '2026-06-11T19:00:00Z', // 3pm ET
+  'south korea_czechia':            '2026-06-12T02:00:00Z', // 10pm ET Jun 11
+  'canada_bosnia-herzegovina':      '2026-06-12T19:00:00Z', // 3pm ET
+  'united states_paraguay':         '2026-06-13T01:00:00Z', // 9pm ET Jun 12
+  'qatar_switzerland':              '2026-06-13T19:00:00Z', // 3pm ET
+  'brazil_morocco':                 '2026-06-13T22:00:00Z', // 6pm ET
+  'haiti_scotland':                 '2026-06-14T01:00:00Z', // 9pm ET Jun 13
+  'australia_turkey':               '2026-06-14T04:00:00Z', // 12am ET
+  'germany_curacao':                '2026-06-14T19:00:00Z', // 3pm ET
+  'netherlands_japan':              '2026-06-14T20:00:00Z', // 4pm ET
+  'ivory coast_ecuador':            '2026-06-14T23:00:00Z', // 7pm ET
+  'sweden_tunisia':                 '2026-06-15T02:00:00Z', // 10pm ET Jun 14
+  'spain_cape verde':               '2026-06-15T16:00:00Z', // 12pm ET
+  'belgium_egypt':                  '2026-06-15T19:00:00Z', // 3pm ET
+  'saudi arabia_uruguay':           '2026-06-15T22:00:00Z', // 6pm ET
+  'iran_new zealand':               '2026-06-16T01:00:00Z', // 9pm ET Jun 15
+  'france_senegal':                 '2026-06-16T19:00:00Z', // 3pm ET
+  'iraq_norway':                    '2026-06-16T22:00:00Z', // 6pm ET
+  'argentina_algeria':              '2026-06-17T01:00:00Z', // 9pm ET Jun 16
+  'austria_jordan':                 '2026-06-17T04:00:00Z', // 12am ET Jun 17
+  'portugal_congo dr':              '2026-06-17T17:00:00Z', // 1pm ET
+  'england_croatia':                '2026-06-17T20:00:00Z', // 4pm ET
+  'ghana_panama':                   '2026-06-17T23:00:00Z', // 7pm ET
+  'uzbekistan_colombia':            '2026-06-18T02:00:00Z', // 10pm ET Jun 17
 
   // MATCHDAY 2
-  "south africa_czechia":           "2026-06-18T16:00:00Z",
-  "switzerland_bosnia-herzegovina": "2026-06-18T19:00:00Z",
-  "canada_qatar":                   "2026-06-18T23:00:00Z",
-  "mexico_south korea":             "2026-06-19T02:00:00Z",
-  "united states_australia":        "2026-06-19T19:00:00Z",
-  "scotland_morocco":               "2026-06-19T22:00:00Z",
-  "brazil_haiti":                   "2026-06-20T01:00:00Z",
-  "turkey_paraguay":                "2026-06-20T04:00:00Z",
-  "netherlands_sweden":             "2026-06-20T17:00:00Z",
-  "germany_ivory coast":            "2026-06-20T20:00:00Z",
-  "ecuador_curacao":                "2026-06-21T00:00:00Z",
-  "tunisia_japan":                  "2026-06-21T02:00:00Z",
-  "spain_saudi arabia":             "2026-06-21T16:00:00Z",
-  "belgium_iran":                   "2026-06-21T19:00:00Z",
-  "uruguay_cape verde":             "2026-06-21T22:00:00Z",
-  "new zealand_egypt":              "2026-06-22T01:00:00Z",
-  "argentina_austria":              "2026-06-22T17:00:00Z",
-  "france_iraq":                    "2026-06-22T21:00:00Z",
-  "norway_senegal":                 "2026-06-23T00:00:00Z",
-  "jordan_algeria":                 "2026-06-23T03:00:00Z",
-  "portugal_uzbekistan":            "2026-06-23T17:00:00Z",
-  "england_ghana":                  "2026-06-23T20:00:00Z",
-  "panama_croatia":                 "2026-06-23T23:00:00Z",
-  "colombia_congo dr":              "2026-06-24T02:00:00Z",
+  'czechia_south africa':           '2026-06-18T16:00:00Z', // 12pm ET
+  'mexico_south korea':             '2026-06-19T01:00:00Z', // 9pm ET Jun 18
+  'switzerland_bosnia-herzegovina': '2026-06-18T19:00:00Z', // 3pm ET
+  'canada_qatar':                   '2026-06-18T22:00:00Z', // 6pm ET
+  'united states_australia':        '2026-06-19T19:00:00Z', // 3pm ET
+  'scotland_morocco':               '2026-06-19T22:00:00Z', // 6pm ET
+  'brazil_haiti':                   '2026-06-19T23:00:00Z', // 7pm ET
+  'turkey_paraguay':                '2026-06-20T02:00:00Z', // 10pm ET Jun 19
+  'netherlands_sweden':             '2026-06-20T17:00:00Z', // 1pm ET
+  'germany_ivory coast':            '2026-06-20T20:00:00Z', // 4pm ET
+  'ecuador_curacao':                '2026-06-21T00:00:00Z', // 8pm ET Jun 20
+  'tunisia_japan':                  '2026-06-21T04:00:00Z', // 12am ET Jun 21
+  'spain_saudi arabia':             '2026-06-21T16:00:00Z', // 12pm ET
+  'belgium_iran':                   '2026-06-21T19:00:00Z', // 3pm ET
+  'uruguay_cape verde':             '2026-06-21T22:00:00Z', // 6pm ET
+  'new zealand_egypt':              '2026-06-22T01:00:00Z', // 9pm ET Jun 21
+  'argentina_austria':              '2026-06-22T17:00:00Z', // 1pm ET
+  'france_iraq':                    '2026-06-22T21:00:00Z', // 5pm ET
+  'norway_senegal':                 '2026-06-23T00:00:00Z', // 8pm ET Jun 22
+  'jordan_algeria':                 '2026-06-23T03:00:00Z', // 11pm ET Jun 22
+  'portugal_uzbekistan':            '2026-06-23T17:00:00Z', // 1pm ET
+  'england_ghana':                  '2026-06-23T20:00:00Z', // 4pm ET
+  'panama_croatia':                 '2026-06-23T23:00:00Z', // 7pm ET
+  'colombia_congo dr':              '2026-06-24T02:00:00Z', // 10pm ET Jun 23
 
   // MATCHDAY 3
-  "czechia_south africa":           "2026-06-24T21:00:00Z",
-  "mexico_south korea":             "2026-06-24T21:00:00Z",
-  "bosnia-herzegovina_switzerland": "2026-06-25T01:00:00Z",
-  "qatar_canada":                   "2026-06-25T01:00:00Z",
-  "australia_haiti":                "2026-06-25T21:00:00Z",
-  "brazil_scotland":                "2026-06-25T21:00:00Z",
-  "morocco_turkey":                 "2026-06-26T01:00:00Z",
-  "new zealand_paraguay":           "2026-06-26T01:00:00Z",
-  "curacao_ivory coast":            "2026-06-26T21:00:00Z",
-  "ecuador_germany":                "2026-06-26T21:00:00Z",
-  "iran_sweden":                    "2026-06-27T01:00:00Z",
-  "japan_netherlands":              "2026-06-27T01:00:00Z",
-  "spain_egypt":                    "2026-06-27T16:00:00Z",
-  "saudi arabia_cape verde":        "2026-06-27T16:00:00Z",
-  "belgium_new zealand":            "2026-06-27T20:00:00Z",
-  "iran_uruguay":                   "2026-06-27T20:00:00Z",
-  "england_panama":                 "2026-06-27T21:00:00Z",
-  "croatia_ghana":                  "2026-06-27T21:00:00Z",
-  "colombia_portugal":              "2026-06-27T23:30:00Z",
-  "congo dr_uzbekistan":            "2026-06-27T23:30:00Z",
-  "algeria_austria":                "2026-06-28T02:00:00Z",
-  "jordan_argentina":               "2026-06-28T02:00:00Z",
-  "france_norway":                  "2026-06-28T19:00:00Z",
-  "senegal_iraq":                   "2026-06-28T19:00:00Z",
+  'switzerland_canada':             '2026-06-24T19:00:00Z', // 3pm ET Jun 24
+  'bosnia-herzegovina_qatar':       '2026-06-24T19:00:00Z', // 3pm ET Jun 24
+  'scotland_brazil':                '2026-06-24T22:00:00Z', // 6pm ET Jun 24
+  'morocco_haiti':                  '2026-06-24T22:00:00Z', // 6pm ET Jun 24
+  'czechia_mexico':                 '2026-06-25T01:00:00Z', // 9pm ET Jun 24
+  'south africa_south korea':       '2026-06-25T01:00:00Z', // 9pm ET Jun 24
+  'ecuador_germany':                '2026-06-25T20:00:00Z', // 4pm ET Jun 25
+  'curacao_ivory coast':            '2026-06-25T20:00:00Z', // 4pm ET Jun 25
+  'japan_sweden':                   '2026-06-25T23:00:00Z', // 7pm ET Jun 25
+  'tunisia_netherlands':            '2026-06-25T23:00:00Z', // 7pm ET Jun 25
+  'turkey_united states':           '2026-06-26T02:00:00Z', // 10pm ET Jun 25
+  'paraguay_australia':             '2026-06-26T02:00:00Z', // 10pm ET Jun 25
+  'norway_france':                  '2026-06-26T19:00:00Z', // 3pm ET Jun 26
+  'senegal_iraq':                   '2026-06-26T19:00:00Z', // 3pm ET Jun 26
+  'cape verde_saudi arabia':        '2026-06-27T00:00:00Z', // 8pm ET Jun 26
+  'uruguay_spain':                  '2026-06-27T00:00:00Z', // 8pm ET Jun 26
+  'egypt_iran':                     '2026-06-27T03:00:00Z', // 11pm ET Jun 26
+  'new zealand_belgium':            '2026-06-27T03:00:00Z', // 11pm ET Jun 26
+  'panama_england':                 '2026-06-27T21:00:00Z', // 5pm ET Jun 27
+  'croatia_ghana':                  '2026-06-27T21:00:00Z', // 5pm ET Jun 27
+  'colombia_portugal':              '2026-06-27T23:30:00Z', // 7:30pm ET Jun 27
+  'congo dr_uzbekistan':            '2026-06-27T23:30:00Z', // 7:30pm ET Jun 27
+  'algeria_austria':                '2026-06-28T02:00:00Z', // 10pm ET Jun 27
+  'jordan_argentina':               '2026-06-28T02:00:00Z', // 10pm ET Jun 27
 };
 
-// KNOCKOUT MATCH TIMES by match number (ET = UTC-4)
+// KNOCKOUT MATCH TIMES by match number - verified from NBC Sports, CBS Sports
 const KNOCKOUT_TIMES = {
   // Round of 32
-  'match 73': '2026-06-28T19:00:00Z', // 3pm ET Jun 28
-  'match 76': '2026-06-29T17:00:00Z', // 1pm ET Jun 29
-  'match 74': '2026-06-29T20:30:00Z', // 4:30pm ET Jun 29
-  'match 75': '2026-06-30T01:00:00Z', // 9pm ET Jun 29
-  'match 78': '2026-06-30T17:00:00Z', // 1pm ET Jun 30
-  'match 77': '2026-06-30T21:00:00Z', // 5pm ET Jun 30
-  'match 79': '2026-07-01T01:00:00Z', // 9pm ET Jun 30
-  'match 80': '2026-07-01T16:00:00Z', // 12pm ET Jul 1
-  'match 82': '2026-07-01T20:00:00Z', // 4pm ET Jul 1
-  'match 81': '2026-07-02T00:00:00Z', // 8pm ET Jul 1
-  'match 83': '2026-07-02T17:00:00Z', // 1pm ET Jul 2
-  'match 84': '2026-07-02T19:00:00Z', // 3pm ET Jul 2  
-  'match 86': '2026-07-02T21:00:00Z', // 5pm ET Jul 2
-  'match 85': '2026-07-03T01:00:00Z', // 9pm ET Jul 2
-  'match 88': '2026-07-03T17:00:00Z', // 1pm ET Jul 3
-  'match 87': '2026-07-03T20:30:00Z', // 4:30pm ET Jul 3
+  'match 73': '2026-06-28T19:00:00Z', // 3pm ET Jun 28 - LA (Runner-up A vs Runner-up B)
+  'match 76': '2026-06-29T17:00:00Z', // 1pm ET Jun 29 - Houston (Winner C vs Runner-up F)
+  'match 74': '2026-06-29T20:30:00Z', // 4:30pm ET Jun 29 - Boston (Winner E vs Best 3rd)
+  'match 75': '2026-06-30T01:00:00Z', // 9pm ET Jun 29 - Monterrey (Winner F vs Runner-up C)
+  'match 78': '2026-06-30T17:00:00Z', // 1pm ET Jun 30 - Dallas (Runner-up E vs Runner-up I)
+  'match 77': '2026-06-30T21:00:00Z', // 5pm ET Jun 30 - New Jersey (Winner I vs Best 3rd)
+  'match 79': '2026-07-01T01:00:00Z', // 9pm ET Jun 30 - Mexico City (Winner A vs Best 3rd)
+  'match 80': '2026-07-01T16:00:00Z', // 12pm ET Jul 1 - Atlanta (Winner L vs Best 3rd)
+  'match 82': '2026-07-01T20:00:00Z', // 4pm ET Jul 1 - Seattle (Winner G vs Best 3rd)
+  'match 81': '2026-07-02T00:00:00Z', // 8pm ET Jul 1 - San Francisco (Winner D vs Best 3rd)
+  'match 84': '2026-07-02T19:00:00Z', // 3pm ET Jul 2 - LA (Winner H vs Runner-up J)
+  'match 83': '2026-07-02T23:00:00Z', // 7pm ET Jul 2 - Toronto (Runner-up K vs Runner-up L)
+  'match 85': '2026-07-03T03:00:00Z', // 11pm ET Jul 2 - Vancouver (Winner B vs Best 3rd)
+  'match 88': '2026-07-03T18:00:00Z', // 2pm ET Jul 3 - Dallas (Runner-up D vs Runner-up G)
+  'match 86': '2026-07-03T22:00:00Z', // 6pm ET Jul 3 - Miami (Winner J vs Runner-up H)
+  'match 87': '2026-07-04T01:30:00Z', // 9:30pm ET Jul 3 - Kansas City (Winner K vs Best 3rd)
   // Round of 16
-  'match 90': '2026-07-04T17:00:00Z', // 1pm ET Jul 4
-  'match 89': '2026-07-04T21:00:00Z', // 5pm ET Jul 4
-  'match 91': '2026-07-05T20:00:00Z', // 4pm ET Jul 5
-  'match 92': '2026-07-06T00:00:00Z', // 8pm ET Jul 5
-  'match 93': '2026-07-06T19:00:00Z', // 3pm ET Jul 6
-  'match 94': '2026-07-07T00:00:00Z', // 8pm ET Jul 6
-  'match 95': '2026-07-07T16:00:00Z', // 12pm ET Jul 7
-  'match 96': '2026-07-07T20:00:00Z', // 4pm ET Jul 7
+  'match 90': '2026-07-04T17:00:00Z', // 1pm ET Jul 4 - Houston
+  'match 89': '2026-07-04T21:00:00Z', // 5pm ET Jul 4 - Philadelphia
+  'match 91': '2026-07-05T20:00:00Z', // 4pm ET Jul 5 - New Jersey
+  'match 92': '2026-07-06T00:00:00Z', // 8pm ET Jul 5 - Mexico City
+  'match 93': '2026-07-06T19:00:00Z', // 3pm ET Jul 6 - Dallas
+  'match 94': '2026-07-07T00:00:00Z', // 8pm ET Jul 6 - Seattle
+  'match 95': '2026-07-07T16:00:00Z', // 12pm ET Jul 7 - Atlanta
+  'match 96': '2026-07-07T20:00:00Z', // 4pm ET Jul 7 - Vancouver
   // Quarter Finals
-  'match 97': '2026-07-09T20:00:00Z', // 4pm ET Jul 9
-  'match 98': '2026-07-10T20:00:00Z', // 4pm ET Jul 10
-  'match 99': '2026-07-10T23:00:00Z', // 7pm ET Jul 10
-  'match 100': '2026-07-11T20:00:00Z', // 4pm ET Jul 11
+  'match 97': '2026-07-09T20:00:00Z', // 4pm ET Jul 9 - Boston
+  'match 98': '2026-07-10T19:00:00Z', // 3pm ET Jul 10 - LA
+  'match 99': '2026-07-11T01:00:00Z', // 9pm ET Jul 10 - Miami/Kansas City
+  'match 100': '2026-07-11T21:00:00Z', // 5pm ET Jul 11
   // Semi Finals
-  'match 101': '2026-07-14T20:00:00Z', // 4pm ET Jul 14
-  'match 102': '2026-07-15T20:00:00Z', // 4pm ET Jul 15
+  'match 101': '2026-07-14T19:00:00Z', // 3pm ET Jul 14
+  'match 102': '2026-07-15T19:00:00Z', // 3pm ET Jul 15
   // 3rd Place & Final
-  'match 103': '2026-07-18T19:00:00Z', // 3pm ET Jul 18
-  'match 104': '2026-07-19T19:00:00Z', // 3pm ET Jul 19
+  'match 103': '2026-07-18T21:00:00Z', // 5pm ET Jul 18
+  'match 104': '2026-07-19T19:00:00Z', // 3pm ET Jul 19 - MetLife Stadium
 };
 
 function getMatchTime(home, away) {
