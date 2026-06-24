@@ -1326,32 +1326,32 @@ let GROUP_STATS = {}; // team name -> { gd, gf, pts }
 
 function getLeadingTeam(playerName) {
   const player = PLAYERS.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-  if (!player) return null;
-  
-  // Use extlb data if available for points per team
+  if (!player || !player.teams.length) return null;
+
   const extTeams = EXTLB_DATA[playerName.toLowerCase()];
-  
   let bestTeam = null, bestPts = -1, bestGD = -999, bestGF = -999;
-  
+
   player.teams.forEach(t => {
-    const pts = extTeams 
-      ? (parseInt(extTeams.find(e => e.team.toLowerCase() === t.toLowerCase())?.total) || 0)
-      : (TEAM_POINTS[t] || 0);
+    let pts;
+    if (extTeams) {
+      const et = extTeams.find(e => e.team.toLowerCase() === t.toLowerCase());
+      pts = et ? (parseInt(et.total) || 0) : (TEAM_POINTS[t] || 0);
+    } else {
+      pts = TEAM_POINTS[t] || 0;
+    }
     const stats = GROUP_STATS[t.toLowerCase()] || { gd: 0, gf: 0 };
-    const gd = stats.gd;
-    const gf = stats.gf;
-    
-    if (pts > bestPts || 
-       (pts === bestPts && gd > bestGD) || 
-       (pts === bestPts && gd === bestGD && gf > bestGF)) {
+
+    if (pts > bestPts ||
+       (pts === bestPts && stats.gd > bestGD) ||
+       (pts === bestPts && stats.gd === bestGD && stats.gf > bestGF)) {
       bestPts = pts;
-      bestGD = gd;
-      bestGF = gf;
+      bestGD = stats.gd;
+      bestGF = stats.gf;
       bestTeam = t;
     }
   });
-  
-  return bestTeam;
+
+  return bestTeam || player.teams[0];
 }
 
 async function loadTeamPoints() {
