@@ -740,6 +740,8 @@ async function loadLeaderboard() {
       const teamsIn = row[4]||'—';
       if (name) LB_ORDER[name] = { rank, pts, teamsIn };
     });
+    // Re-render extended LB if it's visible so sort order is always fresh
+    if (currentLBView === 'picks') renderPicks();
   } catch(e) {
     document.getElementById('lb-content').innerHTML = `<div class="error">⚠ Could not load leaderboard.</div>`;
   }
@@ -1544,7 +1546,7 @@ function switchLBView(view, btn) {
   document.getElementById('lb-view-points').style.display = view === 'points' ? '' : 'none';
   document.getElementById('lb-view-picks').style.display = view === 'picks' ? '' : 'none';
   document.getElementById('lb-view-probs').style.display = view === 'probs' ? '' : 'none';
-  if (view === 'picks' && document.getElementById('picks-grid').children.length === 0) renderPicks();
+  if (view === 'picks') renderPicks(); // always re-render with latest LB_ORDER
   if (view === 'probs' && document.getElementById('probs-content').querySelector('.loading')) loadProbabilities();
 }
 
