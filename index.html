@@ -1692,6 +1692,14 @@ async function openPlayerPage(playerName, e) {
       });
     }
 
+    // Also add knockout matches for this player's teams
+    const knockoutMatches = await getKnockoutMatches();
+    knockoutMatches.forEach(m => {
+      if (playerTeams.includes(m.home.toLowerCase()) || playerTeams.includes(m.away.toLowerCase())) {
+        playerMatches.push({ group: m.group, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
+      }
+    });
+
     if (playerMatches.length) {
       let matchesHTML = '';
       let lastDate = '';
@@ -1744,6 +1752,7 @@ async function openPlayerPage(playerName, e) {
   el.innerHTML = html;
 }
 let ALL_MATCH_ROWS = {};
+let KNOCKOUT_MATCH_ROWS = null;
 
 async function ensureMatchRows(num) {
   if (ALL_MATCH_ROWS[num]) return ALL_MATCH_ROWS[num];
@@ -1751,6 +1760,30 @@ async function ensureMatchRows(num) {
     ALL_MATCH_ROWS[num] = await fetchCSV(GIDS['md'+num]);
   } catch(e) { ALL_MATCH_ROWS[num] = []; }
   return ALL_MATCH_ROWS[num];
+}
+
+async function getKnockoutMatches() {
+  if (KNOCKOUT_MATCH_ROWS) return KNOCKOUT_MATCH_ROWS;
+  try {
+    const rows = await fetchCSV(GIDS.knockouts);
+    // Only include rows where both teams are filled in (col B and E non-empty, not round/date headers)
+    let currentRound = '';
+    let currentDate = '';
+    KNOCKOUT_MATCH_ROWS = [];
+    rows.forEach(row => {
+      const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
+            d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
+      // Round header in col B
+      if (!a && b && /round of|quarter|semi|final|3rd/i.test(b)) { currentRound = b; return; }
+      // Date row in col A
+      if (a && /june|july|august/i.test(a) && !b) { currentDate = a; return; }
+      // Match label row (Match 73 etc) — skip even if teams filled in below
+      if (a && /^match\s+\d+/i.test(a) && b && e) {
+        KNOCKOUT_MATCH_ROWS.push({ group: currentRound, date: currentDate, home: b, away: e, scoreHome: c, scoreAway: d, status: f });
+      }
+    });
+  } catch(e) { KNOCKOUT_MATCH_ROWS = []; }
+  return KNOCKOUT_MATCH_ROWS;
 }
 
 async function openCountryPage(countryName, e) {
@@ -1785,6 +1818,16 @@ async function openCountryPage(countryName, e) {
       }
     });
   }
+
+  // Also check knockout matches
+  const knockoutMatches = await getKnockoutMatches();
+  knockoutMatches.forEach(m => {
+    const isHome = m.home.toLowerCase() === countryName.toLowerCase();
+    const isAway = m.away.toLowerCase() === countryName.toLowerCase();
+    if (isHome || isAway) {
+      allMatches.push({ group: m.group, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
+    }
+  });
 
   // Find full group standings for this country from GROUPS data
   let groupStanding = null;
@@ -2002,6 +2045,7 @@ setInterval(() => {
 setInterval(() => {
   if (document.getElementById('matches').classList.contains('active')) {
     ALL_MATCH_ROWS = {};
+    KNOCKOUT_MATCH_ROWS = null;
     if (currentKnockoutRound) {
       loadKnockoutRound(currentKnockoutRound);
     } else {
