@@ -1696,7 +1696,7 @@ async function openPlayerPage(playerName, e) {
     const knockoutMatches = await getKnockoutMatches();
     knockoutMatches.forEach(m => {
       if (playerTeams.includes(m.home.toLowerCase()) || playerTeams.includes(m.away.toLowerCase())) {
-        playerMatches.push({ group: m.group, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
+        playerMatches.push({ group: m.group || m.matchLabel, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
       }
     });
 
@@ -1721,10 +1721,10 @@ async function openPlayerPage(playerName, e) {
         matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
           <div class="home-side">
             <div class="match-group">${m.group}</div>
-            <div class="match-team-name home" style="${homeIsPlayer?'color:var(--gold)':''}">
+            <div class="match-team-name home" style="${homeIsPlayer?'color:var(--gold)':m.home==='TBD'?'color:var(--muted)':''}">
               ${homeIsPlayer ? playerAvatar(playerName, 24) : ''}
               <span>${m.home}</span>
-              <img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">
+              ${m.home==='TBD'?`<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`:`<img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">`}
             </div>
           </div>
           <div class="match-score-wrap">
@@ -1733,8 +1733,8 @@ async function openPlayerPage(playerName, e) {
           </div>
           <div class="away-side">
             <div class="match-group"></div>
-            <div class="match-team-name" style="${awayIsPlayer?'color:var(--gold)':''}">
-              <img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">
+            <div class="match-team-name" style="${awayIsPlayer?'color:var(--gold)':m.away==='TBD'?'color:var(--muted)':''}">
+              ${m.away==='TBD'?`<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`:`<img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">`}
               <span>${m.away}</span>
               ${awayIsPlayer ? playerAvatar(playerName, 24) : ''}
             </div>
@@ -1777,9 +1777,9 @@ async function getKnockoutMatches() {
       if (!a && b && /round of|quarter|semi|final|3rd/i.test(b)) { currentRound = b; return; }
       // Date row in col A
       if (a && /june|july|august/i.test(a) && !b) { currentDate = a; return; }
-      // Match label row (Match 73 etc) — skip even if teams filled in below
-      if (a && /^match\s+\d+/i.test(a) && b && e) {
-        KNOCKOUT_MATCH_ROWS.push({ group: currentRound, date: currentDate, home: b, away: e, scoreHome: c, scoreAway: d, status: f });
+      // Match label row (Match 73 etc) — show if at least one team is filled in
+      if (a && /^match\s+\d+/i.test(a) && (b || e)) {
+        KNOCKOUT_MATCH_ROWS.push({ group: currentRound, date: currentDate, matchLabel: a, home: b||'TBD', away: e||'TBD', scoreHome: c, scoreAway: d, status: f });
       }
     });
   } catch(e) { KNOCKOUT_MATCH_ROWS = []; }
@@ -1825,7 +1825,7 @@ async function openCountryPage(countryName, e) {
     const isHome = m.home.toLowerCase() === countryName.toLowerCase();
     const isAway = m.away.toLowerCase() === countryName.toLowerCase();
     if (isHome || isAway) {
-      allMatches.push({ group: m.group, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
+      allMatches.push({ group: m.group || m.matchLabel, date: m.date, home: m.home, away: m.away, scoreHome: m.scoreHome, scoreAway: m.scoreAway, status: m.status });
     }
   });
 
@@ -1892,7 +1892,7 @@ async function openCountryPage(countryName, e) {
       matchesHTML += `<div class="match-card" onclick="togglePicker('${uid}')">
         <div class="home-side">
           <div class="match-group">${m.group}</div>
-          <div class="match-team-name home"><span>${m.home}</span>${wrapFlagElim(`<img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">`, m.home, 24)}</div>
+          <div class="match-team-name home"><span style="${m.home==='TBD'?'color:var(--muted)':''}">${m.home}</span>${m.home==='TBD'?`<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`:wrapFlagElim(`<img class="match-team-flag" src="${flag(m.home)}" onerror="this.style.display='none'">`, m.home, 24)}</div>
         </div>
         <div class="match-score-wrap">
           <div class="match-score"><span class="s">${hasScore?m.scoreHome:'–'}</span><span class="sep">:</span><span class="s">${hasScore?m.scoreAway:'–'}</span></div>
@@ -1900,7 +1900,7 @@ async function openCountryPage(countryName, e) {
         </div>
         <div class="away-side">
           <div class="match-group"></div>
-          <div class="match-team-name">${wrapFlagElim(`<img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">`, m.away, 24)}<span>${m.away}</span></div>
+          <div class="match-team-name">${m.away==='TBD'?`<div style="width:24px;height:16px;background:var(--border);border-radius:2px;opacity:0.4"></div>`:wrapFlagElim(`<img class="match-team-flag" src="${flag(m.away)}" onerror="this.style.display='none'">`, m.away, 24)}<span style="${m.away==='TBD'?'color:var(--muted)':''}">${m.away}</span></div>
         </div>
         <div class="match-picker" id="picker-${uid}" style="grid-column:1/-1">
           <div class="picker-col"><h5><img src="${flag(m.home)}" onerror="this.style.display='none'">${m.home}</h5>${pickerRows(homePickers)}</div>
