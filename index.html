@@ -718,14 +718,11 @@ async function loadLeaderboard() {
         return teams;
       }) : [];
       const liveHTML = liveTeams.length ? `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px;vertical-align:middle;flex-wrap:nowrap">${liveTeams.map(t => `<span style="display:inline-flex;align-items:center;gap:2px"><span style="width:5px;height:5px;background:#e44;border-radius:50%;display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0"></span><img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'"></span>`).join('')}</span>` : '';
-      const leadingTeam = getLeadingTeam(name);
-      const leadingFlag = leadingTeam ? `<span class="clickable-country" onclick="openCountryPage('${leadingTeam.replace(/'/g,"\\'")}',event)" title="${leadingTeam}"><img src="${flag(leadingTeam)}" style="width:28px;height:19px;object-fit:cover;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,0.4)" onerror="this.style.display='none'"></span>` : '—';
       const movement = getRankMovement(name, rankNum);
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span>${movement}</td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
         <td style="white-space:nowrap;vertical-align:middle"><span style="display:inline-flex;align-items:center;gap:0"><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${liveHTML}</span></td>
-        <td>${leadingFlag}</td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td><span class="lb-pts">${pts}</span></td>
         <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${gdColor}">${gdDisplay}</span></td>
