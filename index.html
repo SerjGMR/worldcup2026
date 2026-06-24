@@ -695,7 +695,7 @@ async function loadLeaderboard() {
     const rows = await fetchCSV(GIDS.leaderboard);
     const data = rows.slice(2).filter(r => r[3] && r[3].trim());
     let html = `<div class="lb-wrap"><table class="lb-table">
-      <thead><tr><th>#</th><th></th><th>Player</th><th>Teams In</th><th>Points</th><th>GD</th><th>Prize</th></tr></thead><tbody>`;
+      <thead><tr><th>#</th><th></th><th>Player</th><th>⭐</th><th>Teams In</th><th>Points</th><th>GD</th><th>Prize</th></tr></thead><tbody>`;
     data.forEach((row) => {
       const sheetRank = row[2]||'—';
       const rankNum = parseInt(sheetRank)||99;
@@ -1120,6 +1120,7 @@ async function loadGroups() {
           const g = currentGroups[offset];
           if (g && cell) {
             groups[g].push({ name: cell, mp: row[offset+1]||'0', w: row[offset+2]||'0', d: row[offset+3]||'0', l: row[offset+4]||'0', gf: row[offset+5]||'0', ga: row[offset+6]||'0', gd: row[offset+7]||'0', pts: row[offset+8]||'0' });
+            GROUP_STATS[cell.toLowerCase()] = { gd: parseInt(row[offset+7])||0, gf: parseInt(row[offset+5])||0, pts: parseInt(row[offset+8])||0 };
           }
         }
       });
@@ -1321,6 +1322,37 @@ const PLAYERS = [
 
 let TEAM_POINTS = {};
 let LB_ORDER = {};
+let GROUP_STATS = {}; // team name -> { gd, gf, pts }
+
+function getLeadingTeam(playerName) {
+  const player = PLAYERS.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+  if (!player) return null;
+  
+  // Use extlb data if available for points per team
+  const extTeams = EXTLB_DATA[playerName.toLowerCase()];
+  
+  let bestTeam = null, bestPts = -1, bestGD = -999, bestGF = -999;
+  
+  player.teams.forEach(t => {
+    const pts = extTeams 
+      ? (parseInt(extTeams.find(e => e.team.toLowerCase() === t.toLowerCase())?.total) || 0)
+      : (TEAM_POINTS[t] || 0);
+    const stats = GROUP_STATS[t.toLowerCase()] || { gd: 0, gf: 0 };
+    const gd = stats.gd;
+    const gf = stats.gf;
+    
+    if (pts > bestPts || 
+       (pts === bestPts && gd > bestGD) || 
+       (pts === bestPts && gd === bestGD && gf > bestGF)) {
+      bestPts = pts;
+      bestGD = gd;
+      bestGF = gf;
+      bestTeam = t;
+    }
+  });
+  
+  return bestTeam;
+}
 
 async function loadTeamPoints() {
   try {
@@ -1629,6 +1661,12 @@ async function openPlayerPage(playerName, e) {
           <div class="stat-card-label">Win Chance</div>
           <div class="stat-card-value" style="font-size:22px">${probs.winChance || '—'}</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Leading Team</div>
+          <div class="stat-card-value white" style="font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px">
+            ${(() => { const lt = getLeadingTeam(playerName); return lt ? `<img src="${flag(lt)}" style="width:32px;height:21px;object-fit:cover;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,0.4)" onerror="this.style.display='none'"><span>${lt}</span>` : '—'; })()}
+          </div>
+        </div>
       </div>
     </div>
     ${teamsSection}`;
@@ -1930,7 +1968,23 @@ Promise.all([
   loadTeamPoints(),
   loadProbsData(),
   loadExtLBData(),
-  updateLiveTicker()
+  updateLiveTicker(),
+  // Silently preload group stats for Leading Team calculation
+  fetchCSV(GIDS.groups).then(rows => {
+    const groupCols = [0, 10, 20];
+    rows.forEach(row => {
+      groupCols.forEach(offset => {
+        const cell = (row[offset]||'').trim();
+        if (cell && !/^group\s+[a-z]/i.test(cell) && !/^mp$|^w$|^d$|^l$|^gf$|^ga$|^gd$|^pts$/i.test(cell)) {
+          GROUP_STATS[cell.toLowerCase()] = {
+            gd: parseInt(row[offset+7])||0,
+            gf: parseInt(row[offset+5])||0,
+            pts: parseInt(row[offset+8])||0
+          };
+        }
+      });
+    });
+  }).catch(() => {})
 ]).then(finishInit).catch(finishInit);
 // Safety net: never let the page hang on the loading spinner more than 8 seconds
 setTimeout(finishInit, 8000);
