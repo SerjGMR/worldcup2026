@@ -751,7 +751,8 @@ async function loadLeaderboard() {
     // Re-render extended LB if it's visible so sort order is always fresh
     if (currentLBView === 'picks') renderPicks();
   } catch(e) {
-    document.getElementById('lb-content').innerHTML = `<div class="error">⚠ Could not load leaderboard.</div>`;
+    console.error('Leaderboard error:', e);
+    document.getElementById('lb-content').innerHTML = `<div class="error">⚠ Could not load leaderboard. ${e.message}</div>`;
   }
 }
 
