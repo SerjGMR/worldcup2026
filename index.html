@@ -1181,8 +1181,8 @@ async function loadProbabilities() {
       const barWidth = Math.min(Math.round(pct), 100); // actual percentage
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
-        <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
-        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${elimBadge}</td>
+        <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44, pct===0)}</td>
+        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td>
           <span class="prob-pct">${winChance}</span>
