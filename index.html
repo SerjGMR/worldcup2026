@@ -1172,8 +1172,13 @@ async function loadProbabilities() {
       const barWidth = maxPct > 0 ? Math.round((pct/maxPct)*100) : 0;
       html += `<tr>
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
+      const isElim = pct === 0;
+      const rowStyle = isElim ? 'opacity:0.5' : '';
+      const elimBadge = isElim ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--red);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:1px;margin-left:8px;vertical-align:middle">OUT</span>` : '';
+      html += `<tr style="${rowStyle}">
+        <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
-        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span></td>
+        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${name}</span>${elimBadge}</td>
         <td><span class="lb-teams">${teamsIn}</span></td>
         <td>
           <span class="prob-pct">${winChance}</span>
