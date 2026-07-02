@@ -1170,11 +1170,9 @@ async function loadProbabilities() {
       const prize = row[7]||'';
       const pct = parseFloat(winChance.replace('%',''))||0;
       const barWidth = maxPct > 0 ? Math.round((pct/maxPct)*100) : 0;
-      html += `<tr>
-        <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
       const isElim = pct === 0;
       const rowStyle = isElim ? 'opacity:0.5' : '';
-      const elimBadge = isElim ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;background:var(--red);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:1px;margin-left:8px;vertical-align:middle">OUT</span>` : '';
+      const elimBadge = isElim ? '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;background:var(--red);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:1px;margin-left:8px;vertical-align:middle">OUT</span>' : '';
       html += `<tr style="${rowStyle}">
         <td><span class="lb-rank ${rc}">${sheetRank}</span></td>
         <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${name.replace(/'/g,"\\'")}',event)">${playerAvatar(name, 44)}</td>
