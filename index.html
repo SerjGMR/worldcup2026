@@ -369,8 +369,8 @@
     <nav>
       <button class="active" onclick="showSection('leaderboard',this)">Leaderboard</button>
       <button onclick="showSection('matches',this)">Matches</button>
-      <button onclick="showSection('groups',this)">Groups</button>
       <button onclick="showSection('bracket',this)">Bracket</button>
+      <button onclick="showSection('groups',this)">Groups</button>
       <button onclick="showSection('search',this)">Search</button>
     </nav>
   </div>
@@ -387,7 +387,7 @@
 <!-- GROUP STAGE PROGRESS BAR -->
 <div id="progress-bar-wrap" style="background:var(--mid);border-bottom:1px solid var(--border);padding:7px 0;">
   <div style="max-width:1300px;margin:0 auto;padding:0 40px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0" id="progress-label">Group Stage</span>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0" id="progress-label">Tournament</span>
     <div style="flex:1;min-width:120px;background:var(--border);border-radius:4px;height:5px;overflow:hidden;">
       <div id="progress-fill" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width 0.6s ease;"></div>
     </div>
@@ -424,8 +424,8 @@
     <div class="sub-tabs">
       <button class="sub-tab" onclick="loadMatchday(1,this)">Matchday 1</button>
       <button class="sub-tab" onclick="loadMatchday(2,this)">Matchday 2</button>
-      <button class="sub-tab active" onclick="loadMatchday(3,this)">Matchday 3</button>
-      <button class="sub-tab" id="knockouts-btn" onclick="toggleKnockouts(this)">Knockouts ▾</button>
+      <button class="sub-tab" onclick="loadMatchday(3,this)">Matchday 3</button>
+      <button class="sub-tab active" id="knockouts-btn" onclick="toggleKnockouts(this)">Knockouts ▾</button>
     </div>
     <div id="knockout-sub-tabs" style="display:none;margin-bottom:16px;">
       <div class="sub-tabs" style="margin-bottom:0;padding-left:16px;border-left:3px solid var(--gold);">
@@ -572,11 +572,13 @@ async function fetchCSV(gid) {
 let LIVE_MATCHES = []; // [{home, away, scoreHome, scoreAway}]
 
 // GROUP STAGE PROGRESS BAR
-const TOTAL_GROUP_MATCHES = 72;
+const TOTAL_MATCHES = 104; // 72 group stage + 32 knockout
 
 async function updateProgressBar() {
   try {
     let played = 0, live = 0;
+
+    // Count group stage matches
     for (let md = 1; md <= 3; md++) {
       const rows = await fetchCSV(GIDS['md'+md]);
       rows.forEach(row => {
@@ -588,16 +590,37 @@ async function updateProgressBar() {
         }
       });
     }
-    const pct = Math.round((played / TOTAL_GROUP_MATCHES) * 100);
+
+    // Count knockout matches
+    try {
+      const kRows = await fetchCSV(GIDS.knockouts);
+      kRows.forEach(row => {
+        const a=(row[0]||'').trim(), b=(row[1]||'').trim(), c=(row[2]||'').trim(),
+              d=(row[3]||'').trim(), e=(row[4]||'').trim(), f=(row[5]||'').trim();
+        if (/^match\s+\d+/i.test(a) && b && e) {
+          if (c !== '' || d !== '') played++;
+          if (f && f.trim() !== '') live++;
+        }
+      });
+    } catch(e) {}
+
+    const pct = Math.round((played / TOTAL_MATCHES) * 100);
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('progress-pct').textContent = pct + '%';
-    const matchday = played < 24 ? 1 : played < 48 ? 2 : 3;
-    const detail = `Matchday ${matchday} · ${played}/${TOTAL_GROUP_MATCHES} played${live > 0 ? ` · ${live} live` : ''}`;
-    document.getElementById('progress-detail').textContent = detail;
-    if (played >= TOTAL_GROUP_MATCHES) {
-      document.getElementById('progress-label').textContent = 'Group Stage Complete';
-      document.getElementById('progress-label').style.color = 'var(--gold)';
-    }
+
+    // Determine stage
+    let stage = '';
+    if (played < 72) stage = `Group Stage · ${played}/72 played`;
+    else if (played < 88) stage = `Round of 32 · ${played - 72}/16 played`;
+    else if (played < 96) stage = `Round of 16 · ${played - 88}/8 played`;
+    else if (played < 100) stage = `Quarter Finals · ${played - 96}/4 played`;
+    else if (played < 102) stage = `Semi Finals · ${played - 100}/2 played`;
+    else if (played < 104) stage = `Final & 3rd Place · ${played - 102}/2 played`;
+    else stage = 'Tournament Complete';
+
+    document.getElementById('progress-detail').textContent = stage + (live > 0 ? ` · ${live} live` : '');
+    document.getElementById('progress-label').textContent = `${pct}%`;
+    document.getElementById('progress-label').style.color = played >= TOTAL_MATCHES ? 'var(--gold)' : 'var(--muted)';
   } catch(e) { console.warn('Progress bar error', e); }
 }
 
@@ -914,6 +937,18 @@ function formatMatchTime(utcString) {
   const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
   return timeStr;
 }
+function openDefaultMatches() {
+  // Default to Knockouts > Round of 16
+  const knockoutsBtn = document.getElementById('knockouts-btn');
+  const subTabs = document.getElementById('knockout-sub-tabs');
+  subTabs.style.display = 'block';
+  knockoutsBtn.textContent = 'Knockouts ▴';
+  knockoutsBtn.classList.add('active');
+  document.querySelectorAll('.sub-tabs:first-of-type .sub-tab').forEach(b => b.classList.remove('active'));
+  const ro16Btn = document.querySelector('#knockout-sub-tabs .sub-tab:nth-child(2)');
+  loadKnockoutRound('Round of 16', ro16Btn);
+}
+
 function toggleKnockouts(btn) {
   const subTabs = document.getElementById('knockout-sub-tabs');
   const isOpen = subTabs.style.display !== 'none';
@@ -1633,7 +1668,7 @@ function showSection(id, btn) {
 }
 function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
-  else if (id==='matches') loadMatchday(3);
+  else if (id==='matches') openDefaultMatches();
   else if (id==='groups') loadGroups();
   else if (id==='bracket') loadBracket();
   // search has no data to load
