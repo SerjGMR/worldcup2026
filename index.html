@@ -1223,6 +1223,8 @@ async function loadBracket() {
   const el = document.getElementById('bracket-content');
   try {
     const rows = await fetchCSV(GIDS.bracket);
+    console.log('Bracket CSV rows 0-10:', rows.slice(0,10).map((r,i) => i + ': ' + JSON.stringify(r.slice(0,3))));
+    console.log('Row 7 (sheet row 8):', JSON.stringify(rows[7]));
     const CI = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
 
     // Read a specific cell — no filtering, show exactly what is there
