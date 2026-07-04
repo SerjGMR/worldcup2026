@@ -1223,15 +1223,13 @@ async function loadBracket() {
   const el = document.getElementById('bracket-content');
   try {
     const rows = await fetchCSV(GIDS.bracket);
-
     const CI = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
 
+    // Read a specific cell — no filtering, show exactly what is there
     const cell = (col, row) => {
       const rowData = rows[row - 1];
       if (!rowData) return '';
-      const val = (rowData[CI[col]] || '').trim();
-      // Filter out header/label text
-      return val && !/^\+\d|^round of|^semi final|^quarter final|^3rd place|^champion|^bracket|^knockout/i.test(val) ? val : '';
+      return (rowData[CI[col]] || '').trim();
     };
 
     const mkTeam = (t) => t
@@ -1241,28 +1239,9 @@ async function loadBracket() {
         </div>`
       : `<div class="bk-team empty"><span>TBD</span></div>`;
 
-    const mkMatch = (col, r1, r2) => `<div class="bk-match">${mkTeam(cell(col,r1))}${mkTeam(cell(col,r2))}</div>`;
-    const mkMatchDirect = (t1, t2) => `<div class="bk-match">${mkTeam(t1)}${mkTeam(t2)}</div>`;
+    const mkMatch = (t1, t2) => `<div class="bk-match">${mkTeam(t1)}${mkTeam(t2)}</div>`;
 
-    const L32 = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
-    const L16 = [[10,11],[18,19],[26,27],[34,35]];
-    const LQF = [[14,15],[30,31]];
-    const LSF = [[22,23]];
-    const R32 = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
-    const R16 = [[10,11],[18,19],[26,27],[34,35]];
-    const RQF = [[14,15],[30,31]];
-    const RSF = [[22,23]];
-
-    const champ = cell('I',11);
-    const final1 = cell('I',18), final2 = cell('I',19);
-    const playoff1 = cell('I',30), playoff2 = cell('I',31);
-    const third = cell('I',27);
-
-    const colHTML = (pairs, col, marginBetween) =>
-      pairs.map(([r1,r2], i) =>
-        `<div style="margin-bottom:${i < pairs.length-1 ? marginBetween+'px' : '0'}">${mkMatch(col,r1,r2)}</div>`
-      ).join('');
-
+    // Read every cell directly by exact address
     const html = `
     <div class="bracket-scroll bracket-desktop">
       <div class="bk-grid">
@@ -1276,47 +1255,113 @@ async function loadBracket() {
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 16</div><div class="bk-pts">+10 pts</div></div>
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 32</div><div class="bk-pts">+5 pts</div></div>
 
-        <div class="bk-col">${colHTML(L32,'A',8)}</div>
-        <div class="bk-col" style="padding-top:40px">${colHTML(L16,'C',88)}</div>
-        <div class="bk-col" style="padding-top:120px">${colHTML(LQF,'E',264)}</div>
-        <div class="bk-col" style="padding-top:280px">${mkMatch('G',22,23)}</div>
+        <!-- Left RO32 col A -->
+        <div class="bk-col">
+          ${mkMatch(cell('A',8),cell('A',9))}
+          ${mkMatch(cell('A',12),cell('A',13))}
+          ${mkMatch(cell('A',16),cell('A',17))}
+          ${mkMatch(cell('A',20),cell('A',21))}
+          ${mkMatch(cell('A',24),cell('A',25))}
+          ${mkMatch(cell('A',28),cell('A',29))}
+          ${mkMatch(cell('A',32),cell('A',33))}
+          ${mkMatch(cell('A',36),cell('A',37))}
+        </div>
 
+        <!-- Left RO16 col C -->
+        <div class="bk-col" style="padding-top:40px">
+          <div style="margin-bottom:88px">${mkMatch(cell('C',10),cell('C',11))}</div>
+          <div style="margin-bottom:88px">${mkMatch(cell('C',18),cell('C',19))}</div>
+          <div style="margin-bottom:88px">${mkMatch(cell('C',26),cell('C',27))}</div>
+          ${mkMatch(cell('C',34),cell('C',35))}
+        </div>
+
+        <!-- Left QF col E -->
+        <div class="bk-col" style="padding-top:120px">
+          <div style="margin-bottom:264px">${mkMatch(cell('E',14),cell('E',15))}</div>
+          ${mkMatch(cell('E',30),cell('E',31))}
+        </div>
+
+        <!-- Left SF col G -->
+        <div class="bk-col" style="padding-top:280px">
+          ${mkMatch(cell('G',22),cell('G',23))}
+        </div>
+
+        <!-- Center col I -->
         <div class="bk-center">
           <div class="bk-champion">
             <div style="font-size:28px">🏆</div>
-            <div class="bk-champ-name">${champ||'TBD'}</div>
+            <div class="bk-champ-name">${cell('I',11)||'TBD'}</div>
             <div class="bk-pts" style="margin-top:2px">+160 pts</div>
           </div>
           <div style="margin-top:8px">
             <div class="bk-round-label">FINAL <span class="bk-pts">+80 pts</span></div>
-            ${mkMatchDirect(final1, final2)}
+            ${mkMatch(cell('I',18),cell('I',19))}
           </div>
           <div style="margin-top:32px">
             <div class="bk-round-label">3RD PLACE PLAYOFF</div>
-            ${mkMatchDirect(playoff1, playoff2)}
+            ${mkMatch(cell('I',30),cell('I',31))}
           </div>
           <div style="margin-top:8px">
             <div class="bk-round-label">3RD PLACE <span class="bk-pts">+20 pts</span></div>
-            <div class="bk-match">${mkTeam(third)}</div>
+            <div class="bk-match">${mkTeam(cell('I',27))}</div>
           </div>
         </div>
 
-        <div class="bk-col" style="padding-top:280px">${mkMatch('K',22,23)}</div>
-        <div class="bk-col" style="padding-top:120px">${colHTML(RQF,'M',264)}</div>
-        <div class="bk-col" style="padding-top:40px">${colHTML(R16,'O',88)}</div>
-        <div class="bk-col">${colHTML(R32,'Q',8)}</div>
+        <!-- Right SF col K -->
+        <div class="bk-col" style="padding-top:280px">
+          ${mkMatch(cell('K',22),cell('K',23))}
+        </div>
+
+        <!-- Right QF col M -->
+        <div class="bk-col" style="padding-top:120px">
+          <div style="margin-bottom:264px">${mkMatch(cell('M',14),cell('M',15))}</div>
+          ${mkMatch(cell('M',30),cell('M',31))}
+        </div>
+
+        <!-- Right RO16 col O -->
+        <div class="bk-col" style="padding-top:40px">
+          <div style="margin-bottom:88px">${mkMatch(cell('O',10),cell('O',11))}</div>
+          <div style="margin-bottom:88px">${mkMatch(cell('O',18),cell('O',19))}</div>
+          <div style="margin-bottom:88px">${mkMatch(cell('O',26),cell('O',27))}</div>
+          ${mkMatch(cell('O',34),cell('O',35))}
+        </div>
+
+        <!-- Right RO32 col Q -->
+        <div class="bk-col">
+          ${mkMatch(cell('Q',8),cell('Q',9))}
+          ${mkMatch(cell('Q',12),cell('Q',13))}
+          ${mkMatch(cell('Q',16),cell('Q',17))}
+          ${mkMatch(cell('Q',20),cell('Q',21))}
+          ${mkMatch(cell('Q',24),cell('Q',25))}
+          ${mkMatch(cell('Q',28),cell('Q',29))}
+          ${mkMatch(cell('Q',32),cell('Q',33))}
+          ${mkMatch(cell('Q',36),cell('Q',37))}
+        </div>
       </div>
     </div>
 
+    <!-- Mobile stacked -->
     <div class="bracket-mobile">
-      ${['Round of 32','Round of 16','Quarter Finals','Semi Finals'].map((title,i) => {
-        const [lPairs,lCol,rPairs,rCol] = [[L32,'A',R32,'Q'],[L16,'C',R16,'O'],[LQF,'E',RQF,'M'],[LSF,'G',RSF,'K']][i];
-        const pts = ['+5 pts','+10 pts','+20 pts','+40 pts'][i];
-        return `<div class="bracket-round"><div class="bracket-round-title">${title}</div><div class="bracket-round-pts">${pts}</div><div class="bracket-round-matches">${lPairs.map(([r1,r2])=>mkMatch(lCol,r1,r2)).join('')}${rPairs.map(([r1,r2])=>mkMatch(rCol,r1,r2)).join('')}</div></div>`;
-      }).join('')}
-      <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${mkMatchDirect(playoff1,playoff2)}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${mkMatchDirect(final1,final2)}</div></div>
-      <div class="champion-box" style="text-align:center;margin-top:8px"><div class="pts">🏆 +160 pts</div><div class="champion-name">${champ||'TBD'}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Round of 32</div><div class="bracket-round-pts">+5 pts</div><div class="bracket-round-matches">
+        ${mkMatch(cell('A',8),cell('A',9))}${mkMatch(cell('A',12),cell('A',13))}${mkMatch(cell('A',16),cell('A',17))}${mkMatch(cell('A',20),cell('A',21))}
+        ${mkMatch(cell('A',24),cell('A',25))}${mkMatch(cell('A',28),cell('A',29))}${mkMatch(cell('A',32),cell('A',33))}${mkMatch(cell('A',36),cell('A',37))}
+        ${mkMatch(cell('Q',8),cell('Q',9))}${mkMatch(cell('Q',12),cell('Q',13))}${mkMatch(cell('Q',16),cell('Q',17))}${mkMatch(cell('Q',20),cell('Q',21))}
+        ${mkMatch(cell('Q',24),cell('Q',25))}${mkMatch(cell('Q',28),cell('Q',29))}${mkMatch(cell('Q',32),cell('Q',33))}${mkMatch(cell('Q',36),cell('Q',37))}
+      </div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Round of 16</div><div class="bracket-round-pts">+10 pts</div><div class="bracket-round-matches">
+        ${mkMatch(cell('C',10),cell('C',11))}${mkMatch(cell('C',18),cell('C',19))}${mkMatch(cell('C',26),cell('C',27))}${mkMatch(cell('C',34),cell('C',35))}
+        ${mkMatch(cell('O',10),cell('O',11))}${mkMatch(cell('O',18),cell('O',19))}${mkMatch(cell('O',26),cell('O',27))}${mkMatch(cell('O',34),cell('O',35))}
+      </div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Quarter Finals</div><div class="bracket-round-pts">+20 pts</div><div class="bracket-round-matches">
+        ${mkMatch(cell('E',14),cell('E',15))}${mkMatch(cell('E',30),cell('E',31))}
+        ${mkMatch(cell('M',14),cell('M',15))}${mkMatch(cell('M',30),cell('M',31))}
+      </div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Semi Finals</div><div class="bracket-round-pts">+40 pts</div><div class="bracket-round-matches">
+        ${mkMatch(cell('G',22),cell('G',23))}${mkMatch(cell('K',22),cell('K',23))}
+      </div></div>
+      <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${mkMatch(cell('I',30),cell('I',31))}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${mkMatch(cell('I',18),cell('I',19))}</div></div>
+      <div class="champion-box" style="text-align:center;margin-top:8px"><div class="pts">🏆 +160 pts</div><div class="champion-name">${cell('I',11)||'TBD'}</div></div>
     </div>`;
 
     el.innerHTML = html;
