@@ -253,7 +253,7 @@
   .clickable-country:hover { opacity: 0.75; }
   .hide-mobile-probs { } .show-mobile-probs { display:none; }
   @media (max-width:768px) { 
-    .hide-mobile-probs { display:none !important; } 
+    .hide-mobile-probs { display:none !important; visibility:collapse !important; max-width:0 !important; padding:0 !important; border:none !important; overflow:hidden !important; } 
     .show-mobile-probs { display:table-cell !important; }
     .lb-table td, .lb-table th { padding: 8px 6px; }
   }
@@ -539,8 +539,10 @@ const PLAYER_COLORS = {
 
 function isPlayerOut(name) {
   const p = PROBS_DATA[name.toLowerCase()] || {};
-  const pct = parseFloat((p.winChance||"").replace("%","").replace("—",""));
-  return pct === 0;
+  const pct1 = parseFloat((p.winChance||"").replace("%","").replace("—","")) || 0;
+  const pct2 = parseFloat((p.secondChance||"").replace("%","").replace("—","")) || 0;
+  const pct3 = parseFloat((p.thirdChance||"").replace("%","").replace("—","")) || 0;
+  return pct1 === 0 && pct2 === 0 && pct3 === 0;
 }
 
 function playerAvatar(name, size=32, showOut=false) {
