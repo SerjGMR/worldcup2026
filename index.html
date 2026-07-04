@@ -159,6 +159,23 @@
   .first-pick-flag { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; vertical-align: middle; margin-right: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 
   /* BRACKET */
+  .bk-grid { display:grid; grid-template-columns:repeat(9,1fr); min-width:1100px; gap:6px; align-items:start; }
+  .bk-col { display:flex; flex-direction:column; }
+  .bk-col-hdr { padding-bottom:8px; }
+  .bk-hdr { font-family:'Bebas Neue',sans-serif; font-size:14px; color:var(--text); letter-spacing:1px; }
+  .bk-pts { font-family:'Barlow Condensed',sans-serif; font-size:11px; color:var(--gold); letter-spacing:1px; }
+  .bk-match { background:var(--card); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:8px; }
+  .bk-team { display:flex; align-items:center; gap:6px; padding:7px 8px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; border-bottom:1px solid var(--border); cursor:default; transition:background 0.15s; white-space:nowrap; overflow:hidden; }
+  .bk-team:last-child { border-bottom:none; }
+  .bk-team.clickable-country { cursor:pointer; }
+  .bk-team.clickable-country:hover { background:rgba(245,197,24,0.06); }
+  .bk-team.empty { color:var(--muted); font-style:italic; }
+  .bk-center { display:flex; flex-direction:column; align-items:center; gap:0; padding:0 4px; }
+  .bk-champion { background:var(--card); border:2px solid var(--gold); border-radius:12px; padding:12px; text-align:center; width:100%; }
+  .bk-champ-name { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); letter-spacing:2px; }
+  .bk-round-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:4px; }
+  @media (max-width:768px) { .bracket-desktop { display:none; } }
+  @media (min-width:769px) { .bracket-mobile { display:none; } }
   .bracket-scroll { overflow-x: auto; padding-bottom: 16px; }
   .bracket-col-label { text-align: center; margin-bottom: 12px; }
   .bracket-col-label h4 { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; color: var(--text); }
@@ -353,6 +370,7 @@
       <button class="active" onclick="showSection('leaderboard',this)">Leaderboard</button>
       <button onclick="showSection('matches',this)">Matches</button>
       <button onclick="showSection('groups',this)">Groups</button>
+      <button onclick="showSection('bracket',this)">Bracket</button>
       <button onclick="showSection('search',this)">Search</button>
     </nav>
   </div>
@@ -428,7 +446,7 @@
   </div>
 
   <!-- BRACKET -->
-  <div class="section" id="bracket" style="display:none">
+  <div class="section" id="bracket">
     <div class="section-header"><h2>Bracket</h2><p>Knockout stage</p></div>
     <div id="bracket-content"><div class="loading"><div class="spinner"></div>Loading bracket…</div></div>
   </div>
@@ -1205,21 +1223,12 @@ async function loadBracket() {
   const el = document.getElementById('bracket-content');
   try {
     const rows = await fetchCSV(GIDS.bracket);
-    // r(sheetRow, sheetCol) — sheet rows are 1-based, cols are letters
-    const r = (sheetRow, sheetCol) => {
-      const colMap = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
-      const colIdx = colMap[sheetCol] ?? 0;
-      const row = rows[sheetRow - 1];
-      return row && row[colIdx] ? row[colIdx].trim() : '';
-    };
-    const team = (sheetRow, sheetCol) => {
-      const t = r(sheetRow, sheetCol);
-      return t && !/^\+\d|^round|^semi|^quarter|^3rd|^champion|^bracket|^final|^match/i.test(t) ? t : '';
-    };
 
-    // Exact cell positions confirmed
-    // STRICT cell whitelist - only these exact sheet positions are valid bracket slots
-    const VALID_CELLS = new Set([
+    // Column letter to 0-based index
+    const CI = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
+
+    // STRICT whitelist of valid box cells only
+    const VALID = new Set([
       'A8','A9','A12','A13','A16','A17','A20','A21','A24','A25','A28','A29','A32','A33','A36','A37',
       'C10','C11','C18','C19','C26','C27','C34','C35',
       'E14','E15','E30','E31',
@@ -1231,102 +1240,137 @@ async function loadBracket() {
       'Q8','Q9','Q12','Q13','Q16','Q17','Q20','Q21','Q24','Q25','Q28','Q29','Q32','Q33','Q36','Q37'
     ]);
 
-    const teamStrict = (sheetRow, sheetCol) => {
-      if (!VALID_CELLS.has(sheetCol + sheetRow)) return '';
-      const t = r(sheetRow, sheetCol);
-      return t && !/^\+\d|^round|^semi|^quarter|^3rd|^champion|^bracket|^final|^match/i.test(t) ? t : '';
+    const cell = (col, row) => {
+      const key = col + row;
+      if (!VALID.has(key)) return '';
+      const rowData = rows[row - 1];
+      if (!rowData) return '';
+      const val = (rowData[CI[col]] || '').trim();
+      return val && !/^\+\d|^round|^semi|^quarter|^3rd|^champion|^bracket|^final|^match/i.test(val) ? val : '';
     };
 
-    const L32r = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
-    const L16r = [[10,11],[18,19],[26,27],[34,35]];
-    const LQFr = [[14,15],[30,31]];
-    const LSFr = [[22,23]];
-    const R32r = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
-    const R16r = [[10,11],[18,19],[26,27],[34,35]];
-    const RQFr = [[14,15],[30,31]];
-    const RSFr = [[22,23]];
+    // Build a match card with two team slots
+    const mkTeam = (t) => t
+      ? `<div class="bk-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\'")}',event)">
+          ${wrapFlagElim(`<img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`, t, 18)}
+          <span>${t}</span>
+        </div>`
+      : `<div class="bk-team empty"><span>TBD</span></div>`;
 
-    function matchCard(t1, t2) {
-      const mk = (t) => t
-        ? `<div class="bracket-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\\'")}',event)">${wrapFlagElim(`<img src="${flag(t)}" onerror="this.style.display='none'">`,t,20)}${t}</div>`
-        : `<div class="bracket-team empty">TBD</div>`;
-      return `<div class="bracket-matchup">${mk(t1)}${mk(t2)}</div>`;
-    }
+    const mkMatch = (col, r1, r2) => `<div class="bk-match">${mkTeam(cell(col,r1))}${mkTeam(cell(col,r2))}</div>`;
+    const mkMatchDirect = (t1, t2) => `<div class="bk-match">${mkTeam(t1)}${mkTeam(t2)}</div>`;
 
-    function colMatches(pairs, colLetter, gapPx=8) {
-      return pairs.map(([r1,r2],i) =>
-        `<div style="margin-bottom:${i<pairs.length-1?gapPx+'px':'0'}">${matchCard(teamStrict(r1,colLetter),teamStrict(r2,colLetter))}</div>`
+    // All positions
+    const L32 = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
+    const L16 = [[10,11],[18,19],[26,27],[34,35]];
+    const LQF = [[14,15],[30,31]];
+    const LSF = [[22,23]];
+    const R32 = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
+    const R16 = [[10,11],[18,19],[26,27],[34,35]];
+    const RQF = [[14,15],[30,31]];
+    const RSF = [[22,23]];
+
+    const champ = cell('I',11);
+    const final1 = cell('I',18), final2 = cell('I',19);
+    const playoff1 = cell('I',30), playoff2 = cell('I',31);
+    const third = cell('I',27);
+
+    // Gap between matches in each round (px) — each match is ~64px tall
+    // RO32: 8 matches, no gap needed between them (they stack naturally)
+    // RO16: 4 matches, ~72px gap between to align between RO32 pairs
+    // QF: 2 matches, ~208px gap
+    // SF: 1 match, centered
+
+    const colHTML = (pairs, col, marginBetween) =>
+      pairs.map(([r1,r2], i) =>
+        `<div style="margin-bottom:${i < pairs.length-1 ? marginBetween+'px' : '0'}">${mkMatch(col,r1,r2)}</div>`
       ).join('');
-    }
-
-    const champ = teamStrict(11,'I');
-    const final1 = teamStrict(18,'I'), final2 = teamStrict(19,'I');
-    const playoff1 = teamStrict(30,'I'), playoff2 = teamStrict(31,'I');
-    const third = teamStrict(27,'I');
-
-    // Each matchup ~80px. Between RO32 pairs, gap is ~8px.
-    // RO16 sits between pairs of RO32 → offset by 44px, gap 88px between RO16 matches
-    // QF sits between pairs of RO16 → offset 132px, gap 264px
-    // SF sits between QF pair → offset 308px
 
     const html = `
     <div class="bracket-scroll bracket-desktop">
-    <div style="display:grid;grid-template-columns:repeat(9,1fr);min-width:1100px;gap:6px;align-items:start;">
-      <div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>
-      <div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div>
-      <div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div>
-      <div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div>
-      <div class="bracket-col-label" style="text-align:center"><h4>Champion</h4><span>+160 pts</span></div>
-      <div class="bracket-col-label"><h4>Semis</h4><span>+40 pts</span></div>
-      <div class="bracket-col-label"><h4>Quarters</h4><span>+20 pts</span></div>
-      <div class="bracket-col-label"><h4>Round of 16</h4><span>+10 pts</span></div>
-      <div class="bracket-col-label"><h4>Round of 32</h4><span>+5 pts</span></div>
+      <div class="bk-grid">
+        <!-- Headers row -->
+        <div class="bk-col-hdr"><div class="bk-hdr">Round of 32</div><div class="bk-pts">+5 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Round of 16</div><div class="bk-pts">+10 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Quarters</div><div class="bk-pts">+20 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Semis</div><div class="bk-pts">+40 pts</div></div>
+        <div class="bk-col-hdr" style="text-align:center"><div class="bk-hdr">Champion</div><div class="bk-pts">+160 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Semis</div><div class="bk-pts">+40 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Quarters</div><div class="bk-pts">+20 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Round of 16</div><div class="bk-pts">+10 pts</div></div>
+        <div class="bk-col-hdr"><div class="bk-hdr">Round of 32</div><div class="bk-pts">+5 pts</div></div>
 
-      <div>${colMatches(L32r,'A',8)}</div>
-      <div style="padding-top:44px">${colMatches(L16r,'C',88)}</div>
-      <div style="padding-top:132px">${colMatches(LQFr,'E',264)}</div>
-      <div style="padding-top:308px">${matchCard(teamStrict(LSFr[0][0],'G'),teamStrict(LSFr[0][1],'G'))}</div>
+        <!-- Left RO32 -->
+        <div class="bk-col">${colHTML(L32,'A',8)}</div>
+        <!-- Left RO16: padded 40px, 88px between -->
+        <div class="bk-col" style="padding-top:40px">${colHTML(L16,'C',88)}</div>
+        <!-- Left QF: padded 120px, 264px between -->
+        <div class="bk-col" style="padding-top:120px">${colHTML(LQF,'E',264)}</div>
+        <!-- Left SF: padded 280px -->
+        <div class="bk-col" style="padding-top:280px">${mkMatch('G',22,23)}</div>
 
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:0">
-        <div class="champion-box" style="text-align:center;width:100%">
-          <div class="pts">+160 pts</div>
-          <h3>🏆</h3>
-          <div class="champion-name">${champ||'TBD'}</div>
+        <!-- Center -->
+        <div class="bk-center">
+          <div class="bk-champion">
+            <div style="font-size:28px">🏆</div>
+            <div class="bk-champ-name">${champ||'TBD'}</div>
+            <div class="bk-pts" style="margin-top:2px">+160 pts</div>
+          </div>
+          <div style="margin-top:8px">
+            <div class="bk-round-label">FINAL <span class="bk-pts">+80 pts</span></div>
+            ${mkMatchDirect(final1, final2)}
+          </div>
+          <div style="margin-top:32px">
+            <div class="bk-round-label">3RD PLACE PLAYOFF</div>
+            ${mkMatchDirect(playoff1, playoff2)}
+          </div>
+          <div style="margin-top:8px">
+            <div class="bk-round-label">3RD PLACE <span class="bk-pts">+20 pts</span></div>
+            <div class="bk-match">${mkTeam(third)}</div>
+          </div>
         </div>
-        <div class="final-box" style="width:100%">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--gold);letter-spacing:1px;text-align:center;margin-bottom:4px">FINAL +80 pts</div>
-          ${matchCard(final1,final2)}
-        </div>
-        <div style="height:160px"></div>
-        <div class="final-box" style="width:100%">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:1px;text-align:center;margin-bottom:4px">3RD PLACE PLAYOFF</div>
-          ${matchCard(playoff1,playoff2)}
-        </div>
-        <div class="final-box" style="width:100%">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--gold);letter-spacing:1px;text-align:center;margin-bottom:4px">3RD PLACE +20 pts</div>
-          <div class="bracket-matchup">${third?`<div class="bracket-team clickable-country" onclick="openCountryPage('${third.replace(/'/g,"\\'")}',event)">${wrapFlagElim(`<img src="${flag(third)}" onerror="this.style.display='none'">`,third,20)}${third}</div>`:`<div class="bracket-team empty">TBD</div>`}</div>
-        </div>
+
+        <!-- Right SF -->
+        <div class="bk-col" style="padding-top:280px">${mkMatch('K',22,23)}</div>
+        <!-- Right QF -->
+        <div class="bk-col" style="padding-top:120px">${colHTML(RQF,'M',264)}</div>
+        <!-- Right RO16 -->
+        <div class="bk-col" style="padding-top:40px">${colHTML(R16,'O',88)}</div>
+        <!-- Right RO32 -->
+        <div class="bk-col">${colHTML(R32,'Q',8)}</div>
       </div>
+    </div>
 
-      <div style="padding-top:308px">${matchCard(teamStrict(RSFr[0][0],'K'),teamStrict(RSFr[0][1],'K'))}</div>
-      <div style="padding-top:132px">${colMatches(RQFr,'M',264)}</div>
-      <div style="padding-top:44px">${colMatches(R16r,'O',88)}</div>
-      <div>${colMatches(R32r,'Q',8)}</div>
-    </div></div>
-
+    <!-- Mobile stacked -->
     <div class="bracket-mobile">
-      <div class="bracket-round"><div class="bracket-round-title">Round of 32</div><div class="bracket-round-pts">+5 pts</div><div class="bracket-round-matches">${colMatches(L32r,'A')}${colMatches(R32r,'Q')}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">Round of 16</div><div class="bracket-round-pts">+10 pts</div><div class="bracket-round-matches">${colMatches(L16r,'C')}${colMatches(R16r,'O')}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">Quarter Finals</div><div class="bracket-round-pts">+20 pts</div><div class="bracket-round-matches">${colMatches(LQFr,'E')}${colMatches(RQFr,'M')}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">Semi Finals</div><div class="bracket-round-pts">+40 pts</div><div class="bracket-round-matches">${matchCard(teamStrict(LSFr[0][0],'G'),teamStrict(LSFr[0][1],'G'))}${matchCard(teamStrict(RSFr[0][0],'K'),teamStrict(RSFr[0][1],'K'))}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${matchCard(playoff1,playoff2)}</div></div>
-      <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${matchCard(final1,final2)}</div></div>
-      <div class="champion-box" style="text-align:center;margin-top:8px"><div class="pts">+160 pts</div><h3>🏆 Champion</h3><div class="champion-name">${champ||'TBD'}</div></div>
+      ${['Round of 32','Round of 16','Quarter Finals','Semi Finals'].map((title,i) => {
+        const [lPairs, lCol, rPairs, rCol] = [
+          [L32,'A',R32,'Q'],
+          [L16,'C',R16,'O'],
+          [LQF,'E',RQF,'M'],
+          [LSF,'G',RSF,'K']
+        ][i];
+        const pts = ['+5 pts','+10 pts','+20 pts','+40 pts'][i];
+        return `<div class="bracket-round">
+          <div class="bracket-round-title">${title}</div>
+          <div class="bracket-round-pts">${pts}</div>
+          <div class="bracket-round-matches">
+            ${lPairs.map(([r1,r2]) => mkMatch(lCol,r1,r2)).join('')}
+            ${rPairs.map(([r1,r2]) => mkMatch(rCol,r1,r2)).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${mkMatchDirect(playoff1,playoff2)}</div></div>
+      <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${mkMatchDirect(final1,final2)}</div></div>
+      <div class="champion-box" style="text-align:center;margin-top:8px">
+        <div class="pts">🏆 +160 pts</div>
+        <div class="champion-name">${champ||'TBD'}</div>
+      </div>
     </div>`;
 
     el.innerHTML = html;
   } catch(e) {
-    el.innerHTML = `<div class="error">⚠ Could not load bracket data.</div>`;
+    el.innerHTML = `<div class="error">⚠ Could not load bracket. ${e.message}</div>`;
   }
 }
 
@@ -1584,6 +1628,7 @@ function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
   else if (id==='matches') loadMatchday(3);
   else if (id==='groups') loadGroups();
+  else if (id==='bracket') loadBracket();
   else if (id==='bracket') loadBracket();
   // search has no data to load
 }
