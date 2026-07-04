@@ -256,7 +256,6 @@
   .show-mobile-only { display:none; }
   @media (max-width:768px) { 
     .hide-mobile-probs { display:none !important; }
-    @media (max-width:768px) { .hide-mobile-probs { display:none !important; } }
     .show-mobile-only { display:table-cell !important; }
   }
   @media (max-width:768px) { 
@@ -1279,7 +1278,6 @@ async function loadProbabilities() {
           </div>
         </td>
         <td class="show-mobile-only" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:${color};text-align:center">${pct > 0 ? pct.toFixed(1)+'%' : '—'}</td>`;
-      };
       };
 
       html += `<tr>
