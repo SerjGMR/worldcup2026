@@ -1224,32 +1224,16 @@ async function loadBracket() {
   try {
     const rows = await fetchCSV(GIDS.bracket);
 
-    // Column letter to 0-based index
     const CI = {A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7,I:8,J:9,K:10,L:11,M:12,N:13,O:14,P:15,Q:16};
 
-    // STRICT whitelist of valid box cells only
-    const VALID = new Set([
-      'A8','A9','A12','A13','A16','A17','A20','A21','A24','A25','A28','A29','A32','A33','A36','A37',
-      'C10','C11','C18','C19','C26','C27','C34','C35',
-      'E14','E15','E30','E31',
-      'G22','G23',
-      'I11','I18','I19','I27','I30','I31',
-      'K22','K23',
-      'M14','M15','M30','M31',
-      'O10','O11','O18','O19','O26','O27','O34','O35',
-      'Q8','Q9','Q12','Q13','Q16','Q17','Q20','Q21','Q24','Q25','Q28','Q29','Q32','Q33','Q36','Q37'
-    ]);
-
     const cell = (col, row) => {
-      const key = col + row;
-      if (!VALID.has(key)) return '';
       const rowData = rows[row - 1];
       if (!rowData) return '';
       const val = (rowData[CI[col]] || '').trim();
-      return val && !/^\+\d|^round|^semi|^quarter|^3rd|^champion|^bracket|^final|^match/i.test(val) ? val : '';
+      // Filter out header/label text
+      return val && !/^\+\d|^round of|^semi final|^quarter final|^3rd place|^champion|^bracket|^knockout/i.test(val) ? val : '';
     };
 
-    // Build a match card with two team slots
     const mkTeam = (t) => t
       ? `<div class="bk-team clickable-country" onclick="openCountryPage('${t.replace(/'/g,"\'")}',event)">
           ${wrapFlagElim(`<img src="${flag(t)}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`, t, 18)}
@@ -1260,7 +1244,6 @@ async function loadBracket() {
     const mkMatch = (col, r1, r2) => `<div class="bk-match">${mkTeam(cell(col,r1))}${mkTeam(cell(col,r2))}</div>`;
     const mkMatchDirect = (t1, t2) => `<div class="bk-match">${mkTeam(t1)}${mkTeam(t2)}</div>`;
 
-    // All positions
     const L32 = [[8,9],[12,13],[16,17],[20,21],[24,25],[28,29],[32,33],[36,37]];
     const L16 = [[10,11],[18,19],[26,27],[34,35]];
     const LQF = [[14,15],[30,31]];
@@ -1275,12 +1258,6 @@ async function loadBracket() {
     const playoff1 = cell('I',30), playoff2 = cell('I',31);
     const third = cell('I',27);
 
-    // Gap between matches in each round (px) — each match is ~64px tall
-    // RO32: 8 matches, no gap needed between them (they stack naturally)
-    // RO16: 4 matches, ~72px gap between to align between RO32 pairs
-    // QF: 2 matches, ~208px gap
-    // SF: 1 match, centered
-
     const colHTML = (pairs, col, marginBetween) =>
       pairs.map(([r1,r2], i) =>
         `<div style="margin-bottom:${i < pairs.length-1 ? marginBetween+'px' : '0'}">${mkMatch(col,r1,r2)}</div>`
@@ -1289,7 +1266,6 @@ async function loadBracket() {
     const html = `
     <div class="bracket-scroll bracket-desktop">
       <div class="bk-grid">
-        <!-- Headers row -->
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 32</div><div class="bk-pts">+5 pts</div></div>
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 16</div><div class="bk-pts">+10 pts</div></div>
         <div class="bk-col-hdr"><div class="bk-hdr">Quarters</div><div class="bk-pts">+20 pts</div></div>
@@ -1300,16 +1276,11 @@ async function loadBracket() {
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 16</div><div class="bk-pts">+10 pts</div></div>
         <div class="bk-col-hdr"><div class="bk-hdr">Round of 32</div><div class="bk-pts">+5 pts</div></div>
 
-        <!-- Left RO32 -->
         <div class="bk-col">${colHTML(L32,'A',8)}</div>
-        <!-- Left RO16: padded 40px, 88px between -->
         <div class="bk-col" style="padding-top:40px">${colHTML(L16,'C',88)}</div>
-        <!-- Left QF: padded 120px, 264px between -->
         <div class="bk-col" style="padding-top:120px">${colHTML(LQF,'E',264)}</div>
-        <!-- Left SF: padded 280px -->
         <div class="bk-col" style="padding-top:280px">${mkMatch('G',22,23)}</div>
 
-        <!-- Center -->
         <div class="bk-center">
           <div class="bk-champion">
             <div style="font-size:28px">🏆</div>
@@ -1330,42 +1301,22 @@ async function loadBracket() {
           </div>
         </div>
 
-        <!-- Right SF -->
         <div class="bk-col" style="padding-top:280px">${mkMatch('K',22,23)}</div>
-        <!-- Right QF -->
         <div class="bk-col" style="padding-top:120px">${colHTML(RQF,'M',264)}</div>
-        <!-- Right RO16 -->
         <div class="bk-col" style="padding-top:40px">${colHTML(R16,'O',88)}</div>
-        <!-- Right RO32 -->
         <div class="bk-col">${colHTML(R32,'Q',8)}</div>
       </div>
     </div>
 
-    <!-- Mobile stacked -->
     <div class="bracket-mobile">
       ${['Round of 32','Round of 16','Quarter Finals','Semi Finals'].map((title,i) => {
-        const [lPairs, lCol, rPairs, rCol] = [
-          [L32,'A',R32,'Q'],
-          [L16,'C',R16,'O'],
-          [LQF,'E',RQF,'M'],
-          [LSF,'G',RSF,'K']
-        ][i];
+        const [lPairs,lCol,rPairs,rCol] = [[L32,'A',R32,'Q'],[L16,'C',R16,'O'],[LQF,'E',RQF,'M'],[LSF,'G',RSF,'K']][i];
         const pts = ['+5 pts','+10 pts','+20 pts','+40 pts'][i];
-        return `<div class="bracket-round">
-          <div class="bracket-round-title">${title}</div>
-          <div class="bracket-round-pts">${pts}</div>
-          <div class="bracket-round-matches">
-            ${lPairs.map(([r1,r2]) => mkMatch(lCol,r1,r2)).join('')}
-            ${rPairs.map(([r1,r2]) => mkMatch(rCol,r1,r2)).join('')}
-          </div>
-        </div>`;
+        return `<div class="bracket-round"><div class="bracket-round-title">${title}</div><div class="bracket-round-pts">${pts}</div><div class="bracket-round-matches">${lPairs.map(([r1,r2])=>mkMatch(lCol,r1,r2)).join('')}${rPairs.map(([r1,r2])=>mkMatch(rCol,r1,r2)).join('')}</div></div>`;
       }).join('')}
       <div class="bracket-round"><div class="bracket-round-title">3rd Place Playoff</div><div class="bracket-round-matches">${mkMatchDirect(playoff1,playoff2)}</div></div>
       <div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-round-pts">+80 pts</div><div class="bracket-round-matches">${mkMatchDirect(final1,final2)}</div></div>
-      <div class="champion-box" style="text-align:center;margin-top:8px">
-        <div class="pts">🏆 +160 pts</div>
-        <div class="champion-name">${champ||'TBD'}</div>
-      </div>
+      <div class="champion-box" style="text-align:center;margin-top:8px"><div class="pts">🏆 +160 pts</div><div class="champion-name">${champ||'TBD'}</div></div>
     </div>`;
 
     el.innerHTML = html;
