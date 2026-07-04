@@ -252,12 +252,16 @@
   .clickable-country { cursor: pointer; }
   .clickable-country:hover { opacity: 0.75; }
   .scroll-hint { display:none; }
-  .show-mobile-probs { display:none !important; }
   .hide-mobile-probs { }
+  .show-mobile-only { display:none; }
+  @media (max-width:768px) { 
+    .hide-mobile-probs { display:none !important; }
+    @media (max-width:768px) { .hide-mobile-probs { display:none !important; } }
+    .show-mobile-only { display:table-cell !important; }
+  }
   @media (max-width:768px) { 
     .scroll-hint { display:flex; align-items:center; justify-content:flex-end; font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--muted); letter-spacing:1px; padding:4px 2px 8px; gap:4px; }
     .hide-mobile-probs { display:none !important; visibility:collapse !important; max-width:0 !important; padding:0 !important; border:none !important; overflow:hidden !important; } 
-    .show-mobile-probs { display:table-cell !important; }
     .lb-table td, .lb-table th { padding: 8px 6px; }
   }
   .clickable-player { cursor: pointer; text-decoration: none; }
@@ -1237,7 +1241,9 @@ async function loadProbabilities() {
         <tr>
           <th>#</th><th></th><th>Player</th><th>Teams In</th>
           <th colspan="3" style="text-align:center;border-bottom:2px solid var(--gold)" class="hide-mobile-probs">Win Chance</th>
-          <th class="show-mobile-probs" style="text-align:center;border-bottom:2px solid var(--gold)">🥇/🥈/🥉</th>
+          <th style="text-align:center;color:#F5C518" class="show-mobile-only">🥇</th>
+          <th style="text-align:center;color:#C0C0C0" class="show-mobile-only">🥈</th>
+          <th style="text-align:center;color:#CD7F32" class="show-mobile-only">🥉</th>
           <th>First Pick</th><th>Value</th>
         </tr>
         <tr style="background:var(--darker)" class="hide-mobile-probs">
@@ -1271,7 +1277,9 @@ async function loadProbabilities() {
             </div>
             <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:${color};min-width:42px;text-align:right">${pct > 0 ? pct.toFixed(2)+'%' : '—'}</span>
           </div>
-        </td>`;
+        </td>
+        <td class="show-mobile-only" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:${color};text-align:center">${pct > 0 ? pct.toFixed(1)+'%' : '—'}</td>`;
+      };
       };
 
       html += `<tr>
@@ -1282,13 +1290,6 @@ async function loadProbabilities() {
         ${bar(pct1, '#F5C518')}
         ${bar(pct2, '#C0C0C0')}
         ${bar(pct3, '#CD7F32')}
-        <td class="show-mobile-probs" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;white-space:nowrap">
-          <span style="color:#F5C518">${pct1>0?pct1.toFixed(1)+'%':'—'}</span>
-          <span style="color:var(--muted)"> / </span>
-          <span style="color:#C0C0C0">${pct2>0?pct2.toFixed(1)+'%':'—'}</span>
-          <span style="color:var(--muted)"> / </span>
-          <span style="color:#CD7F32">${pct3>0?pct3.toFixed(1)+'%':'—'}</span>
-        </td>
         <td class="clickable-country" onclick="openCountryPage('${firstPick.replace(/'/g,"\\'")}',event)" style="white-space:nowrap">
           <img class="first-pick-flag" src="${flag(firstPick)}" onerror="this.style.display='none'">
           <span class="lb-teams">${firstPick}</span>
