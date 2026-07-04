@@ -1617,7 +1617,7 @@ function showSection(id, btn) {
   document.getElementById(id).classList.add('active');
   if (btn) { btn.classList.add('active'); lastBtn = btn; }
   if (id !== 'country-page' && id !== 'player-page') lastSection = id;
-  if (id === 'groups' || id === 'leaderboard') {
+  if (id === 'groups' || id === 'leaderboard' || id === 'bracket') {
     loadSection(id);
   } else if (!sectionLoaded[id]) {
     sectionLoaded[id] = true;
@@ -1628,7 +1628,6 @@ function loadSection(id) {
   if (id==='leaderboard') loadLeaderboard();
   else if (id==='matches') loadMatchday(3);
   else if (id==='groups') loadGroups();
-  else if (id==='bracket') loadBracket();
   else if (id==='bracket') loadBracket();
   // search has no data to load
 }
