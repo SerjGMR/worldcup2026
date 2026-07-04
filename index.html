@@ -1855,6 +1855,7 @@ async function openPlayerPage(playerName, e) {
     });
 
     if (playerMatches.length) {
+      playerMatches.reverse();
       let matchesHTML = '';
       let lastDate = '';
       playerMatches.forEach(m => {
@@ -2031,6 +2032,7 @@ async function openCountryPage(countryName, e) {
   // Build matches separated by date
   let matchesHTML = '';
   if (allMatches.length) {
+    allMatches.reverse();
     let lastDate = '';
     allMatches.forEach(m => {
       if (m.date && m.date !== lastDate) {
