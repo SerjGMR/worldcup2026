@@ -545,9 +545,11 @@ const PLAYER_COLORS = {
 
 function isPlayerOut(name) {
   const p = PROBS_DATA[name.toLowerCase()] || {};
-  const pct1 = parseFloat((p.winChance||"").replace("%","").replace("—","")) || 0;
-  const pct2 = parseFloat((p.secondChance||"").replace("%","").replace("—","")) || 0;
-  const pct3 = parseFloat((p.thirdChance||"").replace("%","").replace("—","")) || 0;
+  const pct1 = parseFloat((p.winChance||'0').replace('%','').replace('—','0')) || 0;
+  const pct2 = parseFloat((p.secondChance||'0').replace('%','').replace('—','0')) || 0;
+  const pct3 = parseFloat((p.thirdChance||'0').replace('%','').replace('—','0')) || 0;
+  // Only OUT if PROBS_DATA is actually loaded and all three are 0
+  if (!p.winChance) return false;
   return pct1 === 0 && pct2 === 0 && pct3 === 0;
 }
 
