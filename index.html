@@ -48,7 +48,9 @@
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
   nav button.active { color: var(--gold); }
   nav button.active::after { content: ''; position: absolute; bottom: -2px; left: 16px; right: 16px; height: 2px; background: var(--gold); }
-  /* GLOBAL SEARCH */
+  .hypo-select { width:100%; background:var(--mid); border:1px solid var(--border); color:var(--text); font-family:'Barlow Condensed',sans-serif; font-size:15px; padding:8px 12px; border-radius:6px; outline:none; cursor:pointer; }
+  .hypo-select:focus { border-color:var(--gold); }
+  .hypo-select option { background:var(--mid); }
   .global-search-wrap { position: relative; margin-bottom: 32px; }
   .global-search-input { width: 100%; padding: 16px 24px; background: var(--card); border: 2px solid var(--border); border-radius: 30px; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 16px; outline: none; transition: border-color 0.2s; }
   .global-search-input:focus { border-color: var(--gold); }
@@ -383,6 +385,7 @@
       <button onclick="showSection('matches',this)">Matches</button>
       <button onclick="showSection('bracket',this)">Bracket</button>
       <button onclick="showSection('groups',this)">Groups</button>
+      <button onclick="showSection('hypotheticals',this)">Hypotheticals</button>
       <button onclick="showSection('search',this)">Search</button>
     </nav>
   </div>
@@ -463,6 +466,40 @@
     <div id="bracket-content"><div class="loading"><div class="spinner"></div>Loading bracket…</div></div>
   </div>
 
+  <!-- HYPOTHETICALS -->
+  <div class="section" id="hypotheticals">
+    <div class="section-header"><h2>Hypotheticals</h2><p>Filter simulations by conditions</p></div>
+    <div id="hypo-builder" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:16px">Build Your Scenario</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px" id="hypo-filters">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🏆 Champion</div>
+            <select id="hypo-champion" class="hypo-select"><option value="">Any</option></select>
+          </div>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🥈 In Final</div>
+            <select id="hypo-final" class="hypo-select"><option value="">Any</option></select>
+          </div>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🔝 In Semis</div>
+            <select id="hypo-semi" class="hypo-select"><option value="">Any</option></select>
+          </div>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">⚡ In Quarters</div>
+            <select id="hypo-qf" class="hypo-select"><option value="">Any</option></select>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:16px">
+          <button onclick="runHypothetical()" style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;background:var(--gold);color:#000;border:none;padding:10px 32px;border-radius:6px;cursor:pointer">GO</button>
+          <button onclick="resetHypothetical()" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;border-radius:6px;cursor:pointer">Reset</button>
+          <span id="hypo-count" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted)"></span>
+        </div>
+      </div>
+      <div id="hypo-results"></div>
+    </div>
+  </div>
+
   <!-- GLOBAL SEARCH -->
   <div class="section" id="search">
     <div class="section-header"><h2>Search</h2><p>Players & countries</p></div>
@@ -488,7 +525,7 @@
 
 <script>
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6F2WCGWZxZgg6TCnjpODIAT4TNxR53OFNUtLFaeElyAthAYoTudjKQr-kVEGlZH3rf2IDieTerOAx/pub?output=csv&gid=';
-const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806', extlb:'1764237413', knockouts:'912894311', eliminated:'418209221' };
+const GIDS = { leaderboard:'1101782913', md1:'1655786227', md2:'1080001360', md3:'782783342', groups:'1340150710', points:'1698138254', bracket:'184467559', probs:'1446687806', extlb:'1764237413', knockouts:'912894311', eliminated:'418209221', simresults:'561829058' };
 
 const FLAGS = {
   "Argentina":"ar","Belgium":"be","Uruguay":"uy","Sweden":"se","Algeria":"dz","Egypt":"eg","Panama":"pa","Jordan":"jo",
@@ -1612,7 +1649,171 @@ function filterPicks(q) {
   document.getElementById('no-results').style.display=v===0?'block':'none';
 }
 
-// GLOBAL SEARCH
+// HYPOTHETICALS
+let SIM_DATA = null; // cached sim results rows
+let ALL_TEAMS = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
+
+async function loadSimData() {
+  if (SIM_DATA) return SIM_DATA;
+  const rows = await fetchCSV(GIDS.simresults);
+  SIM_DATA = rows.slice(1); // skip header
+  return SIM_DATA;
+}
+
+async function initHypotheticals() {
+  // Populate dropdowns with all known teams
+  const selects = ['hypo-champion','hypo-final','hypo-semi','hypo-qf'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    ALL_TEAMS.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      el.appendChild(opt);
+    });
+  });
+
+  // Load sim data and show count
+  const el = document.getElementById('hypo-count');
+  el.textContent = 'Loading simulations...';
+  try {
+    const data = await loadSimData();
+    el.textContent = `${data.length.toLocaleString()} simulations available`;
+  } catch(e) {
+    el.textContent = 'Could not load simulations';
+  }
+}
+
+async function runHypothetical() {
+  const champion = document.getElementById('hypo-champion').value;
+  const finalTeam = document.getElementById('hypo-final').value;
+  const semiTeam = document.getElementById('hypo-semi').value;
+  const qfTeam = document.getElementById('hypo-qf').value;
+
+  const countEl = document.getElementById('hypo-count');
+  const resultsEl = document.getElementById('hypo-results');
+  resultsEl.innerHTML = '<div class="loading"><div class="spinner"></div>Filtering simulations…</div>';
+  countEl.textContent = '';
+
+  try {
+    const data = await loadSimData();
+    // Columns: 0=SimNum, 1-30=player ranks, 31=QF, 32=SF, 33=Final, 34=Champion
+    const filtered = data.filter(row => {
+      const qf = (row[31]||'').toLowerCase();
+      const sf = (row[32]||'').toLowerCase();
+      const fin = (row[33]||'').toLowerCase();
+      const champ = (row[34]||'').toLowerCase();
+      if (champion && !champ.includes(champion.toLowerCase())) return false;
+      if (finalTeam && !fin.includes(finalTeam.toLowerCase())) return false;
+      if (semiTeam && !sf.includes(semiTeam.toLowerCase())) return false;
+      if (qfTeam && !qf.includes(qfTeam.toLowerCase())) return false;
+      return true;
+    });
+
+    const total = filtered.length;
+    countEl.textContent = `${total.toLocaleString()} matching simulations of ${data.length.toLocaleString()}`;
+
+    if (total === 0) {
+      resultsEl.innerHTML = '<div class="search-empty">No simulations match these conditions. Try removing some filters.</div>';
+      return;
+    }
+
+    // Calculate probabilities from filtered sims
+    const summaryData = PLAYERS.map((player, idx) => {
+      const col = idx + 1;
+      let wins = 0, seconds = 0, thirds = 0, rankSum = 0, valid = 0;
+      filtered.forEach(row => {
+        const rank = parseInt(row[col]) || 0;
+        if (rank > 0) {
+          valid++;
+          rankSum += rank;
+          if (rank === 1) wins++;
+          if (rank === 2) seconds++;
+          if (rank === 3) thirds++;
+        }
+      });
+      const pct1 = valid > 0 ? (wins/valid*100) : 0;
+      const pct2 = valid > 0 ? (seconds/valid*100) : 0;
+      const pct3 = valid > 0 ? (thirds/valid*100) : 0;
+      const avgRank = valid > 0 ? (rankSum/valid) : 99;
+      const avgPrize = (pct1/100*1000) + (pct2/100*400) + (pct3/100*100);
+      return { name: player, pct1, pct2, pct3, avgRank, avgPrize };
+    });
+
+    summaryData.sort((a,b) => {
+      if (b.pct1 !== a.pct1) return b.pct1 - a.pct1;
+      if (b.pct2 !== a.pct2) return b.pct2 - a.pct2;
+      return b.pct3 - a.pct3;
+    });
+
+    const max1 = Math.max(...summaryData.map(d => d.pct1));
+    const max2 = Math.max(...summaryData.map(d => d.pct2));
+    const max3 = Math.max(...summaryData.map(d => d.pct3));
+
+    const bar = (pct, color) => {
+      const w = Math.min(Math.round(pct), 100);
+      return `<td class="hide-mobile-probs" style="width:130px;max-width:130px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;background:var(--border);border-radius:3px;height:8px;overflow:hidden">
+            <div style="width:${w}%;height:100%;background:${color};border-radius:3px"></div>
+          </div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:${color};min-width:42px;text-align:right">${pct > 0 ? pct.toFixed(2)+'%' : '—'}</span>
+        </div>
+      </td>
+      <td class="show-mobile-only" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:${color};text-align:center">${pct > 0 ? pct.toFixed(2)+'%' : '—'}</td>`;
+    };
+
+    let html = `<div class="lb-wrap"><table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th><th></th><th>Player</th><th>Teams In</th>
+          <th colspan="3" style="text-align:center;border-bottom:2px solid var(--gold)" class="hide-mobile-probs">Win Chance</th>
+          <th style="text-align:center;color:#F5C518" class="show-mobile-only">🥇</th>
+          <th style="text-align:center;color:#C0C0C0" class="show-mobile-only">🥈</th>
+          <th style="text-align:center;color:#CD7F32" class="show-mobile-only">🥉</th>
+          <th>Avg Rank</th><th>Value</th>
+        </tr>
+        <tr style="background:var(--darker)" class="hide-mobile-probs">
+          <th></th><th></th><th></th><th></th>
+          <th style="text-align:center;color:#F5C518;font-size:16px">🥇</th>
+          <th style="text-align:center;color:#C0C0C0;font-size:16px">🥈</th>
+          <th style="text-align:center;color:#CD7F32;font-size:16px">🥉</th>
+          <th></th><th></th>
+        </tr>
+      </thead><tbody>`;
+
+    summaryData.forEach((d, i) => {
+      const rank = i + 1;
+      const rc = rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+      const isOut = d.pct1===0 && d.pct2===0 && d.pct3===0;
+      const teamsIn = (PROBS_DATA[d.name.toLowerCase()]||{}).teamsIn || '—';
+      html += `<tr>
+        <td><span class="lb-rank ${rc}">${rank}</span></td>
+        <td style="padding:8px 6px;cursor:pointer" onclick="openPlayerPage('${d.name.replace(/'/g,"\\'")}',event)">${playerAvatar(d.name,44,isOut)}</td>
+        <td><span class="lb-name clickable-player" onclick="openPlayerPage('${d.name.replace(/'/g,"\\'")}',event)">${d.name}</span></td>
+        <td><span class="lb-teams">${teamsIn}</span></td>
+        ${bar(d.pct1,'#F5C518')}
+        ${bar(d.pct2,'#C0C0C0')}
+        ${bar(d.pct3,'#CD7F32')}
+        <td><span class="lb-teams">${d.avgRank.toFixed(1)}</span></td>
+        <td><span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green)">$${d.avgPrize.toFixed(0)}</span></td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    resultsEl.innerHTML = html;
+
+  } catch(e) {
+    resultsEl.innerHTML = `<div class="error">⚠ Could not run hypothetical. ${e.message}</div>`;
+  }
+}
+
+function resetHypothetical() {
+  ['hypo-champion','hypo-final','hypo-semi','hypo-qf'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('hypo-results').innerHTML = '';
+  document.getElementById('hypo-count').textContent = SIM_DATA ? `${SIM_DATA.length.toLocaleString()} simulations available` : '';
+}
 const ALL_COUNTRIES = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
 
 function globalSearch(q) {
@@ -1721,6 +1922,7 @@ function loadSection(id) {
   else if (id==='matches') openDefaultMatches();
   else if (id==='groups') loadGroups();
   else if (id==='bracket') loadBracket();
+  else if (id==='hypotheticals') initHypotheticals();
   // search has no data to load
 }
 
