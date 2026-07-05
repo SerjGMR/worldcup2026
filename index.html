@@ -472,24 +472,27 @@
     <div id="hypo-builder" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:16px">Build Your Scenario</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px" id="hypo-filters">
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🏆 Champion</div>
-            <select id="hypo-champion" class="hypo-select"><option value="">Any</option></select>
-          </div>
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🥈 In Final (up to 2)</div>
-            <select id="hypo-final" class="hypo-select" multiple size="3"><option value="">Any</option></select>
-          </div>
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">🔝 In Semis (up to 4)</div>
-            <select id="hypo-semi" class="hypo-select" multiple size="4"><option value="">Any</option></select>
-          </div>
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">⚡ In Quarters (up to 8)</div>
-            <select id="hypo-qf" class="hypo-select" multiple size="5"><option value="">Any</option></select>
-          </div>
+        
+        <div style="margin-bottom:14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">🏆 Champion</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="hypo-champion-wrap"></div>
         </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C0C0C0;margin-bottom:8px">🥈 In Final (up to 2)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="hypo-final-wrap"></div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">🔝 In Semis (up to 4)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="hypo-semi-wrap"></div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">⚡ In Quarters (up to 8)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="hypo-qf-wrap"></div>
+        </div>
+
         <div style="margin-top:16px;display:flex;align-items:center;gap:16px">
           <button onclick="runHypothetical()" style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;background:var(--gold);color:#000;border:none;padding:10px 32px;border-radius:6px;cursor:pointer">GO</button>
           <button onclick="resetHypothetical()" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;border-radius:6px;cursor:pointer">Reset</button>
@@ -1683,28 +1686,37 @@ async function loadSimData() {
 }
 
 async function initHypotheticals() {
-  // Only show non-eliminated teams
-  const availableTeams = ALL_TEAMS.filter(t => !isEliminated(t));
+  if (document.getElementById('hypo-champion-wrap').children.length > 0) return; // already init
 
-  const makeSelect = (id, label, maxItems) => {
-    const el = document.getElementById(id);
-    if (el.children.length > 1) return; // already populated
-    availableTeams.forEach(t => {
+  // Only non-eliminated teams
+  const teams = ALL_TEAMS.filter(t => !isEliminated(t));
+
+  const makeDropdown = (id) => {
+    const sel = document.createElement('select');
+    sel.className = 'hypo-select';
+    sel.id = id;
+    const blank = document.createElement('option');
+    blank.value = ''; blank.textContent = 'Any';
+    sel.appendChild(blank);
+    teams.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t; opt.textContent = t;
-      el.appendChild(opt);
+      sel.appendChild(opt);
     });
-    el.setAttribute('multiple', maxItems > 1);
-    if (maxItems > 1) {
-      el.size = Math.min(maxItems, 5);
-      el.style.height = 'auto';
-    }
+    return sel;
   };
 
-  makeSelect('hypo-champion', 'Champion', 1);
-  makeSelect('hypo-final', 'In Final', 2);
-  makeSelect('hypo-semi', 'In Semis', 4);
-  makeSelect('hypo-qf', 'In Quarters', 8);
+  // 1 champion dropdown
+  document.getElementById('hypo-champion-wrap').appendChild(makeDropdown('hypo-champ-0'));
+
+  // 2 final dropdowns
+  for (let i = 0; i < 2; i++) document.getElementById('hypo-final-wrap').appendChild(makeDropdown('hypo-final-'+i));
+
+  // 4 semi dropdowns
+  for (let i = 0; i < 4; i++) document.getElementById('hypo-semi-wrap').appendChild(makeDropdown('hypo-semi-'+i));
+
+  // 8 quarter dropdowns
+  for (let i = 0; i < 8; i++) document.getElementById('hypo-qf-wrap').appendChild(makeDropdown('hypo-qf-'+i));
 
   const countEl = document.getElementById('hypo-count');
   countEl.textContent = 'Loading simulations...';
@@ -1712,15 +1724,15 @@ async function initHypotheticals() {
     const simData = await loadSimData();
     countEl.textContent = `${simData.rows.length.toLocaleString()} simulations available`;
   } catch(e) {
-    countEl.textContent = 'Could not load simulations: ' + e.message;
+    countEl.textContent = 'Error: ' + e.message;
   }
 }
 
 async function runHypothetical() {
-  const champion = document.getElementById('hypo-champion').value;
-  const finalTeams = Array.from(document.getElementById('hypo-final').selectedOptions).map(o=>o.value).filter(v=>v);
-  const semiTeams = Array.from(document.getElementById('hypo-semi').selectedOptions).map(o=>o.value).filter(v=>v);
-  const qfTeams = Array.from(document.getElementById('hypo-qf').selectedOptions).map(o=>o.value).filter(v=>v);
+  const champion = document.getElementById('hypo-champ-0').value;
+  const finalTeams = [0,1].map(i => document.getElementById('hypo-final-'+i)?.value).filter(v=>v);
+  const semiTeams = [0,1,2,3].map(i => document.getElementById('hypo-semi-'+i)?.value).filter(v=>v);
+  const qfTeams = [0,1,2,3,4,5,6,7].map(i => document.getElementById('hypo-qf-'+i)?.value).filter(v=>v);
 
   const countEl = document.getElementById('hypo-count');
   const resultsEl = document.getElementById('hypo-results');
@@ -1853,10 +1865,10 @@ async function runHypothetical() {
 }
 
 function resetHypothetical() {
-  ['hypo-champion','hypo-final','hypo-semi','hypo-qf'].forEach(id => {
-    const el = document.getElementById(id);
-    Array.from(el.options).forEach(o => o.selected = false);
-  });
+  document.getElementById('hypo-champ-0').value = '';
+  [0,1].forEach(i => { const el = document.getElementById('hypo-final-'+i); if(el) el.value=''; });
+  [0,1,2,3].forEach(i => { const el = document.getElementById('hypo-semi-'+i); if(el) el.value=''; });
+  [0,1,2,3,4,5,6,7].forEach(i => { const el = document.getElementById('hypo-qf-'+i); if(el) el.value=''; });
   document.getElementById('hypo-results').innerHTML = '';
   document.getElementById('hypo-count').textContent = SIM_DATA ? `${SIM_DATA.rows.length.toLocaleString()} simulations available` : '';
 }
