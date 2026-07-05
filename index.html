@@ -1719,6 +1719,7 @@ async function runHypothetical() {
 
     // Calculate probabilities from filtered sims
     const summaryData = PLAYERS.map((player, idx) => {
+      const playerName = typeof player === 'string' ? player : player.name;
       const col = idx + 1;
       let wins = 0, seconds = 0, thirds = 0, rankSum = 0, valid = 0;
       filtered.forEach(row => {
@@ -1736,7 +1737,7 @@ async function runHypothetical() {
       const pct3 = valid > 0 ? (thirds/valid*100) : 0;
       const avgRank = valid > 0 ? (rankSum/valid) : 99;
       const avgPrize = (pct1/100*1000) + (pct2/100*400) + (pct3/100*100);
-      return { name: player, pct1, pct2, pct3, avgRank, avgPrize };
+      return { name: playerName, pct1, pct2, pct3, avgRank, avgPrize };
     });
 
     summaryData.sort((a,b) => {
