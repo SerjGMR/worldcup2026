@@ -1656,7 +1656,9 @@ let ALL_TEAMS = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
 async function loadSimData() {
   if (SIM_DATA) return SIM_DATA;
   const rows = await fetchCSV(GIDS.simresults);
-  SIM_DATA = rows.slice(1); // skip header
+  // First row is header: SimNum, Player1_Rank, Player2_Rank, ..., QF_Teams, SF_Teams, Final_Teams, Champion
+  const header = rows[0];
+  SIM_DATA = { rows: rows.slice(1), header };
   return SIM_DATA;
 }
 
@@ -1676,8 +1678,8 @@ async function initHypotheticals() {
   const el = document.getElementById('hypo-count');
   el.textContent = 'Loading simulations...';
   try {
-    const data = await loadSimData();
-    el.textContent = `${data.length.toLocaleString()} simulations available`;
+    const simData = await loadSimData();
+    el.textContent = `${simData.rows.length.toLocaleString()} simulations available`;
   } catch(e) {
     el.textContent = 'Could not load simulations';
   }
@@ -1695,13 +1697,22 @@ async function runHypothetical() {
   countEl.textContent = '';
 
   try {
-    const data = await loadSimData();
-    // Columns: 0=SimNum, 1-30=player ranks, 31=QF, 32=SF, 33=Final, 34=Champion
+    const simData = await loadSimData();
+    const { rows: data, header } = simData;
+
+    // Build column index map from header
+    const colIdx = {};
+    header.forEach((h, i) => { colIdx[h.trim()] = i; });
+    const qfCol = colIdx['QF_Teams'];
+    const sfCol = colIdx['SF_Teams'];
+    const finCol = colIdx['Final_Teams'];
+    const champCol = colIdx['Champion'];
+
     const filtered = data.filter(row => {
-      const qf = (row[31]||'').toLowerCase();
-      const sf = (row[32]||'').toLowerCase();
-      const fin = (row[33]||'').toLowerCase();
-      const champ = (row[34]||'').toLowerCase();
+      const qf = (row[qfCol]||'').toLowerCase();
+      const sf = (row[sfCol]||'').toLowerCase();
+      const fin = (row[finCol]||'').toLowerCase();
+      const champ = (row[champCol]||'').toLowerCase();
       if (champion && !champ.includes(champion.toLowerCase())) return false;
       if (finalTeam && !fin.includes(finalTeam.toLowerCase())) return false;
       if (semiTeam && !sf.includes(semiTeam.toLowerCase())) return false;
@@ -1717,21 +1728,23 @@ async function runHypothetical() {
       return;
     }
 
-    // Calculate probabilities from filtered sims
-    const summaryData = PLAYERS.map((player, idx) => {
+    // Calculate probabilities using header to find each player's column
+    const summaryData = PLAYERS.map((player) => {
       const playerName = typeof player === 'string' ? player : player.name;
-      const col = idx + 1;
+      const col = colIdx[playerName + '_Rank'];
       let wins = 0, seconds = 0, thirds = 0, rankSum = 0, valid = 0;
-      filtered.forEach(row => {
-        const rank = parseInt(row[col]) || 0;
-        if (rank > 0) {
-          valid++;
-          rankSum += rank;
-          if (rank === 1) wins++;
-          if (rank === 2) seconds++;
-          if (rank === 3) thirds++;
-        }
-      });
+      if (col !== undefined) {
+        filtered.forEach(row => {
+          const rank = parseInt(row[col]) || 0;
+          if (rank > 0) {
+            valid++;
+            rankSum += rank;
+            if (rank === 1) wins++;
+            if (rank === 2) seconds++;
+            if (rank === 3) thirds++;
+          }
+        });
+      }
       const pct1 = valid > 0 ? (wins/valid*100) : 0;
       const pct2 = valid > 0 ? (seconds/valid*100) : 0;
       const pct3 = valid > 0 ? (thirds/valid*100) : 0;
@@ -1813,7 +1826,7 @@ function resetHypothetical() {
     document.getElementById(id).value = '';
   });
   document.getElementById('hypo-results').innerHTML = '';
-  document.getElementById('hypo-count').textContent = SIM_DATA ? `${SIM_DATA.length.toLocaleString()} simulations available` : '';
+  document.getElementById('hypo-count').textContent = SIM_DATA ? `${SIM_DATA.rows.length.toLocaleString()} simulations available` : '';
 }
 const ALL_COUNTRIES = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
 
