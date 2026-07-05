@@ -1655,11 +1655,31 @@ let ALL_TEAMS = [...new Set(PLAYERS.flatMap(p => p.teams))].sort();
 
 async function loadSimData() {
   if (SIM_DATA) return SIM_DATA;
-  const rows = await fetchCSV(GIDS.simresults);
-  // First row is header: SimNum, Player1_Rank, Player2_Rank, ..., QF_Teams, SF_Teams, Final_Teams, Champion
-  const header = rows[0];
-  SIM_DATA = { rows: rows.slice(1), header };
-  return SIM_DATA;
+  try {
+    const url = BASE + GIDS.simresults;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const t = await r.text();
+    const rows = t.split('\n').map(line => {
+      const cols=[]; let inQ=false, cur='';
+      for(let i=0;i<line.length;i++){
+        const c=line[i];
+        if(c==='"'){inQ=!inQ;}
+        else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
+        else cur+=c;
+      }
+      cols.push(cur.trim());
+      return cols;
+    }).filter(r=>r.some(c=>c));
+    const header = rows[0];
+    SIM_DATA = { rows: rows.slice(1), header };
+    // Show debug on page
+    document.getElementById('hypo-count').textContent = `${SIM_DATA.rows.length.toLocaleString()} simulations — headers: ${header.slice(0,3).join(', ')}... last: ${header.slice(-4).join(', ')}`;
+    return SIM_DATA;
+  } catch(e) {
+    document.getElementById('hypo-count').textContent = 'Error: ' + e.message;
+    throw e;
+  }
 }
 
 async function initHypotheticals() {
